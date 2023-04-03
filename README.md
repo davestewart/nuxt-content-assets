@@ -53,7 +53,7 @@ To run the demo online, go to:
 
 You can browse the demo files in:
 
-- .https://github.com/davestewart/nuxt-content-assets/tree/main/demo
+- https://github.com/davestewart/nuxt-content-assets/tree/main/demo
 
 To run the demo locally, clone the application and from the root, run:
 
@@ -74,7 +74,7 @@ Configure `nuxt.config.ts`:
 ```js
 export default defineNuxtConfig({
   modules: [
-    'nuxt-content-relative-assets', // make sure to add before content!
+    'nuxt-content-assets', // make sure to add before content!
     '@nuxt/content',
   ]
 })
@@ -111,21 +111,28 @@ See the [configuration](#output) section for more options.
 
 ### Images
 
-The module [optionally](#image-attributes) writes `width` and `height` attributes to the generated HTML:
+The module can [optionally](#image-attributes) write `width`, `height` and `aspect-ratio` information to generated `<img>` tags:
 
 ```html
-<img src="..." width="640" height="480">
+<img src="..." width="640" height="480" style="aspect-ratio:640/480">
 ```
 
-This locks the aspect ratio of the image preventing content jumps.
+This can prevent content jumps on page load. If you add `attributes` only, include the following CSS in your app:
 
-If you use custom [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can even grab these values using the Vue `$attrs` property:
+```css
+img {
+  max-width: 100%;
+  height: auto;
+}
+```
+
+If you use custom [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can use these values in your own markup:
 
 ```vue
 <template>
-  <div class="image">
-    <img :src="$attrs.src" :style="`aspect-ratio:${$attrs.width}/${$attrs.height}`" />
-  </div>
+  <span class="image">
+    <img :src="$attrs.src" :style="$attrs.style" />
+  </span>
 </template>
 
 <script>
@@ -154,8 +161,8 @@ export default defineNuxtConfig({
     // completely replace supported extensions
     extensions: 'png jpg',
     
-    // add image width and height
-    imageAttrs: true,
+    // use aspect-ratio rather than attributes
+    imageSize: 'ratio',
     
     // print debug messages to the console
     debug: true,
@@ -218,21 +225,31 @@ To completely replace supported extensions, use `extensions`:
 
 ```ts
 {
-	extensions: 'png jpg' // serve png and jpg files only
+  extensions: 'png jpg' // serve png and jpg files only
 }
 ```
 
 ### Image attributes
 
-The module automatically adds `width` and `height` attributes to images.
+You can add image size hints to the generated images.
 
-Opt out of this by passing `false`:
+To add `style` aspect-ratio:
 
 ```ts
 {
-  imageAttrs: false
+  imageSize: 'style'
 }
 ```
+
+To add `width` and `height` attributes:
+
+```ts
+{
+  imageSize: 'attrs'
+}
+```
+
+You can even add both if you need to.
 
 ## Development
 
