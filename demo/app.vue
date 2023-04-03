@@ -12,4 +12,8 @@
 body {
   margin-bottom: 10rem;
 }
+
+a, .breadcrumb a {
+  color: #2cb687;
+}
 </style>

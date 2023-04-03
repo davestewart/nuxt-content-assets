@@ -1,11 +1,15 @@
 # Nuxt Content Assets
 
-> Enable locally-located assets in Nuxt Content
-
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 [![License][license-src]][license-href]
 [![Nuxt][nuxt-src]][nuxt-href]
+
+> Enable locally-located assets in Nuxt Content
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/davestewart/nuxt-content-assets/main/demo/content/splash.png" alt="Nuxt Content Assets logo">
+</p>
 
 ## Overview
 
