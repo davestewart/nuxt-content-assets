@@ -1,6 +1,6 @@
 import Path from 'path'
 import { hash as ohash } from 'ohash'
-import { extensions, imageExtensions } from '../config'
+import { extensions, imageExtensions } from '../options'
 import { log } from './debug'
 
 /**

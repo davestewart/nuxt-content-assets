@@ -1,11 +1,11 @@
 import Path from 'path'
 import { visit } from 'unist-util-visit'
 import { NitroApp } from 'nitropack'
+import { isValidAsset, walk } from './utils'
+import { tags } from './options'
 
-// @ts-ignore – this is injected in setup
-import { assets, sources } from '#content-assets'
-import { tags } from '../../../config'
-import { isValidAsset, walk } from '../../../utils'
+// @ts-ignore – options injected via module.ts
+import { assets, sources } from '#nuxt-content-assets'
 
 /**
  * Return an absolute path to a content article

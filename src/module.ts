@@ -4,8 +4,9 @@ import getImageSize from 'image-size'
 import glob from 'glob'
 import * as Fs from 'fs'
 import * as Path from 'path'
-import { defaults, extensions, name } from './config'
-import { getSources, interpolatePattern, isImage, matchWords, log } from './utils'
+import { getSources, interpolatePattern, isImage, matchWords, log } from './runtime/utils'
+import { defaults, extensions } from './runtime/options'
+import { moduleKey, moduleName } from './config'
 
 const resolve = createResolver(import.meta.url).resolve
 
@@ -19,7 +20,8 @@ export interface ModuleOptions {
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
-    name,
+    name: moduleName,
+    configKey: moduleKey,
   },
 
   defaults: {
@@ -36,7 +38,7 @@ export default defineNuxtModule<ModuleOptions>({
     // ---------------------------------------------------------------------------------------------------------------------
 
     // local paths
-    const pluginPath = resolve('./runtime/server') + '/plugins/plugin'
+    const pluginPath = resolve('./runtime/plugin')
 
     // build folders
     const buildPath = nuxt.options.buildDir
@@ -185,8 +187,8 @@ export default defineNuxtModule<ModuleOptions>({
 
     // make config available to nuxt
     // see https://discord.com/channels/473401852243869706/1075789688188698685/1075792884957192334
-    nuxt.options.alias[`#${name}`] = addTemplate({
-      filename: `${name}.mjs`,
+    nuxt.options.alias[`#${moduleName}`] = addTemplate({
+      filename: `${moduleName}.mjs`,
       getContents: () => virtualConfig,
     }).dst
 
@@ -198,7 +200,7 @@ export default defineNuxtModule<ModuleOptions>({
 
       // make config available to nitro
       config.virtual ||= {}
-      config.virtual[`#${name}`] = virtualConfig
+      config.virtual[`#${moduleName}`] = virtualConfig
 
       // serve public assets
       config.publicAssets ||= []
