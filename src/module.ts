@@ -22,6 +22,9 @@ export default defineNuxtModule<ModuleOptions>({
   meta: {
     name: moduleName,
     configKey: moduleKey,
+    compatibility: {
+      nuxt: '^3.0.0'
+    }
   },
 
   defaults: {
