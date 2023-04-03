@@ -52,13 +52,16 @@ export default defineNitroPlugin(async (nitroApp: NitroApp) => {
       visit(file.body, (n: any) => tags.includes(n.tag), (node) => {
         // media
         if (node.props.src) {
-          const { rel, width, height } = getAsset(absDoc, node.props.src)
+          const { rel, width, height, ratio } = getAsset(absDoc, node.props.src)
           if (rel) {
             node.props.src = rel
           }
           if (width && height) {
             node.props.width = width
             node.props.height = height
+          }
+          if (ratio) {
+            node.props.style = `aspect-ratio:${ratio}`
           }
         }
 

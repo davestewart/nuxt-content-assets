@@ -14,7 +14,7 @@ export interface ModuleOptions {
   output?: string
   additionalExtensions?: string
   extensions?: string
-  imageAttrs?: boolean
+  imageSize?: string
   debug?: boolean
 }
 
@@ -28,7 +28,7 @@ export default defineNuxtModule<ModuleOptions>({
     output: `${defaults.assetsDir}/${defaults.assetsPattern}`,
     extensions: '',
     additionalExtensions: '',
-    imageAttrs: true,
+    imageSize: '',
     debug: false,
   },
 
@@ -112,10 +112,16 @@ export default defineNuxtModule<ModuleOptions>({
       // image dimensions
       let width: number | undefined = undefined
       let height: number | undefined = undefined
-      if (options.imageAttrs && isImage(src)) {
+      let ratio: string = ''
+      if (options.imageSize && isImage(src)) {
         const size = getImageSize(src)
-        width = size.width
-        height = size.height
+        if (options.imageSize.includes('style')) {
+          ratio = `${size.width}/${size.height}`
+        }
+        if (options.imageSize.includes('attrs')) {
+          width = size.width
+          height = size.height
+        }
       }
 
       // content id
@@ -131,7 +137,7 @@ export default defineNuxtModule<ModuleOptions>({
       const rel = Path.join('/', assetsDir, file)
 
       // return
-      return { id, file, trg, rel, width, height }
+      return { id, file, trg, rel, width, height, ratio }
     }
 
     // prepare for building assets
