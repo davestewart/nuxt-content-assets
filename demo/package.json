@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "name": "nuxt-content-assets-demo",
+  "dependencies": {
+    "@nuxt/content": "^2.5.2"
+  }
+}
