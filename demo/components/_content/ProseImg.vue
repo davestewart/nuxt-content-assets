@@ -1,12 +1,13 @@
 <template>
-  <div class="image">
+  <span class="image">
     <img :src="$attrs.src"
          :alt="$attrs.title"
+         :width="$attrs.width"
+         :height="$attrs.height"
          :title="$attrs.src"
-         :style="$attrs.style"
     >
     <label>{{ $attrs.title || $attrs.alt || 'Image' }}{{ size }}</label>
-  </div>
+  </span>
 </template>
 
 <script>

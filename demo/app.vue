@@ -7,3 +7,9 @@
     </div>
   </div>
 </template>
+
+<style>
+body {
+  margin-bottom: 10rem;
+}
+</style>

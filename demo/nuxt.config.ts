@@ -21,14 +21,14 @@ export default defineNuxtConfig({
   },
 
   'content-assets': {
-    // content-relative assets folder
-    output: 'content/[hash].[ext]',
+    // use a content-relative assets path
+    output: 'content/[folder]/[file]',
 
-    // add html to supported types
+    // enable html files to be served
     additionalExtensions: 'html',
 
-    // add aspect-ratio data to images
-    aspect: 'style data',
+    // add image size hints
+    imageSize: 'attrs',
 
     // show debug messages
     debug: true,
