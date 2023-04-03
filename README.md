@@ -166,7 +166,7 @@ export default defineNuxtConfig({
     extensions: 'png jpg',
     
     // use aspect-ratio rather than attributes
-    imageSize: 'ratio',
+    imageSize: 'style',
     
     // print debug messages to the console
     debug: true,
