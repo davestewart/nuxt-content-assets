@@ -2,7 +2,7 @@ import { matchWords } from './utils/assets'
 
 export const defaults = {
   assetsDir: 'assets/content',
-  assetsPattern: '[name]-[hash].[ext]'
+  assetsPattern: '[folder]/[file]'
 }
 
 export const imageExtensions = matchWords('png jpg jpeg gif svg webp ico')

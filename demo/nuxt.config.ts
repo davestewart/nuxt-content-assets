@@ -21,10 +21,10 @@ export default defineNuxtConfig({
   },
 
   'content-assets': {
-    // use a content-relative assets path
-    output: 'content/[folder]/[file]',
+    // place all assets in a single folder
+    output: 'assets/content/[name]-[hash].[ext]',
 
-    // enable html files to be served
+    // serve html files to be shown in iframes
     additionalExtensions: 'html',
 
     // add image size hints

@@ -175,7 +175,7 @@ export default defineNuxtConfig({
 The output path can be customised using a template string:
 
 ```
-assets/img/content/[path]/[name][extname]
+assets/content/[name]-[hash].[ext]
 ```
 
 The first part of the path should be public root-relative folder:
@@ -184,7 +184,7 @@ The first part of the path should be public root-relative folder:
 assets/img/content
 ```
 
-The optional second part of the path indicates specific placement of each image: 
+The optional second part of the path indicates the relative location of each image: 
 
 | Token       | Description                                | Example            |
 |-------------|--------------------------------------------|--------------------|
@@ -203,15 +203,15 @@ For example:
 | `assets/img/[name]-[hash].[ext]`     | `assets/img/featured-9M00N4l9A0.jpg`               |
 | `content/[hash].[ext]`               | `content/9M00N4l9A0.jpg`                           |
 
-Note that the module defaults to all files in a single folder:
+Note that the module defaults to:
 
 ```
-/assets/content/[name]-[hash].[ext]
+/assets/content/[folder]/[file]
 ```
 
 ### Extensions
 
-You can add or replace supported extensions if you need to:
+You can add (or replace) supported extensions if you need to:
 
 To add extensions, use `additionalExtensions`:
 
@@ -221,7 +221,7 @@ To add extensions, use `additionalExtensions`:
 }
 ```
 
-To completely replace supported extensions, use `extensions`:
+To replace extensions, use `extensions`:
 
 ```ts
 {
