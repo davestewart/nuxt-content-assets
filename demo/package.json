@@ -3,8 +3,5 @@
   "name": "nuxt-content-assets-demo",
   "dependencies": {
     "@nuxt/content": "^2.5.2"
-  },
-  "devDependencies": {
-    "sass": "^1.60.0"
   }
 }
