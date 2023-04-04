@@ -22,7 +22,7 @@ const replacers: Record<string, Function> = {
  * @param dir       The absolute path to its containing folder
  * @param warn      An optional flag to warn for unknown tokens
  */
-export function interpolatePattern (pattern: string, src: string, dir: string, warn = false) {
+export function interpolatePattern (pattern: string, src: string, dir: string, warn = false): string {
   return Path.join(pattern.replace(/\[\w+]/g, (match: string) => {
     const name = match.substring(1, match.length - 1)
     const fn = replacers[name]

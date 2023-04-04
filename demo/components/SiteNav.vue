@@ -1,12 +1,16 @@
 <template>
-  <nav class="breadcrumb" aria-label="breadcrumbs">
+  <nav class="breadcrumb">
     <ul>
       <template v-for="(link, index) in links" :key="link.href">
         <li v-if="index < links.length - 1">
-          <NuxtLink :to="link.href">{{ link.text }}</NuxtLink>
+          <NuxtLink :to="link.href">
+            {{ link.text }}
+          </NuxtLink>
         </li>
         <li v-else class="is-active">
-          <NuxtLink to="#" aria-current="page">{{ link.text }}</NuxtLink>
+          <NuxtLink to="#" aria-current="page">
+            {{ link.text }}
+          </NuxtLink>
         </li>
       </template>
     </ul>

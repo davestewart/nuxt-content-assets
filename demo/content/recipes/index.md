@@ -24,5 +24,5 @@ recipes:
  
 Here are four delicious recipes:
 
-::Gallery{:items="recipes"}
+::ImageGallery{:data="recipes"}
 ::

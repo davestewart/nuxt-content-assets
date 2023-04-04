@@ -1,12 +1,13 @@
 <template>
   <div class="gallery">
     <div class="columns is-multiline">
-      <div v-for="image in images" class="column is-half">
-        <NuxtLink :to="image.route">
-          <img :src="image.src"
-               :width="image.width"
-               :height="image.height"
-               :alt="image.title"
+      <div v-for="item in items" :key="item.src" class="column is-half">
+        <NuxtLink :to="item.route">
+          <img
+            :src="item.src"
+            :width="item.width"
+            :height="item.height"
+            :alt="item.title"
           >
         </NuxtLink>
       </div>
@@ -17,14 +18,15 @@
 <script>
 export default {
   props: {
-    items: {
+    data: {
       type: Array,
+      required: true,
     }
   },
 
   computed: {
-    images () {
-      return this.items.map(item => {
+    items () {
+      return this.data.map(item => {
         const { route, title, image } = item
         return {
           route,

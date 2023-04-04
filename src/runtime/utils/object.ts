@@ -9,7 +9,7 @@ export type Filter = (value: any, key?: string | number) => boolean | void
  * @param callback
  * @param filter
  */
-export function walk (node: any, callback: Callback, filter?: Filter) {
+export function walk (node: any, callback: Callback, filter?: Filter): void {
   function visit (node: any, callback: Callback, parent?: any, key?: string | number) {
     // filter
     if (filter) {

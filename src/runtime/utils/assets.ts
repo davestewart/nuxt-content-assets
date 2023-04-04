@@ -27,6 +27,6 @@ export function isAsset (path: string): boolean {
 /**
  * Test if value is a valid asset
  */
-export function isValidAsset (value?: string) {
+export function isValidAsset (value?: string): boolean {
   return typeof value === 'string' && isAsset(value) && isRelative(value)
 }

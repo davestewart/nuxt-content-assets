@@ -1,10 +1,11 @@
 <template>
   <span class="image">
-    <img :src="$attrs.src"
-         :alt="$attrs.title"
-         :width="$attrs.width"
-         :height="$attrs.height"
-         :title="$attrs.src"
+    <img
+      :src="$attrs.src"
+      :alt="$attrs.title"
+      :width="$attrs.width"
+      :height="$attrs.height"
+      :title="$attrs.src"
     >
     <label>{{ $attrs.title || $attrs.alt || 'Image' }}{{ size }}</label>
   </span>

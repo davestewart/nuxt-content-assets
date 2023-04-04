@@ -2,15 +2,16 @@ import Path from 'path'
 import Fs from 'fs'
 import { moduleKey } from '../../config'
 
-export function log (...data: any[]) {
+export function log (...data: any[]): void {
   console.info(`[${moduleKey}]`, ...data)
 }
 
-export function warn (...data: any[]) {
+export function warn (...data: any[]): void {
   console.warn(`[${moduleKey}]`, ...data)
 }
 
-export function dump (name: string, data: any) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function dump (name: string, data: any): void {
   const path = `debug/${name}.json`
   const folder = Path.dirname(path)
   log(`Dumping "${path}"`)
