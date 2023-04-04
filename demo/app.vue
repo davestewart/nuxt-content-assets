@@ -17,6 +17,11 @@ body {
   margin-bottom: 10rem;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Dosis', sans-serif;
+  font-weight: 700 !important;
+}
+
 .content blockquote {
   background: none;
   border: none;

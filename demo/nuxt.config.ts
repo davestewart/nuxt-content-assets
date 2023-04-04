@@ -2,7 +2,10 @@ export default defineNuxtConfig({
   app: {
     head: {
       link: [
-        { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css' }
+        { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css' },
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true },
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Dosis:wght@600;700&display=swap' },
       ]
     },
   },
@@ -34,3 +37,4 @@ export default defineNuxtConfig({
     debug: true,
   },
 })
+
