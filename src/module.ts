@@ -4,7 +4,7 @@ import getImageSize from 'image-size'
 import glob from 'glob'
 import * as Fs from 'fs'
 import * as Path from 'path'
-import { getSources, interpolatePattern, isImage, matchWords, log } from './runtime/utils'
+import { getSources, interpolatePattern, isImage, matchWords, log, dump } from './runtime/utils'
 import { defaults, extensions } from './runtime/options'
 import { moduleKey, moduleName } from './config'
 
@@ -74,9 +74,6 @@ export default defineNuxtModule<ModuleOptions>({
         sources.content = content
       }
     }
-
-    // debug: inspect config
-    // Fs.writeFileSync('nuxt.config.json', JSON.stringify(nuxt.options, null, '  '), { encoding: 'utf8' })
 
     // ---------------------------------------------------------------------------------------------------------------------
     // options
