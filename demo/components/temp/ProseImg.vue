@@ -25,8 +25,7 @@ export default {
 
   computed: {
     size () {
-      const width = this.$attrs['data-width']
-      const height = this.$attrs['data-height']
+      const { width, height } = this.$attrs
       return width && height
         ? ` (${width}px x ${height}px)`
         : ''
