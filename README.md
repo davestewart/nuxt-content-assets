@@ -132,7 +132,7 @@ Then pass these to components like so:
 ::
 ```
 
-> Note: to pass size hints in frontmatter, set the `imageSize` configuration option to `'url'`
+> Note: to pass size hints in frontmatter, set the `imageSize` configuration [option](#image-size) to `'url'`
 
 See the [Demo](demo/content/recipes/index.md) for an example.
 
@@ -156,7 +156,7 @@ The module can prevent content jumps by optionally writing image size informatio
 <img src="/image.jpg?width=640&height=480" width="640" height="480" style="aspect-ratio:640/480">
 ```
 
-If you use custom [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can pass these values to your own markup:
+If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can pass these values to your own markup:
 
 ```vue
 <template>
@@ -172,7 +172,7 @@ export default {
 </script>
 ```
 
-See the [configuration](#image-size) section to add this, and the [Demo](demo/components/_content/ProseImg.vue) for an example.
+See the [configuration](#image-size) section to add this, and the [Demo](demo/components/temp/ProseImg.vue) for an example.
 
 ### Build
 
@@ -219,10 +219,10 @@ The output path can be customised using a template string:
 assets/content/[name]-[hash].[ext]
 ```
 
-The first part of the path should be public root-relative folder:
+The first part of the path is where you want content assets to be served from:
 
 ```
-assets/img/content
+assets/content/
 ```
 
 The optional second part of the path indicates the relative location of each image: 
