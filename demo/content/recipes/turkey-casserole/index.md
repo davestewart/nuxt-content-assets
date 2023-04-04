@@ -4,7 +4,7 @@ image: ../../images/turkey-casserole.jpg
 
 # Creamy Turkey & Sundried Tomato Pesto Casserole
 
-> Image in parent folder, with src as frontmatter variable
+> Image src as frontmatter variable
 
 ::img{:src="image" alt="Turkey & Pesto Casserole"}
 ::

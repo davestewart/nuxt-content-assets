@@ -1,6 +1,6 @@
 # Media
 
-
+> Linking and embedding other file types
 
 ## Links
 

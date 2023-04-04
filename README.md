@@ -26,7 +26,7 @@ Nuxt Content Assets enables locally-located assets in your [Nuxt Content](https:
                 +- seaside.mp4
 ```
 
-In your documents, simply reference assets using relative paths:
+In your documents, reference assets with relative paths:
 
 ```markdown
 ---
@@ -43,11 +43,7 @@ Almost as much as being in the sea!
 <video src="media/seaside.mp4"></video>
 ```
 
-The module:
-
-- supports configurable image, media and file types
-- supports appropriate HTML tags
-- converts markdown and frontmatter content
+That's it!
 
 ## Demo
 
@@ -84,26 +80,63 @@ export default defineNuxtConfig({
 })
 ```
 
-Run the dev server or build and assets should now be served alongside markdown content.
+Run the dev server or build and local assets should now be served alongside markdown content.
 
 ## Usage
 
 ### Overview
 
-Once the build or dev server is running, paths should be rewritten and assets served automatically. 
+Use relative paths anywhere within your documents:
 
-Here's how it works:
+```mdx
+![image](image.jpg)
+<video src="media/video.mp4" />
+```
 
-- the module scans content folders for assets
-- these are copied to a temporary build folder
-- matching relative paths in markdown are updated
-- Nitro serves the assets from the new location
+Relative paths are defined by anything not starting with a slash or `http`, for example:
 
-Right now, if you change any assets, you will need to re-run the dev server / build.
+```
+image.jpg
+images/featured.png
+../assets/cv.pdf
+```
 
-### Supported formats
+Note that only specific tags and attributes are targeted:
 
-The following file formats are supported out of the box:
+```html
+<img src="...">
+<video src="...">
+<audio src="...">
+<source src="...">
+<embed src="...">
+<iframe src="...">
+<a href="...">
+```
+
+However, you can use relative paths in frontmatter:
+
+```mdx
+---
+title: Portfolio Item 1
+images:
+  - images/image-1.jpg
+  - images/image-2.jpg
+  - images/image-3.jpg
+---
+```
+
+Then pass these to components like so:
+
+```markdown
+::gallery{:images="images"}
+::
+```
+
+See the [Demo](demo/content/recipes/index.md) for an example.
+
+### Supported assets
+
+The following file extensions are targeted by default:
 
 | Type   | Extensions                                                              |
 |--------|-------------------------------------------------------------------------|
@@ -111,31 +144,22 @@ The following file formats are supported out of the box:
 | Media  | `mp3`, `m4a`, `wav`, `mp4`, `mov`, `webm`, `ogg`, `avi`, `flv`, `avchd` |
 | Files  | `pdf`, `doc`, `docx`, `xls`, `xlsx`, `ppt`, `pptx`, `odp`, `key`        |
 
-See the [configuration](#output) section for more options.
+See the [configuration](#output) section to modify or change this list, and the [Demo](demo/nuxt.config.ts) for an example.
 
 ### Images
 
-The module can [optionally](#image-attributes) write `width`, `height` and `aspect-ratio` information to generated `<img>` tags:
+The module can prevent content jumps by writing image size information to generated `<img>` tags:
 
 ```html
 <img src="..." width="640" height="480" style="aspect-ratio:640/480">
 ```
 
-This can prevent content jumps on page load. If you add `attributes` only, include the following CSS in your app:
-
-```css
-img {
-  max-width: 100%;
-  height: auto;
-}
-```
-
-If you use custom [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can use these values in your own markup:
+If you use custom [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can pass these values to your own markup:
 
 ```vue
 <template>
   <span class="image">
-    <img :src="$attrs.src" :style="$attrs.style" />
+    <img :src="$attrs.src" :width="$attrs.width" :height="$attrs.height" />
   </span>
 </template>
 
@@ -146,11 +170,22 @@ export default {
 </script>
 ```
 
-See the [Demo](demo/components/_content/ProseImg.vue) for an example.
+See the [configuration](#image-size) section to add this, and the [Demo](demo/components/_content/ProseImg.vue) for an example.
+
+### Build
+
+Once the dev server or build is running, the following happens:
+
+- the module scans content folders for assets
+- these are copied to a temporary build folder
+- matching relative paths markdown are rewritten
+- Nitro serves the assets from the new location
+
+If you change any assets, you'll need to re-run the dev server / build (there is an [issue](https://github.com/davestewart/nuxt-content-assets/issues/1) open to look at this).
 
 ## Configuration
 
-The module **doesn't require** any configuration, but you can tweak the following settings:
+The should run without any configuration, but you can configure the following:
 
 ```ts
 // nuxt.config.ts
@@ -233,7 +268,7 @@ To replace extensions, use `extensions`:
 }
 ```
 
-### Image attributes
+### Image size
 
 You can add image size hints to the generated images.
 
@@ -253,7 +288,26 @@ To add `width` and `height` attributes:
 }
 ```
 
-You can even add both if you need to.
+If you add `attributes` only, include the following CSS in your app:
+
+```css
+img {
+  max-width: 100%;
+  height: auto;
+}
+```
+
+Note that you can add both keywords if you need to.
+
+### Debug
+
+If you want to see what the module does as it runs, set `debug` to true:
+
+```ts
+{
+  debug: true
+}
+```
 
 ## Development
 
