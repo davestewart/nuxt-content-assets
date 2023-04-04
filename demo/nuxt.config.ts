@@ -24,8 +24,8 @@ export default defineNuxtConfig({
   },
 
   'content-assets': {
-    // place all assets in a single folder
-    output: 'assets/content/[name]-[hash].[ext]',
+    // serve assets in same structure as content folder
+    output: '/[folder]/[file]',
 
     // serve html files to be shown in iframes
     additionalExtensions: 'html',

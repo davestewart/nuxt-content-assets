@@ -3,7 +3,7 @@
     <NuxtLoadingIndicator :height="10" />
     <SiteNav />
     <div class="content">
-      <ContentDoc />
+      <ContentDoc :path="$route.path === '/' ? '/main' : $route.path" />
     </div>
   </div>
 </template>
@@ -22,7 +22,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700 !important;
 }
 
-.content blockquote {
+.content h1 + blockquote {
   background: none;
   border: none;
   padding: 0;
@@ -34,5 +34,9 @@ h1, h2, h3, h4, h5, h6 {
 
 a, .breadcrumb a {
   color: var(--green);
+}
+
+img + p {
+  margin-top: 1rem;
 }
 </style>
