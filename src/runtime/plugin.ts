@@ -65,7 +65,7 @@ export default defineNitroPlugin(async (nitroApp: NitroApp) => {
           }
         }
 
-        // links not currently supported
+        // links
         else if (node.tag === 'a') {
           if (node.props.href) {
             const { rel } = getAsset(absDoc, node.props.href)

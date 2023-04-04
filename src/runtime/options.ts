@@ -1,4 +1,4 @@
-import { matchWords } from './utils/assets'
+import { matchWords } from './utils/config'
 
 export const defaults = {
   assetsDir: 'assets/content',
