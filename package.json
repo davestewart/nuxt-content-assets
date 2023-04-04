@@ -1,6 +1,6 @@
 {
   "name": "nuxt-content-assets",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "Enable locally-located assets in Nuxt Content",
   "repository": "davestewart/nuxt-content-assets",
   "license": "MIT",
@@ -18,11 +18,13 @@
     "dist"
   ],
   "scripts": {
-    "prepack": "nuxt-module-build",
     "dev": "nuxi dev demo",
     "dev:build": "nuxi build demo",
     "dev:prepare": "nuxt-module-build --stub && nuxi prepare demo",
-    "release": "npm run lint && npm run test && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
+    "build": "nuxt-module-build",
+    "release": "npm run lint && npm run test && npm run build && npm publish && git push --follow-tags",
+    "release:dry": "npm run lint && npm run test && npm run build && npm publish --dry-run",
+    "release:old": "npm run lint && npm run test && npm run build && changelogen --release && npm publish && git push --follow-tags",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest watch"
