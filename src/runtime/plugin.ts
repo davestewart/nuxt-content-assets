@@ -41,9 +41,9 @@ export default defineNitroPlugin(async (nitroApp: NitroApp) => {
       const filter = (value: any, key?: string | number) => !(String(key).startsWith('_') || key === 'body')
       walk(file, (value: any, parent: any, key: any) => {
         if (isValidAsset(value)) {
-          const { rel } = getAsset(absDoc, value)
+          const { rel, query } = getAsset(absDoc, value)
           if (rel) {
-            parent[key] = rel
+            parent[key] = rel + (query || '')
           }
         }
       }, filter)

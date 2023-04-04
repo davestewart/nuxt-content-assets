@@ -88,17 +88,15 @@ export default defineNuxtModule<ModuleOptions>({
     // test asset pattern for invalid tokens
     interpolatePattern(assetsPattern, '', '', true)
 
+    // image size generation
+    const imageFlags = matchWords(options.imageSize)
+
     // assign extensions
     if (options.extensions?.trim()) {
       extensions.splice(0, extensions.length, ...matchWords(options.extensions))
     }
     else if (options.additionalExtensions) {
       extensions.push(...matchWords(options.additionalExtensions))
-    }
-
-    // set up content ignores
-    if (nuxt.options.content) {
-      nuxt.options.content.ignores ||= []
     }
 
     // ---------------------------------------------------------------------------------------------------------------------
@@ -112,15 +110,19 @@ export default defineNuxtModule<ModuleOptions>({
       // image dimensions
       let width: number | undefined = undefined
       let height: number | undefined = undefined
-      let ratio: string = ''
-      if (options.imageSize && isImage(src)) {
+      let ratio: string | undefined = undefined
+      let query: string | undefined = undefined
+      if (imageFlags.length && isImage(src)) {
         const size = getImageSize(src)
-        if (options.imageSize.includes('style')) {
+        if (imageFlags.includes('style')) {
           ratio = `${size.width}/${size.height}`
         }
-        if (options.imageSize.includes('attrs')) {
+        if (imageFlags.includes('attrs')) {
           width = size.width
           height = size.height
+        }
+        if (imageFlags.includes('url')) {
+          query = `?width=${width}&height=${height}`
         }
       }
 
@@ -137,13 +139,18 @@ export default defineNuxtModule<ModuleOptions>({
       const rel = Path.join('/', assetsDir, file)
 
       // return
-      return { id, file, trg, rel, width, height, ratio }
+      return { id, file, trg, rel, width, height, ratio, query }
     }
 
     // prepare for building assets
     const publicFolder = Path.join(cachePath, assetsDir)
     const sourceFolders: string[] = Object.values(sources)
     const assets: Record<string, any> = {}
+
+    // set up content ignores
+    if (nuxt.options.content) {
+      nuxt.options.content.ignores ||= []
+    }
 
     // build assets map
     sourceFolders.forEach(folder => {

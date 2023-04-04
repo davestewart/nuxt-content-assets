@@ -28,7 +28,7 @@ export default defineNuxtConfig({
     additionalExtensions: 'html',
 
     // add image size hints
-    imageSize: 'attrs',
+    imageSize: 'attrs url',
 
     // show debug messages
     debug: true,

@@ -132,6 +132,8 @@ Then pass these to components like so:
 ::
 ```
 
+> Note: to pass size hints in frontmatter, set the `imageSize` configuration option to `'url'`
+
 See the [Demo](demo/content/recipes/index.md) for an example.
 
 ### Supported assets
@@ -148,10 +150,10 @@ See the [configuration](#output) section to modify or change this list, and the 
 
 ### Images
 
-The module can prevent content jumps by writing image size information to generated `<img>` tags:
+The module can prevent content jumps by optionally writing image size information to generated `<img>` tags:
 
 ```html
-<img src="..." width="640" height="480" style="aspect-ratio:640/480">
+<img src="/image.jpg?width=640&height=480" width="640" height="480" style="aspect-ratio:640/480">
 ```
 
 If you use custom [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can pass these values to your own markup:
@@ -185,7 +187,7 @@ If you change any assets, you'll need to re-run the dev server / build (there is
 
 ## Configuration
 
-The should run without any configuration, but you can configure the following:
+The module will run happily without configuration, but should you need to:
 
 ```ts
 // nuxt.config.ts
@@ -270,7 +272,7 @@ To replace extensions, use `extensions`:
 
 ### Image size
 
-You can add image size hints to the generated images.
+You can add image size hints to the generated images via attributes, style, or the URL.
 
 To add `style` aspect-ratio:
 
@@ -297,7 +299,15 @@ img {
 }
 ```
 
-Note that you can add both keywords if you need to.
+To pass size hints as parameters in the URL (frontmatter only, see [Demo](demo/components/content/Gallery.vue)):
+
+```ts
+{
+  imageSize: 'url'
+}
+```
+
+Note that you can one, some or all keywords, i.e. `attrs url`.
 
 ### Debug
 
