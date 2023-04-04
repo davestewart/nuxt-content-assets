@@ -323,18 +323,14 @@ If you want to see what the module does as it runs, set `debug` to true:
 
 Should you wish to develop the project, the scripts are:
 
+Develop the module itself:
+
 ```bash
 # install dependencies
 npm install
 
-# generate type stubs
-npm run dev:prepare
-
-# develop with the demo
+# develop (runs using the demo)
 npm run dev
-
-# build the demo
-npm run dev:build
 
 # run eslint
 npm run lint
@@ -342,10 +338,35 @@ npm run lint
 # run vitest
 npm run test
 npm run test:watch
+```
 
+Build and check the demo:
+
+```bash
+# generate demo type stubs
+npm run demo:prepare
+
+# build the demo
+npm run demo:build
+
+# generate the demo
+npm run demo:generate
+
+# serve the demo
+npm run demo:serve
+```
+
+Make a new release:
+
+```bash
 # release new version
 npm run release
+
+# dry run the release
+npm run release:dry
 ```
+
+Make sure to edit changelog and update `package.json` version first!
 
 <!-- Badges -->
 [npm-version-src]: https://img.shields.io/npm/v/nuxt-content-assets/latest.svg?style=flat&colorA=18181B&colorB=28CF8D
