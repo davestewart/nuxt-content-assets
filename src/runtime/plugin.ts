@@ -1,6 +1,6 @@
 import Path from 'path'
+import type { NitroApp, NitroAppPlugin } from 'nitropack'
 import { visit } from 'unist-util-visit'
-import { NitroApp } from 'nitropack'
 import { isValidAsset, walk } from './utils'
 import { tags } from './options'
 
@@ -31,8 +31,8 @@ function getAsset (absDoc: string, relAsset: string) {
   return assets[absAsset] || {}
 }
 
-export default defineNitroPlugin(async (nitroApp: NitroApp) => {
-  nitroApp.hooks.hook('content:file:afterParse', async (file) => {
+const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
+  nitro.hooks.hook('content:file:afterParse', async (file) => {
     if (file._id.endsWith('.md')) {
       // location
       const absDoc = getDocPath(file._id)
@@ -78,4 +78,6 @@ export default defineNitroPlugin(async (nitroApp: NitroApp) => {
       })
     }
   })
-})
+}
+
+export default plugin

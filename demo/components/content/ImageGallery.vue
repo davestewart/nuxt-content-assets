@@ -10,7 +10,7 @@
             :alt="item.title"
           >
         </NuxtLink>
-        <h5 class="mt-1">{{ item.title }}</h5>
+        <p>{{ item.title }}</p>
       </div>
     </div>
   </div>

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.1
+
+- Fixed first-run issues #4
+
 ## v0.6.0
 
 - Added `imageSize: 'url'` preference to pass image size hints in frontmatter paths
