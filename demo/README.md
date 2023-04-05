@@ -8,23 +8,42 @@ The demo shows off the module's main features:
 - using inline and `frontmatter` image paths
 - image, link, video, iframe, and embed examples
 
-Additionally, component functionality:
+Additionally, configuration:
+
+- `output`: custom output path
+- `extensions`: `.html` files configured as iframe assets 
+- `imageSize`: image sizes passed by URL in frontmatter
+- `debug`: see what the module is doing
+
+And, components:
 
 - example `<Gallery>` component
 - example `<ProseImg />` component
 
 ## Running the demo
 
-To run the demo, from the project root, run:
+To view the demo locally, run:
 
 ```
-npm run demo
+npm run dev
 ```
 
-## Prose components
+To view the demo online, visit:
+
+- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=demo%2Fapp.vue
+
+## Features
+
+### Output path
+
+The `output` path is configured to exactly mirror the `content/` folder:
+
+- the content index file is named `main.md` so to not conflict with the site `/index.html`
+- the `<ContentDoc>` is passed `/main` on `/` and the route path on any other page 
+
+### Prose components
 
 To view an example image [prose component](https://content.nuxtjs.org/api/components/prose/) passing generated attributes:
 
-- in the folder `components/temp`
-- move the `ProseImg.vue` component to `components/content`
+- move `components/temp/ProseImg.vue` to `components/content`
 - restart the demo

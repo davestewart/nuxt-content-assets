@@ -23,10 +23,10 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "demo:build": "nuxi build demo",
     "demo:prepare": "nuxt-module-build --stub && nuxi prepare demo",
     "demo:generate": "nuxt generate demo",
     "demo:serve": "npx serve demo/dist",
+    "demo:build": "nuxi build demo",
     "release": "npm run lint && npm run test && npm run build && npm publish && git push --follow-tags",
     "release:dry": "npm run lint && npm run test && npm run build && npm publish --dry-run"
   },

@@ -47,19 +47,19 @@ That's it!
 
 ## Demo
 
-To run the demo online, go to:
+To view the demo locally, run:
+
+```
+npm run dev
+```
+
+To view the demo online, visit:
 
 - https://stackblitz.com/github/davestewart/nuxt-content-assets?file=demo%2Fapp.vue
 
 You can browse the demo files in:
 
 - https://github.com/davestewart/nuxt-content-assets/tree/main/demo
-
-To run the demo locally, clone the application and from the root, run:
-
-```
-npm run demo
-```
 
 ## Setup
 
@@ -346,14 +346,14 @@ Build and check the demo:
 # generate demo type stubs
 npm run demo:prepare
 
-# build the demo
-npm run demo:build
-
-# generate the demo
+# generate the demo output
 npm run demo:generate
 
-# serve the demo
+# serve the demo output
 npm run demo:serve
+
+# build the demo
+npm run demo:build
 ```
 
 Make a new release:
