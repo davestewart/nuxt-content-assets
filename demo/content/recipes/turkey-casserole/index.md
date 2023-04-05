@@ -1,5 +1,5 @@
 ---
-image: ../../images/turkey-casserole.jpg
+image: turkey-casserole.jpg
 ---
 
 # Creamy Turkey & Sundried Tomato Pesto Casserole

@@ -11,11 +11,11 @@ recipes:
   -
     route: /recipes/sicilian-fish-stew
     title: Sicilian Fish Stew with Lemony Courgette Salad
-    image: ../images/sicilian-fish-stew.jpg
+    image: images/sicilian-fish-stew.jpg
   -
     route: /recipes/turkey-casserole
     title: Creamy Turkey & Tomato Pesto Casserole
-    image: ../images/turkey-casserole.jpg
+    image: turkey-casserole/turkey-casserole.jpg
 ---
 
 # Recipes
