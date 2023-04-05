@@ -8,7 +8,7 @@
   </div>
 </template>
 
-<style >
+<style>
 :root {
   --green: #2cb687;
 }

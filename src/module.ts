@@ -5,8 +5,8 @@ import glob from 'glob'
 import * as Fs from 'fs'
 import * as Path from 'path'
 import { getSources, interpolatePattern, isImage, matchWords, log } from './runtime/utils'
+import { moduleKey, moduleName } from './runtime/config'
 import { defaults, extensions } from './runtime/options'
-import { moduleKey, moduleName } from './config'
 
 const resolve = createResolver(import.meta.url).resolve
 
@@ -148,6 +148,7 @@ export default defineNuxtModule<ModuleOptions>({
     const assets: Record<string, any> = {}
 
     // set up content ignores
+    nuxt.options.content ||= {}
     if (nuxt.options.content) {
       nuxt.options.content.ignores ||= []
     }

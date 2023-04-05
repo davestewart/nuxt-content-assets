@@ -1,6 +1,6 @@
 import Path from 'path'
 import Fs from 'fs'
-import { moduleKey } from '../../config'
+import { moduleKey } from '../config'
 
 export function log (...data: any[]): void {
   console.info(`[${moduleKey}]`, ...data)
