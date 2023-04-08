@@ -21,6 +21,10 @@ Frontmatter transformation:
 - [Image src as frontmatter variable](/recipes/turkey-casserole)
 - [Gallery example](/recipes) 
 
+External sources
+
+- [Content from GitHub](/external)
+
 GitHub:
 
 - [Repo and docs](https://github.com/davestewart/nuxt-content-assets)

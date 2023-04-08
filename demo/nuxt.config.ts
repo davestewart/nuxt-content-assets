@@ -17,15 +17,23 @@ export default defineNuxtConfig({
 
   // https://content.nuxtjs.org/api/configuration
   content: {
-    documentDriven: true,
     markdown: {
       anchorLinks: false,
-    }
+    },
+
+    sources: {
+      ds: {
+        driver: 'github',
+        repo: 'davestewart/nuxt-content-assets',
+        dir: '/demo/external',
+        prefix: '/external'
+      },
+    },
   },
 
   'content-assets': {
-    // serve assets in same structure as content folder
-    output: '/[folder]/[file]',
+    // serve assets using sub-folder structure
+    output: '/assets/[folder]/[file]',
 
     // serve html files to be shown in iframes
     additionalExtensions: 'html',
