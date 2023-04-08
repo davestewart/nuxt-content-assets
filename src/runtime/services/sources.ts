@@ -9,13 +9,14 @@ type GithubOptions = {
   repo: string,
   branch?: string,
   dir?: string,
+  prefix?: string,
   ttl?: number
 }
 
-export async function getGithubAssets (source: GithubOptions, tempPath: string, extensions: string[]): Promise<string[]> {
+export async function getGithubAssets (key: string, source: GithubOptions, tempPath: string, extensions: string[]): Promise<string[]> {
   // storage
   const storage = createStorage()
-  storage.mount('gh', githubDriver({
+  storage.mount(key, githubDriver({
     repo: source.repo,
     branch: source.branch || 'main',
     dir: source.dir || '/',
@@ -28,18 +29,21 @@ export async function getGithubAssets (source: GithubOptions, tempPath: string, 
   // get assets
   const keys = await storage.getKeys()
   const assetKeys = keys.filter(key => rx.test(key))
-  const assetItems = await Promise.all(assetKeys.map(async key => {
-    const data = await storage.getItem(key)
-    return { key, data }
+  const assetItems = await Promise.all(assetKeys.map(async id => {
+    const data = await storage.getItem(id)
+    return { id, data }
   }))
+
+  // variables
+  const prefix = source.prefix || ''
 
   // copy assets to temp path
   const paths: string[] = []
-  for (const { key, data } of assetItems) {
+  for (const { id, data } of assetItems) {
     if (data) {
       // variables
-      const path = key.replaceAll(':', '/')
-      const absPath = Path.join(tempPath, path)
+      const path = id.replaceAll(':', '/')
+      const absPath = Path.join(tempPath, path.replace(key, `${key}/${prefix}`))
       const absFolder = Path.dirname(absPath)
 
       // save file

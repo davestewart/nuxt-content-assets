@@ -6,8 +6,9 @@ import { log } from '../utils'
  * Hash of replacer functions
  */
 const replacers: Record<string, (src: string) => string> = {
-  key: (src: string) => src.split('/').filter(e => e).shift() || '',
-  folder: (src: string) => Path.dirname(src),
+  key: (src: string) => Path.dirname(src).split('/').filter(e => e).shift() || '',
+  path: (src: string) => Path.dirname(src),
+  folder: (src: string) => Path.dirname(src).replace(/[^\/]+\//, ''),
   file: (src: string) => Path.basename(src),
   name: (src: string) => Path.basename(src, Path.extname(src)),
   extname: (src: string) => Path.extname(src),

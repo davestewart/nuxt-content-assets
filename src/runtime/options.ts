@@ -1,8 +1,9 @@
+// must target utils/string; otherwise, circular dependency!
 import { matchWords } from './utils/string'
 
 export const defaults = {
-  assetsDir: 'assets/content',
-  assetsPattern: '[folder]/[file]'
+  assetsDir: '/assets/',
+  assetsPattern: '[path]/[file]'
 }
 
 export const imageExtensions = matchWords('png jpg jpeg gif svg webp ico')

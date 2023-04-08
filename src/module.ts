@@ -96,11 +96,16 @@ export default defineNuxtModule<ModuleOptions>({
     // generate assets patterns
     const output = options.output || defaults.assetsDir
     const matches = output.match(/([^[]+)(.*)?/)
-    const assetsDir = matches ? matches[1] : defaults.assetsDir
-    const assetsPattern = (matches ? matches[2] : '') || defaults.assetsPattern
+    const assetsDir = matches
+      ? matches[1].replace(/^\/*/, '/')
+      : defaults.assetsDir
+    const assetsPattern = (matches ? matches[2] : '')
+      || defaults.assetsPattern
 
     // test asset pattern for invalid tokens
     interpolatePattern(assetsPattern, '', true)
+
+    console.log({ assetsDir, assetsPattern })
 
     // convert image size hints to array
     const imageFlags = matchWords(options.imageSize)
@@ -141,7 +146,7 @@ export default defineNuxtModule<ModuleOptions>({
           break
 
         case 'github':
-          paths = await getGithubAssets(source as any, tempPath, extensions)
+          paths = await getGithubAssets(key, source as any, tempPath, extensions)
           srcDir = Path.join(tempPath, key)
           break
       }
@@ -151,7 +156,15 @@ export default defineNuxtModule<ModuleOptions>({
         // build asset configs
         paths.forEach((src: string) => {
           // get asset
-          const { id, srcRel, srcAttr, width, height, ratio, query } = getAssetConfig(srcDir, src, assetsPattern, imageFlags)
+          const {
+            id,
+            srcRel,
+            srcAttr,
+            width,
+            height,
+            ratio,
+            query
+          } = getAssetConfig(srcDir, src, assetsPattern, imageFlags)
 
           // tell content to ignore file
           nuxt.options.content.ignores.push(id)
