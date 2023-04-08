@@ -1,12 +1,12 @@
-import { addTemplate, createResolver, defineNuxtModule } from '@nuxt/kit'
-import { Nuxt } from '@nuxt/schema'
-import getImageSize from 'image-size'
-import glob from 'glob'
 import * as Fs from 'fs'
 import * as Path from 'path'
-import { getSources, interpolatePattern, isImage, matchWords, log } from './runtime/utils'
+import { addTemplate, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { MountOptions } from '@nuxt/content'
+import { Nuxt } from '@nuxt/schema'
+import { AssetConfig, getAssetConfig, interpolatePattern, getFsAssets, getGithubAssets } from './runtime/services'
 import { moduleKey, moduleName } from './runtime/config'
 import { defaults, extensions } from './runtime/options'
+import { log, matchWords, } from './runtime/utils'
 
 const resolve = createResolver(import.meta.url).resolve
 
@@ -35,7 +35,7 @@ export default defineNuxtModule<ModuleOptions>({
     debug: false,
   },
 
-  setup (options, nuxt: Nuxt) {
+  async setup (options, nuxt: Nuxt) {
     // ---------------------------------------------------------------------------------------------------------------------
     // setup
     // ---------------------------------------------------------------------------------------------------------------------
@@ -45,7 +45,18 @@ export default defineNuxtModule<ModuleOptions>({
 
     // build folders
     const buildPath = nuxt.options.buildDir
-    const cachePath = Path.resolve(buildPath, 'content-assets')
+    const cachePath = Path.join(buildPath, 'content-assets')
+    const publicPath = Path.join(cachePath, 'public')
+    const tempPath = Path.join(cachePath, 'temp')
+
+    // dump to file helper
+    const dump = (name: string, data: any): void => {
+      const path = `${cachePath}/debug/${name}.json`
+      const folder = Path.dirname(path)
+      log(`Dumping "${path}"`)
+      Fs.mkdirSync(folder, { recursive: true })
+      Fs.writeFileSync(path, JSON.stringify(data, null, '  '), { encoding: 'utf8' })
+    }
 
     // clear caches
     if (options.debug) {
@@ -54,15 +65,15 @@ export default defineNuxtModule<ModuleOptions>({
     // ensures markdown image paths get replaced
     Fs.rmSync(Path.join(buildPath, 'content-cache'), { recursive: true, force: true })
 
-    // clear image paths from previous run
+    // clear images from previous run
     Fs.rmSync(cachePath, { recursive: true, force: true })
 
     // collate content folders
-    const sources = nuxt.options._layers
+    const sources: Record<string, MountOptions> = nuxt.options._layers
       .map(layer => layer.config?.content?.sources)
       .reduce((output, sources) => {
         if (sources) {
-          Object.assign(output, getSources(sources))
+          Object.assign(output, sources)
         }
         return output
       }, {})
@@ -71,7 +82,10 @@ export default defineNuxtModule<ModuleOptions>({
     if (Object.keys(sources).length === 0 || !sources.content) {
       const content = nuxt.options.srcDir + '/content'
       if (Fs.existsSync(content)) {
-        sources.content = content
+        sources.content = {
+          driver: 'fs',
+          base: content
+        }
       }
     }
 
@@ -86,9 +100,9 @@ export default defineNuxtModule<ModuleOptions>({
     const assetsPattern = (matches ? matches[2] : '') || defaults.assetsPattern
 
     // test asset pattern for invalid tokens
-    interpolatePattern(assetsPattern, '', '', true)
+    interpolatePattern(assetsPattern, '', true)
 
-    // image size generation
+    // convert image size hints to array
     const imageFlags = matchWords(options.imageSize)
 
     // assign extensions
@@ -103,49 +117,8 @@ export default defineNuxtModule<ModuleOptions>({
     // assets
     // ---------------------------------------------------------------------------------------------------------------------
 
-    /**
-     * Get asset config
-     */
-    function getAssetConfig (pattern: string, src: string, dir: string) {
-      // image dimensions
-      let width: number | undefined = undefined
-      let height: number | undefined = undefined
-      let ratio: string | undefined = undefined
-      let query: string | undefined = undefined
-      if (imageFlags.length && isImage(src)) {
-        const size = getImageSize(src)
-        if (imageFlags.includes('style')) {
-          ratio = `${size.width}/${size.height}`
-        }
-        if (imageFlags.includes('attrs')) {
-          width = size.width
-          height = size.height
-        }
-        if (imageFlags.includes('url')) {
-          query = `?width=${width}&height=${height}`
-        }
-      }
-
-      // content id
-      const id = Path.join(Path.basename(dir), Path.relative(dir, src)).replaceAll('/', ':')
-
-      // interpolate asset pattern
-      const file = interpolatePattern(pattern, src, dir)
-
-      // target file path
-      const trg = Path.join(cachePath, assetsDir, file)
-
-      // page src
-      const rel = Path.join('/', assetsDir, file)
-
-      // return
-      return { id, file, trg, rel, width, height, ratio, query }
-    }
-
     // prepare for building assets
-    const publicFolder = Path.join(cachePath, assetsDir)
-    const sourceFolders: string[] = Object.values(sources)
-    const assets: Record<string, any> = {}
+    const assets: Record<string, { src: string, trg: string, config: Partial<AssetConfig> }> = {}
 
     // set up content ignores
     nuxt.options.content ||= {}
@@ -153,50 +126,89 @@ export default defineNuxtModule<ModuleOptions>({
       nuxt.options.content.ignores ||= []
     }
 
-    // build assets map
-    sourceFolders.forEach(folder => {
-      const pattern = `${folder}/**/*.{${extensions.join(',')}}`
-      const paths = glob.globSync(pattern)
-      paths.forEach((src: string) => {
-        // get asset
-        const config = getAssetConfig(assetsPattern, src, folder)
+    // process sources
+    for (const [key, source] of Object.entries(sources)) {
+      // folder
+      const { driver } = source
+      let srcDir: string = ''
 
-        // tell content to ignore file
-        nuxt.options.content.ignores.push(config.id)
+      // get all images
+      let paths: string[] = []
+      switch (driver) {
+        case 'fs':
+          paths = getFsAssets(source.base, extensions)
+          srcDir = source.base
+          break
 
-        // add assets to map
-        assets[src] = config
-      })
-    })
+        case 'github':
+          paths = await getGithubAssets(source as any, tempPath, extensions)
+          srcDir = Path.join(tempPath, key)
+          break
+      }
+
+      // build assets map
+      if (paths.length) {
+        // build asset configs
+        paths.forEach((src: string) => {
+          // get asset
+          const { id, srcRel, srcAttr, width, height, ratio, query } = getAssetConfig(srcDir, src, assetsPattern, imageFlags)
+
+          // tell content to ignore file
+          nuxt.options.content.ignores.push(id)
+
+          // target file path
+          const trg = Path.join(publicPath, assetsDir, srcAttr)
+
+          // add assets to config
+          assets[srcRel] = {
+            src,
+            trg,
+            config: {
+              srcAttr: Path.join(assetsDir, srcAttr),
+              width,
+              height,
+              ratio,
+              query
+            }
+          }
+        })
+      }
+    }
+
+    // debug
+    if (options.debug) {
+      dump('assets', assets)
+    }
 
     // copy assets
     nuxt.hook('build:before', function () {
-      // make sure temp folder exists
-      Fs.mkdirSync(publicFolder, { recursive: true })
-
       // debug
       if (options.debug) {
-        const paths = Object.keys(assets).map(key => '   - ' + assets[key].id.replaceAll(':', '/'))
-        log(`Copying ${Object.keys(assets).length} assets:\n\n${paths.join('\n')}\n`)
+        const paths = Object.keys(assets).map(key => `   - ${key}`)
+        log(`Preparing ${Object.keys(assets).length} assets:\n\n${paths.join('\n')}\n`)
       }
 
       // loop over all assets and copy
-      Object.keys(assets).forEach(src => {
-        const { trg } = assets[src]
+      for (const { src, trg } of Object.values(assets)) {
         const trgFolder = Path.dirname(trg)
         Fs.mkdirSync(trgFolder, { recursive: true })
         Fs.copyFileSync(src, trg)
-      })
+      }
     })
 
     // ---------------------------------------------------------------------------------------------------------------------
     // nitro plugin
     // ---------------------------------------------------------------------------------------------------------------------
 
+    // convert assets for nitro
+    const nitroAssets = Object.entries(assets).reduce((output, [key, value]) => {
+      output[key] = value.config
+      return output
+    }, {} as any)
+
     // build config
     const virtualConfig = [
-      `export const assets = ${JSON.stringify(assets)}`,
-      `export const sources = ${JSON.stringify(sources)}`,
+      `export const assets = ${JSON.stringify(nitroAssets, null, '  ')}`,
     ].join('\n')
 
     // make config available to nuxt
@@ -219,7 +231,7 @@ export default defineNuxtModule<ModuleOptions>({
       // serve public assets
       config.publicAssets ||= []
       config.publicAssets.push({
-        dir: cachePath,
+        dir: publicPath,
         // maxAge: 60 * 60 * 24 * 365 // 1 year
       })
     })
