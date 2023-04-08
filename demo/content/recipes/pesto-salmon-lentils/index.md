@@ -1,4 +1,4 @@
-# Pesto Salmon & Mediterranean-style lentils
+# Pesto Salmon & Mediterranean-style Lentils
 
 > Image in sub folder
 
