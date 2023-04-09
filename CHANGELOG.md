@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.8.0
+
+- Removed requirement to explicitly configure asset extensions #2
+
 ## v0.7.0
 
 - Added support for multiple sources #5

@@ -1,5 +1,5 @@
 import Path from 'path'
-import { extensions, imageExtensions } from '../options'
+import { extensions } from '../options'
 
 /**
  * Test path to be relative
@@ -13,19 +13,26 @@ export function isRelative (path: string): boolean {
  */
 export function isImage (path: string): boolean {
   const ext = Path.extname(path).substring(1)
-  return imageExtensions.includes(ext)
+  return extensions.image.includes(ext)
 }
 
 /**
- * Test path for asset extension
+ * Test path is markdown
+ */
+export function isArticle (path: string): boolean {
+  return /\.mdx?$/.test(path)
+}
+
+/**
+ * Test path or id for asset
  */
 export function isAsset (path: string): boolean {
-  const ext = Path.extname(path).substring(1)
-  return extensions.includes(ext)
+  const ext = Path.extname(path)
+  return !!ext && ext !== '.DS_Store' && !isArticle(path)
 }
 
 /**
- * Test if value is a valid asset
+ * Test if value is a relative asset
  */
 export function isValidAsset (value?: string): boolean {
   return typeof value === 'string' && isAsset(value) && isRelative(value)

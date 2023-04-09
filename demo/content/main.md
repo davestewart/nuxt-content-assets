@@ -23,7 +23,7 @@ Frontmatter transformation:
 
 External sources
 
-- [Content from GitHub](/external) (need to enable in `nuxt.config.ts`)
+- [Content from GitHub](/external) (disabled in StackBlitz)
 
 GitHub:
 

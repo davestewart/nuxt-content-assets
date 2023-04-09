@@ -5,15 +5,13 @@ import { MountOptions } from '@nuxt/content'
 import { Nuxt } from '@nuxt/schema'
 import { AssetConfig, getAssetConfig, interpolatePattern, getFsAssets, getGithubAssets } from './runtime/services'
 import { moduleKey, moduleName } from './runtime/config'
-import { defaults, extensions } from './runtime/options'
+import { defaults } from './runtime/options'
 import { copyFile, list, log, matchWords, removeFolder, writeFile, } from './runtime/utils'
 
 const resolve = createResolver(import.meta.url).resolve
 
 export interface ModuleOptions {
   output?: string
-  additionalExtensions?: string
-  extensions?: string
   imageSize?: string
   debug?: boolean
 }
@@ -29,8 +27,6 @@ export default defineNuxtModule<ModuleOptions>({
 
   defaults: {
     output: `${defaults.assetsDir}/${defaults.assetsPattern}`,
-    extensions: '',
-    additionalExtensions: '',
     imageSize: '',
     debug: false,
   },
@@ -93,14 +89,6 @@ export default defineNuxtModule<ModuleOptions>({
     // convert image size hints to array
     const imageFlags = matchWords(options.imageSize)
 
-    // assign extensions
-    if (options.extensions?.trim()) {
-      extensions.splice(0, extensions.length, ...matchWords(options.extensions))
-    }
-    else if (options.additionalExtensions) {
-      extensions.push(...matchWords(options.additionalExtensions))
-    }
-
     // ---------------------------------------------------------------------------------------------------------------------
     // assets
     // ---------------------------------------------------------------------------------------------------------------------
@@ -145,12 +133,12 @@ export default defineNuxtModule<ModuleOptions>({
       let paths: string[] = []
       switch (driver) {
         case 'fs':
-          paths = getFsAssets(source.base, extensions)
+          paths = getFsAssets(source.base)
           srcDir = source.base
           break
 
         case 'github':
-          paths = await getGithubAssets(key, source, tempPath, extensions)
+          paths = await getGithubAssets(key, source, tempPath)
           srcDir = Path.join(tempPath, key)
           break
       }
