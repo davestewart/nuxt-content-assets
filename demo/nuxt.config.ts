@@ -22,12 +22,13 @@ export default defineNuxtConfig({
     },
 
     sources: {
-      ds: {
-        driver: 'github',
-        repo: 'davestewart/nuxt-content-assets',
-        dir: '/demo/external',
-        prefix: '/external'
-      },
+      // disabled for online demo
+      // ds: {
+      //   driver: 'github',
+      //   repo: 'davestewart/nuxt-content-assets',
+      //   dir: '/demo/external',
+      //   prefix: '/external'
+      // },
     },
   },
 
