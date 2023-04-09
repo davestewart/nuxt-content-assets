@@ -4,8 +4,8 @@
     <SiteNav />
     <div class="content">
       <ContentDoc
-        :path="$route.path === '/' ? '/main' : $route.path"
         :key="$route.path"
+        :path="$route.path === '/' ? '/main' : $route.path"
       />
     </div>
   </div>

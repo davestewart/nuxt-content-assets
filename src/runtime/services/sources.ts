@@ -24,7 +24,7 @@ export async function getGithubAssets (key: string, source: GithubOptions, tempP
   }))
 
   // test asset against registered extensions
-  const rx = new RegExp(`\.${extensions.join('|')}$`)
+  const rx = new RegExp(`.${extensions.join('|')}$`)
 
   // get assets
   const keys = await storage.getKeys()

@@ -96,15 +96,13 @@ export default defineNuxtModule<ModuleOptions>({
     const output = options.output || defaults.assetsDir
     const matches = output.match(/([^[]+)(.*)?/)
     const assetsDir = matches
-      ? matches[1].replace(/^\/*/, '/')
+      ? matches[1].replace(/^\/*/, '/').replace(/\/*$/, '')
       : defaults.assetsDir
     const assetsPattern = (matches ? matches[2] : '')
       || defaults.assetsPattern
 
     // test asset pattern for invalid tokens
     interpolatePattern(assetsPattern, '', true)
-
-    console.log({ assetsDir, assetsPattern })
 
     // convert image size hints to array
     const imageFlags = matchWords(options.imageSize)
@@ -121,13 +119,18 @@ export default defineNuxtModule<ModuleOptions>({
     // assets
     // ---------------------------------------------------------------------------------------------------------------------
 
-    // prepare for building assets
+    // store asset data
     const assets: Record<string, { src: string, trg: string, config: Partial<AssetConfig> }> = {}
 
     // set up content ignores
     nuxt.options.content ||= {}
     if (nuxt.options.content) {
       nuxt.options.content.ignores ||= []
+    }
+
+    // debug
+    if (options.debug) {
+      log('Preparing sources...')
     }
 
     // process sources
@@ -148,6 +151,11 @@ export default defineNuxtModule<ModuleOptions>({
           paths = await getGithubAssets(key, source as any, tempPath, extensions)
           srcDir = Path.join(tempPath, key)
           break
+      }
+
+      // debug
+      if (options.debug) {
+        log(`Prepared ${paths.length} paths for source "${key}"`)
       }
 
       // build assets map
@@ -187,24 +195,38 @@ export default defineNuxtModule<ModuleOptions>({
       }
     }
 
-    // debug
-    if (options.debug) {
-      dump('assets', assets)
-    }
-
-    // copy assets
     nuxt.hook('build:before', function () {
       // debug
       if (options.debug) {
-        const paths = Object.keys(assets).map(key => `   - ${key}`)
-        log(`Preparing ${Object.keys(assets).length} assets:\n\n${paths.join('\n')}\n`)
+        dump('assets', assets)
+      }
+
+      // debug
+      if (options.debug) {
+        log(`Copying ${Object.keys(assets).length} assets...`)
       }
 
       // loop over all assets and copy
-      for (const { src, trg } of Object.values(assets)) {
-        const trgFolder = Path.dirname(trg)
-        Fs.mkdirSync(trgFolder, { recursive: true })
-        Fs.copyFileSync(src, trg)
+      const copied: string[] = []
+      const failed: string[] = []
+      for (const [key, { src, trg }] of Object.entries(assets)) {
+        if (Fs.existsSync(src)) {
+          copyFile(src, trg)
+          copied.push(key)
+        }
+        else {
+          failed.push(key)
+        }
+      }
+
+      // debug
+      if (options.debug) {
+        if (copied.length) {
+          list('Copied', copied)
+        }
+        if (failed.length) {
+          list('Failed to copy', failed)
+        }
       }
     })
 
