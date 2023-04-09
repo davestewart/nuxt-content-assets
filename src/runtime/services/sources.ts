@@ -4,25 +4,17 @@ import { Blob } from 'buffer'
 import glob from 'glob'
 import { createStorage } from 'unstorage'
 import githubDriver from 'unstorage/drivers/github'
-import { warn } from '../utils/debug'
+import { MountOptions } from '@nuxt/content'
+import { warn } from '../utils'
 
-type GithubOptions = {
-  repo: string,
-  branch?: string,
-  dir?: string,
-  prefix?: string,
-  ttl?: number
-}
-
-export async function getGithubAssets (key: string, source: GithubOptions, tempPath: string, extensions: string[]): Promise<string[]> {
+export async function getGithubAssets (key: string, source: MountOptions, tempPath: string, extensions: string[]): Promise<string[]> {
   // storage
   const storage = createStorage()
   storage.mount(key, githubDriver({
-    repo: source.repo,
-    branch: source.branch || 'main',
-    dir: source.dir || '/',
-    ttl: source.ttl || 600
-  }))
+    branch: 'main',
+    dir: '/',
+    ...source
+  } as any))
 
   // test asset against registered extensions
   const rx = new RegExp(`.${extensions.join('|')}$`)

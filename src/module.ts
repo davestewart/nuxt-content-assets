@@ -150,7 +150,7 @@ export default defineNuxtModule<ModuleOptions>({
           break
 
         case 'github':
-          paths = await getGithubAssets(key, source as any, tempPath, extensions)
+          paths = await getGithubAssets(key, source, tempPath, extensions)
           srcDir = Path.join(tempPath, key)
           break
       }
