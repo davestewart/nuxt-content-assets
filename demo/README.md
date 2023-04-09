@@ -7,6 +7,7 @@ The demo shows off the module's main features:
 - various relative path locations
 - using inline and `frontmatter` image paths
 - image, link, video, iframe, and embed examples
+- local and [external](https://content.nuxtjs.org/api/configuration#sources) sources
 
 Additionally, configuration:
 
