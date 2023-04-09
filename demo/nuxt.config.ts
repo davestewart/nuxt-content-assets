@@ -1,3 +1,19 @@
+import { MountOptions } from '@nuxt/content'
+
+// sources
+const sources: Record<string, MountOptions> = {}
+
+// @ts-ignore
+if (!process.GIT_PROXY?.includes('stackblitz')) {
+  // no external demo in stackblitz
+  sources.ds = {
+    driver: 'github',
+    repo: 'davestewart/nuxt-content-assets',
+    dir: '/demo/external',
+    prefix: '/external'
+  }
+}
+
 export default defineNuxtConfig({
   app: {
     head: {
@@ -20,16 +36,7 @@ export default defineNuxtConfig({
     markdown: {
       anchorLinks: false,
     },
-
-    sources: {
-      // disabled for online demo
-      // ds: {
-      //   driver: 'github',
-      //   repo: 'davestewart/nuxt-content-assets',
-      //   dir: '/demo/external',
-      //   prefix: '/external'
-      // },
-    },
+    sources,
   },
 
   'content-assets': {
