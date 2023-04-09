@@ -82,6 +82,8 @@ export default defineNuxtConfig({
 
 Run the dev server or build and local assets should now be served alongside markdown content.
 
+See the [How it works](#how-it-works) section for more information.
+
 ## Usage
 
 ### Overview
@@ -93,7 +95,7 @@ Use relative paths anywhere within your documents:
 <video src="media/video.mp4" />
 ```
 
-Relative paths can also be passed in frontmatter, as long as they are the only value:
+Relative paths can be defined in frontmatter, as long as they are the only value:
 
 ```mdx
 ---
@@ -105,14 +107,14 @@ images:
 ---
 ```
 
-These variables can then be passed to components:
+These values can then be passed to components:
 
 ```markdown
 ::gallery{:data="images"}
 ::
 ```
 
-See the [Demo](demo/content/recipes/index.md) for an example.
+See the [Demo](demo/content/recipes/index.md) for a component example.
 
 ### Images
 
@@ -139,29 +141,6 @@ export default {
 ```
 
 For more information see the [configuration](#image-size) section and [Demo](demo/components/temp/ProseImg.vue) for an example.
-
-### How it works
-
-When Nuxt builds, the following happens:
-
-- the module scans content source folders for assets
-- found assets are copied to a temporary build folder
-- after markdown is parsed, matching paths are rewritten
-- finally, Nitro serves the copied assets via the new paths
-
-Note only specific tags and attributes are targeted for rewriting:
-
-```html
-<a href="...">
-<img src="...">
-<video src="...">
-<audio src="...">
-<source src="...">
-<embed src="...">
-<iframe src="...">
-```
-
-If you modify any assets, you'll need to re-run the dev server / build (there is an [issue](https://github.com/davestewart/nuxt-content-assets/issues/1) open to look at this).
 
 ## Configuration
 
@@ -275,6 +254,29 @@ If you want to see what the module does as it runs, set `debug` to true:
   debug: true
 }
 ```
+
+## How it works
+
+When Nuxt builds, the following happens:
+
+- the module scans content source folders for assets
+- found assets are copied to a temporary build folder
+- after markdown is parsed, matching paths are rewritten
+- finally, Nitro serves the copied assets via the new paths
+
+Note only specific tags and attributes are targeted for rewriting:
+
+```html
+<a href="...">
+<img src="...">
+<video src="...">
+<audio src="...">
+<source src="...">
+<embed src="...">
+<iframe src="...">
+```
+
+If you modify any assets, you'll need to re-run the dev server / build (there is an [issue](https://github.com/davestewart/nuxt-content-assets/issues/1) open to look at this).
 
 ## Development
 
