@@ -3,8 +3,8 @@ import * as Path from 'path'
 import { Blob } from 'buffer'
 import glob from 'glob'
 import { createStorage } from 'unstorage'
-// @ts-ignore
 import githubDriver from 'unstorage/drivers/github'
+import { warn } from '../utils/debug'
 
 type GithubOptions = {
   repo: string,
@@ -31,8 +31,14 @@ export async function getGithubAssets (key: string, source: GithubOptions, tempP
   const keys = await storage.getKeys()
   const assetKeys = keys.filter(key => rx.test(key))
   const assetItems = await Promise.all(assetKeys.map(async id => {
-    const data = await storage.getItem(id)
-    return { id, data }
+    try {
+      const data = await storage.getItem(id)
+      return { id, data }
+    }
+    catch (err: any) {
+      warn(err.message)
+      return { id }
+    }
   }))
 
   // variables
