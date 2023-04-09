@@ -97,7 +97,7 @@ Relative paths are defined by anything not starting with a slash or `http`, for 
 
 ```
 image.jpg
-images/featured.png
+assets/featured.png
 ../assets/cv.pdf
 ```
 
@@ -119,16 +119,16 @@ However, you can use relative paths in frontmatter:
 ---
 title: Portfolio Item 1
 images:
-  - images/image-1.jpg
-  - images/image-2.jpg
-  - images/image-3.jpg
+  - assets/image-1.jpg
+  - assets/image-2.jpg
+  - assets/image-3.jpg
 ---
 ```
 
 Then pass these to components like so:
 
 ```markdown
-::gallery{:images="images"}
+::gallery{:data="images"}
 ::
 ```
 
@@ -196,7 +196,7 @@ export default defineNuxtConfig({
     // where to generate and serve the assets from
     output: 'assets/content/[path]/[file]',
     
-    // add additional extensions
+    // include additional extensions
     additionalExtensions: 'html',
     
     // completely replace supported extensions
@@ -216,38 +216,43 @@ export default defineNuxtConfig({
 The output path can be customised using a template string:
 
 ```
-assets/content/[name]-[hash].[ext]
+assets/[name]-[hash].[ext]
 ```
 
 The first part of the path is where you want content assets to be served from:
 
 ```
-assets/content/
+assets/
 ```
 
-The optional second part of the path indicates the relative location of each image: 
+The optional second part of the path indicates the relative location of each asset.
 
-| Token       | Description                                | Example            |
-|-------------|--------------------------------------------|--------------------|
-| `[folder]`  | The relative folder of the file            | `posts/2023-01-01` |
-| `[file]`    | The full filename of the file              | `featured.jpg`     |
-| `[name]`    | The name of the file without the extension | `featured`         |
-| `[hash]`    | A hash of the absolute source path         | `9M00N4l9A0`       |
-| `[extname]` | The full extension with the dot            | `.jpg`             |
-| `[ext]`     | The extension without the dot              | `jpg`              |
+The table below shows replacements for the asset `content/posts/2023-01-01/featured.jpg`:
+
+| Token       | Description                                                                                        | Example                    |
+|-------------|----------------------------------------------------------------------------------------------------|----------------------------|
+| `[key]`     | The config key of the source (see [sources](https://content.nuxtjs.org/api/configuration#sources)) | `content`                  |
+| `[path]`    | The relative path of the source                                                                    | `content/posts/2023-01-01` |
+| `[folder]`  | The relative path of the file's folder                                                             | `posts/2023-01-01`         |
+| `[file]`    | The full filename of the file                                                                      | `featured.jpg`             |
+| `[name]`    | The name of the file without the extension                                                         | `featured`                 |
+| `[hash]`    | A hash of the absolute source path                                                                 | `9M00N4l9A0`               |
+| `[extname]` | The full extension with the dot                                                                    | `.jpg`                     |
+| `[ext]`     | The extension without the dot                                                                      | `jpg`                      |
 
 For example:
 
-| Template                             | Output                                             |
-|--------------------------------------|----------------------------------------------------|
-| `assets/img/content/[folder]/[file]` | `assets/img/content/posts/2023-01-01/featured.jpg` |
-| `assets/img/[name]-[hash].[ext]`     | `assets/img/featured-9M00N4l9A0.jpg`               |
-| `content/[hash].[ext]`               | `content/9M00N4l9A0.jpg`                           |
+| Template                     | Output                                         |
+|------------------------------|------------------------------------------------|
+| `assets/[path]/[file]`       | `assets/content/posts/2023-01-01/featured.jpg` |
+| `assets/[folder]/[file]`     | `assets/posts/2023-01-01/featured.jpg`         |
+| `assets/[name]-[hash].[ext]` | `assets/featured-9M00N4l9A0.jpg`               |
+| `assets/[hash].[ext]`        | `assets/9M00N4l9A0.jpg`                        |
 
 Note that the module defaults to:
 
 ```
-/assets/content/[folder]/[file]
+/assets/[path]/[file]
 ```
 
 ### Extensions

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.7.0
+
+- Added support for multiple sources #5
+
 ## v0.6.1
 
 - Fixed first-run issues #4
