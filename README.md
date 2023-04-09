@@ -13,7 +13,7 @@
 
 ## Overview
 
-Nuxt Content Assets enables locally-located assets in your [Nuxt Content](https://content.nuxtjs.org/) folder:
+Nuxt Content Assets enables locally-located assets in [Nuxt Content](https://content.nuxtjs.org/):
 
 ```
 +- content
@@ -93,27 +93,7 @@ Use relative paths anywhere within your documents:
 <video src="media/video.mp4" />
 ```
 
-Relative paths are defined by anything not starting with a slash or `http`, for example:
-
-```
-image.jpg
-assets/featured.png
-../assets/cv.pdf
-```
-
-Note that only specific tags and attributes are targeted:
-
-```html
-<img src="...">
-<video src="...">
-<audio src="...">
-<source src="...">
-<embed src="...">
-<iframe src="...">
-<a href="...">
-```
-
-However, you can use relative paths in frontmatter:
+Relative paths can also be passed in frontmatter, as long as they are the only value:
 
 ```mdx
 ---
@@ -125,28 +105,14 @@ images:
 ---
 ```
 
-Then pass these to components like so:
+These variables can then be passed to components:
 
 ```markdown
 ::gallery{:data="images"}
 ::
 ```
 
-> Note: to pass size hints in frontmatter, set the `imageSize` configuration [option](#image-size) to `'url'`
-
 See the [Demo](demo/content/recipes/index.md) for an example.
-
-### Supported assets
-
-The following file extensions are targeted by default:
-
-| Type   | Extensions                                                              |
-|--------|-------------------------------------------------------------------------|
-| Images | `png`, `jpg`, `jpeg`, `gif`, `svg`, `webp`                              |
-| Media  | `mp3`, `m4a`, `wav`, `mp4`, `mov`, `webm`, `ogg`, `avi`, `flv`, `avchd` |
-| Files  | `pdf`, `doc`, `docx`, `xls`, `xlsx`, `ppt`, `pptx`, `odp`, `key`        |
-
-See the [configuration](#output) section to modify or change this list, and the [Demo](demo/nuxt.config.ts) for an example.
 
 ### Images
 
@@ -156,7 +122,7 @@ The module can prevent content jumps by optionally writing image size informatio
 <img src="/image.jpg?width=640&height=480" width="640" height="480" style="aspect-ratio:640/480">
 ```
 
-If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can pass these values to your own markup:
+If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can hook into these values via the `$attrs` property:
 
 ```vue
 <template>
@@ -172,18 +138,30 @@ export default {
 </script>
 ```
 
-See the [configuration](#image-size) section to add this, and the [Demo](demo/components/temp/ProseImg.vue) for an example.
+For more information see the [configuration](#image-size) section and [Demo](demo/components/temp/ProseImg.vue) for an example.
 
-### Build
+### How it works
 
-Once the dev server or build is running, the following happens:
+When Nuxt builds, the following happens:
 
-- the module scans content folders for assets
-- these are copied to a temporary build folder
-- matching relative paths markdown are rewritten
-- Nitro serves the assets from the new location
+- the module scans content source folders for assets
+- found assets are copied to a temporary build folder
+- after markdown is parsed, matching paths are rewritten
+- finally, Nitro serves the copied assets via the new paths
 
-If you change any assets, you'll need to re-run the dev server / build (there is an [issue](https://github.com/davestewart/nuxt-content-assets/issues/1) open to look at this).
+Note only specific tags and attributes are targeted for rewriting:
+
+```html
+<a href="...">
+<img src="...">
+<video src="...">
+<audio src="...">
+<source src="...">
+<embed src="...">
+<iframe src="...">
+```
+
+If you modify any assets, you'll need to re-run the dev server / build (there is an [issue](https://github.com/davestewart/nuxt-content-assets/issues/1) open to look at this).
 
 ## Configuration
 
@@ -195,12 +173,6 @@ export default defineNuxtConfig({
   'content-assets': {
     // where to generate and serve the assets from
     output: 'assets/content/[path]/[file]',
-    
-    // include additional extensions
-    additionalExtensions: 'html',
-    
-    // completely replace supported extensions
-    extensions: 'png jpg',
     
     // use aspect-ratio rather than attributes
     imageSize: 'style',
@@ -253,26 +225,6 @@ Note that the module defaults to:
 
 ```
 /assets/[path]/[file]
-```
-
-### Extensions
-
-You can add (or replace) supported extensions if you need to:
-
-To add extensions, use `additionalExtensions`:
-
-```ts
-{
-  additionalExtensions: 'html' // add support for html
-}
-```
-
-To replace extensions, use `extensions`:
-
-```ts
-{
-  extensions: 'png jpg' // serve png and jpg files only
-}
 ```
 
 ### Image size

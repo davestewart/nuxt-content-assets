@@ -36,9 +36,6 @@ export default defineNuxtConfig({
     // serve assets using sub-folder structure
     output: '/assets/[folder]/[file]',
 
-    // serve html files to be shown in iframes
-    additionalExtensions: 'html',
-
     // add image size hints
     imageSize: 'attrs url',
 

@@ -12,7 +12,6 @@ The demo shows off the module's main features:
 Additionally, configuration:
 
 - `output`: custom output path
-- `extensions`: `.html` files configured as iframe assets 
 - `imageSize`: image sizes passed by URL in frontmatter
 - `debug`: see what the module is doing
 
