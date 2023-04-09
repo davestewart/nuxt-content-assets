@@ -1,4 +1,5 @@
 export * from './assert'
-export * from './string'
 export * from './debug'
+export * from './fs'
+export * from './string'
 export * from './object'

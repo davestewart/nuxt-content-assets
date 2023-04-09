@@ -6,7 +6,7 @@ import { Nuxt } from '@nuxt/schema'
 import { AssetConfig, getAssetConfig, interpolatePattern, getFsAssets, getGithubAssets } from './runtime/services'
 import { moduleKey, moduleName } from './runtime/config'
 import { defaults, extensions } from './runtime/options'
-import { log, matchWords, } from './runtime/utils'
+import { copyFile, list, log, matchWords, removeFolder, writeFile, } from './runtime/utils'
 
 const resolve = createResolver(import.meta.url).resolve
 
@@ -47,15 +47,13 @@ export default defineNuxtModule<ModuleOptions>({
     const buildPath = nuxt.options.buildDir
     const cachePath = Path.join(buildPath, 'content-assets')
     const publicPath = Path.join(cachePath, 'public')
-    const tempPath = Path.join(cachePath, 'temp')
+    const tempPath = Path.resolve('node_modules/.nuxt-content-assets')
 
     // dump to file helper
     const dump = (name: string, data: any): void => {
       const path = `${cachePath}/debug/${name}.json`
-      const folder = Path.dirname(path)
-      log(`Dumping "${path}"`)
-      Fs.mkdirSync(folder, { recursive: true })
-      Fs.writeFileSync(path, JSON.stringify(data, null, '  '), { encoding: 'utf8' })
+      log(`Dumping "${Path.relative('', path)}"`)
+      writeFile(path, data)
     }
 
     // clear caches
@@ -63,10 +61,11 @@ export default defineNuxtModule<ModuleOptions>({
       log('Removing cache folders...')
     }
     // ensures markdown image paths get replaced
-    Fs.rmSync(Path.join(buildPath, 'content-cache'), { recursive: true, force: true })
+    removeFolder(Path.join(buildPath, 'content-cache'))
 
     // clear images from previous run
-    Fs.rmSync(cachePath, { recursive: true, force: true })
+    removeFolder(cachePath)
+    removeFolder(tempPath)
 
     // collate content folders
     const sources: Record<string, MountOptions> = nuxt.options._layers
