@@ -67,25 +67,11 @@ export default defineNuxtModule<ModuleOptions>({
     removeFolder(cachePath)
     removeFolder(tempPath)
 
-    // collate content folders
-    const sources: Record<string, MountOptions> = nuxt.options._layers
-      .map(layer => layer.config?.content?.sources)
-      .reduce((output, sources) => {
-        if (sources) {
-          Object.assign(output, sources)
-        }
-        return output
-      }, {})
-
-    // add default content folder
-    if (Object.keys(sources).length === 0 || !sources.content) {
-      const content = nuxt.options.srcDir + '/content'
-      if (Fs.existsSync(content)) {
-        sources.content = {
-          driver: 'fs',
-          base: content
-        }
-      }
+    // @ts-ignore
+    // set up content ignores
+    nuxt.options.content ||= {}
+    if (nuxt.options.content) {
+      nuxt.options.content.ignores ||= []
     }
 
     // ---------------------------------------------------------------------------------------------------------------------
@@ -119,18 +105,34 @@ export default defineNuxtModule<ModuleOptions>({
     // assets
     // ---------------------------------------------------------------------------------------------------------------------
 
-    // store asset data
-    const assets: Record<string, { src: string, trg: string, config: Partial<AssetConfig> }> = {}
-
-    // set up content ignores
-    nuxt.options.content ||= {}
-    if (nuxt.options.content) {
-      nuxt.options.content.ignores ||= []
-    }
-
     // debug
     if (options.debug) {
       log('Preparing sources...')
+    }
+
+    // store asset data
+    const assets: Record<string, { src: string, trg: string, config: Partial<AssetConfig> }> = {}
+
+    // collate content folders
+    const sources: Record<string, MountOptions> = nuxt.options._layers
+      // @ts-ignore
+      .map(layer => layer.config?.content?.sources)
+      .reduce((output, sources) => {
+        if (sources) {
+          Object.assign(output, sources)
+        }
+        return output
+      }, {})
+
+    // add default content folder
+    if (Object.keys(sources).length === 0 || !sources.content) {
+      const content = nuxt.options.srcDir + '/content'
+      if (Fs.existsSync(content)) {
+        sources.content = {
+          driver: 'fs',
+          base: content
+        }
+      }
     }
 
     // process sources
@@ -174,6 +176,7 @@ export default defineNuxtModule<ModuleOptions>({
           } = getAssetConfig(srcDir, src, assetsPattern, imageFlags)
 
           // tell content to ignore file
+          // @ts-ignore
           nuxt.options.content.ignores.push(id)
 
           // target file path
