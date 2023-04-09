@@ -1,11 +1,11 @@
 import { MountOptions } from '@nuxt/content'
 
-// sources
-const sources: Record<string, MountOptions> = {}
-
 // @ts-ignore
-if (!process.GIT_PROXY?.includes('stackblitz')) {
-  // no external demo in stackblitz
+const isStackblitz = process.env.GIT_PROXY?.includes('stackblitz')
+
+// no external demo in stackblitz (due to CORS)
+const sources: Record<string, MountOptions> = {}
+if (!isStackblitz) {
   sources.ds = {
     driver: 'github',
     repo: 'davestewart/nuxt-content-assets',
@@ -33,10 +33,10 @@ export default defineNuxtConfig({
 
   // https://content.nuxtjs.org/api/configuration
   content: {
+    sources,
     markdown: {
       anchorLinks: false,
     },
-    sources,
   },
 
   'content-assets': {
