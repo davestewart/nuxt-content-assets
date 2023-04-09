@@ -5,9 +5,9 @@ import glob from 'glob'
 import { createStorage } from 'unstorage'
 import githubDriver from 'unstorage/drivers/github'
 import { MountOptions } from '@nuxt/content'
-import { warn } from '../utils'
+import { warn, isAsset } from '../utils'
 
-export async function getGithubAssets (key: string, source: MountOptions, tempPath: string, extensions: string[]): Promise<string[]> {
+export async function getGithubAssets (key: string, source: MountOptions, tempPath: string): Promise<string[]> {
   // storage
   const storage = createStorage()
   storage.mount(key, githubDriver({
@@ -16,12 +16,9 @@ export async function getGithubAssets (key: string, source: MountOptions, tempPa
     ...source
   } as any))
 
-  // test asset against registered extensions
-  const rx = new RegExp(`.${extensions.join('|')}$`)
-
   // get assets
   const keys = await storage.getKeys()
-  const assetKeys = keys.filter(key => rx.test(key))
+  const assetKeys = keys.filter(isAsset)
   const assetItems = await Promise.all(assetKeys.map(async id => {
     try {
       const data = await storage.getItem(id)
@@ -63,7 +60,12 @@ export async function getGithubAssets (key: string, source: MountOptions, tempPa
   return paths
 }
 
-export function getFsAssets (path: string, extensions: string[]) {
-  const pattern = `${path}/**/*.{${extensions.join(',')}}`
-  return glob.globSync(pattern) || []
+export function getFsAssets (path: string) {
+  const pattern = `${path}/**/*.*`
+  return glob.globSync(pattern, {
+    nodir: true,
+    ignore: {
+      ignored: p => !isAsset(p.name)
+    }
+  }) || []
 }
