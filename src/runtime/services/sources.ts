@@ -1,9 +1,10 @@
 import * as Fs from 'fs'
 import * as Path from 'path'
+import { Blob } from 'buffer'
 import glob from 'glob'
 import { createStorage } from 'unstorage'
+// @ts-ignore
 import githubDriver from 'unstorage/drivers/github'
-import { Blob } from 'buffer'
 
 type GithubOptions = {
   repo: string,

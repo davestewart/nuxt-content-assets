@@ -35,7 +35,8 @@
     "glob": "^9.3.2",
     "image-size": "^1.0.2",
     "ohash": "^1.0.0",
-    "unist-util-visit": "^4.1.2"
+    "unist-util-visit": "^4.1.2",
+    "unstorage": "^1.4.1"
   },
   "peerDependencies": {
     "@nuxt/content": "latest"
@@ -51,7 +52,7 @@
     "nuxt": "^3.3.2",
     "vitest": "^0.29.7"
   },
-  "engines" : {
-    "node" : ">=14.0.0"
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
