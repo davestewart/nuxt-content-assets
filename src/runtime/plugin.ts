@@ -1,7 +1,7 @@
 import Path from 'path'
 import { visit } from 'unist-util-visit'
 import type { NitroApp, NitroAppPlugin } from 'nitropack'
-import { deKey, isValidAsset, readFile, toPath, walk } from './utils'
+import { deKey, isValidAsset, toPath, walk } from './utils'
 import { tags } from './options'
 
 // @ts-ignore – options injected via module.ts

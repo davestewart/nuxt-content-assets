@@ -3,7 +3,7 @@ import { createStorage, WatchEvent, Storage } from 'unstorage'
 import githubDriver, { GithubOptions } from 'unstorage/drivers/github'
 import fsDriver, { FSStorageOptions } from 'unstorage/drivers/fs'
 import { MountOptions } from '@nuxt/content'
-import { warn, isAsset, toPath, removeFile, copyFile, writeBlob, writeFile, toKey, log, deKey } from '../utils'
+import { warn, isAsset, toPath, removeFile, copyFile, writeBlob, writeFile, deKey } from '../utils'
 
 /**
  * Make a Storage instance

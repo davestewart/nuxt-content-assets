@@ -6,7 +6,7 @@ import { Nuxt } from '@nuxt/schema'
 import debounce from 'debounce'
 import type { AssetConfig, SourceManager } from './runtime/services'
 import { getAssetConfig, interpolatePattern, makeSourceManager } from './runtime/services'
-import { Callback, list, log, matchWords, removeFolder, writeFile, } from './runtime/utils'
+import { list, log, matchWords, removeFolder, writeFile, } from './runtime/utils'
 import { moduleKey, moduleName } from './runtime/config'
 import { defaults } from './runtime/options'
 import { useSocketServer } from './runtime/services/sockets/server'
@@ -49,6 +49,7 @@ export default defineNuxtModule<ModuleOptions>({
     const indexPath = Path.join(cachePath, 'assets.json')
 
     // dump to file helper
+    // eslint-disable-next-line
     const dump = (name: string, data: any): void => {
       const path = `${cachePath}/debug/${name}.json`
       log(`Dumping "${Path.relative('', path)}"`)
@@ -80,9 +81,9 @@ export default defineNuxtModule<ModuleOptions>({
     // generate assets patterns
     const output = options.output || defaults.assetsDir
     const matches = output.match(/([^[]+)(.*)?/)
-    const assetsDir = matches
-      ? matches[1].replace(/^\/*/, '/').replace(/\/*$/, '')
-      : defaults.assetsDir
+    // const assetsDir = matches
+    //   ? matches[1].replace(/^\/*/, '/').replace(/\/*$/, '')
+    //   : defaults.assetsDir
     const assetsPattern = (matches ? matches[2] : '')
       || defaults.assetsPattern
 

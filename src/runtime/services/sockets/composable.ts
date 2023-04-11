@@ -70,7 +70,9 @@ export function useSocket (channel: string, callback: (data: any) => void) {
       try {
         ws.close()
       }
-      catch (err) {}
+      catch (err) {
+        // empty
+      }
       ws = undefined
     }
 

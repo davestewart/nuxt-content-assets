@@ -45,7 +45,9 @@ export function createWebSocket () {
           .filter(handler => handler.channel === channel || handler.channel === '*')
           .forEach(handler => handler.callback(data))
       }
-      catch (err) {}
+      catch (err) {
+        // empty
+      }
     })
   })
 

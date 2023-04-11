@@ -1,7 +1,6 @@
 import * as Path from 'path'
 import getImageSize from 'image-size'
 import { isImage, warn } from '../utils'
-import { interpolatePattern } from './paths'
 
 export type AssetConfig = {
   id?: string
