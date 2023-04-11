@@ -28,7 +28,10 @@ export default defineNuxtConfig({
 
   modules: [
     '../src/module',
+    '@davestewart/nuxt-sockets',
+    // '/Volumes/Data/Work/OpenSource/JavaScript/NuxtSockets/nuxt-sockets/src/module',
     '@nuxt/content',
+    // '@nuxt/devtools',
   ],
 
   // https://content.nuxtjs.org/api/configuration

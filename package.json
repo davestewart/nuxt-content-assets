@@ -31,13 +31,16 @@
     "release:dry": "npm run lint && npm run test && npm run build && npm publish --dry-run"
   },
   "dependencies": {
+    "@davestewart/nuxt-sockets": "^0.1.0",
     "@nuxt/kit": "^3.3.2",
     "debounce": "^1.2.1",
     "glob": "^9.3.2",
     "image-size": "^1.0.2",
+    "listhen": "^1.0.4",
     "ohash": "^1.0.0",
     "unist-util-visit": "^4.1.2",
-    "unstorage": "^1.4.1"
+    "unstorage": "^1.4.1",
+    "ws": "^8.13.0"
   },
   "peerDependencies": {
     "@nuxt/content": "latest"
