@@ -9,7 +9,7 @@ export function isRelative (path: string): boolean {
 }
 
 /**
- * Test path for image extension
+ * Test path or id for image extension
  */
 export function isImage (path: string): boolean {
   const ext = Path.extname(path).substring(1)
@@ -17,14 +17,14 @@ export function isImage (path: string): boolean {
 }
 
 /**
- * Test path is markdown
+ * Test path or id is markdown
  */
 export function isArticle (path: string): boolean {
   return /\.mdx?$/.test(path)
 }
 
 /**
- * Test path or id for asset
+ * Test path or id is asset
  */
 export function isAsset (path: string): boolean {
   const ext = Path.extname(path)

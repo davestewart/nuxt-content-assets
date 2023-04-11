@@ -21,7 +21,7 @@ Frontmatter transformation:
 - [Image src as frontmatter variable](/recipes/turkey-casserole)
 - [Gallery example](/recipes) 
 
-External sources
+External sources:
 
 - [Content from GitHub](/external) (disabled in StackBlitz)
 

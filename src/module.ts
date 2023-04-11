@@ -1,12 +1,15 @@
 import * as Fs from 'fs'
 import * as Path from 'path'
-import { addTemplate, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { MountOptions } from '@nuxt/content'
 import { Nuxt } from '@nuxt/schema'
-import { AssetConfig, getAssetConfig, interpolatePattern, getFsAssets, getGithubAssets } from './runtime/services'
+import debounce from 'debounce'
+import type { AssetConfig, SourceManager } from './runtime/services'
+import { getAssetConfig, interpolatePattern, makeSourceManager } from './runtime/services'
+import { Callback, list, log, matchWords, removeFolder, writeFile, } from './runtime/utils'
 import { moduleKey, moduleName } from './runtime/config'
 import { defaults } from './runtime/options'
-import { copyFile, list, log, matchWords, removeFolder, writeFile, } from './runtime/utils'
+import { useSocketServer } from './runtime/services/sockets/server'
 
 const resolve = createResolver(import.meta.url).resolve
 
@@ -43,7 +46,7 @@ export default defineNuxtModule<ModuleOptions>({
     const buildPath = nuxt.options.buildDir
     const cachePath = Path.join(buildPath, 'content-assets')
     const publicPath = Path.join(cachePath, 'public')
-    const tempPath = Path.resolve('node_modules/.nuxt-content-assets')
+    const indexPath = Path.join(cachePath, 'assets.json')
 
     // dump to file helper
     const dump = (name: string, data: any): void => {
@@ -56,12 +59,11 @@ export default defineNuxtModule<ModuleOptions>({
     if (options.debug) {
       log('Removing cache folders...')
     }
-    // ensures markdown image paths get replaced
+    // clear cached markdown so image paths get updated
     removeFolder(Path.join(buildPath, 'content-cache'))
 
     // clear images from previous run
     removeFolder(cachePath)
-    removeFolder(tempPath)
 
     // @ts-ignore
     // set up content ignores
@@ -69,6 +71,7 @@ export default defineNuxtModule<ModuleOptions>({
     if (nuxt.options.content) {
       nuxt.options.content.ignores ||= []
     }
+    nuxt.options.content?.ignores.push('^((?!(md|json|yaml|csv)).)*$')
 
     // ---------------------------------------------------------------------------------------------------------------------
     // options
@@ -89,19 +92,7 @@ export default defineNuxtModule<ModuleOptions>({
     // convert image size hints to array
     const imageFlags = matchWords(options.imageSize)
 
-    // ---------------------------------------------------------------------------------------------------------------------
-    // assets
-    // ---------------------------------------------------------------------------------------------------------------------
-
-    // debug
-    if (options.debug) {
-      log('Preparing sources...')
-    }
-
-    // store asset data
-    const assets: Record<string, { src: string, trg: string, config: Partial<AssetConfig> }> = {}
-
-    // collate content folders
+    // collate sources
     const sources: Record<string, MountOptions> = nuxt.options._layers
       // @ts-ignore
       .map(layer => layer.config?.content?.sources)
@@ -123,125 +114,123 @@ export default defineNuxtModule<ModuleOptions>({
       }
     }
 
-    // process sources
-    for (const [key, source] of Object.entries(sources)) {
-      // folder
-      const { driver } = source
-      let srcDir: string = ''
+    // ---------------------------------------------------------------------------------------------------------------------
+    // image reloading
+    // ---------------------------------------------------------------------------------------------------------------------
 
-      // get all images
-      let paths: string[] = []
-      switch (driver) {
-        case 'fs':
-          paths = getFsAssets(source.base)
-          srcDir = source.base
-          break
+    addPlugin(resolve('./runtime/watcher'))
+    const socket = nuxt.options.dev
+      ? useSocketServer(nuxt as any, 'content-assets')
+      : null
 
-        case 'github':
-          paths = await getGithubAssets(key, source, tempPath)
-          srcDir = Path.join(tempPath, key)
-          break
+    // ---------------------------------------------------------------------------------------------------------------------
+    // sources setup
+    // ---------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Remove asset config
+     */
+    function removeAsset (src: string) {
+      const srcRel = Path.relative(publicPath, src)
+      delete assets[srcRel]
+      saveAssets()
+      return '/' + srcRel
+    }
+
+    /**
+     * Set asset config
+     */
+    function updateAsset (src: string) {
+      // get asset
+      const {
+        srcRel,
+        srcAttr,
+        width,
+        height,
+        ratio,
+        query
+      } = getAssetConfig(publicPath, src, assetsPattern, imageFlags)
+
+      // add assets to config
+      assets[srcRel] = {
+        srcRel,
+        srcAttr,
+        width,
+        height,
+        ratio,
+        query
       }
 
-      // debug
-      if (options.debug) {
-        log(`Prepared ${paths.length} paths for source "${key}"`)
-      }
+      // update
+      saveAssets()
 
-      // build assets map
-      if (paths.length) {
-        // build asset configs
-        paths.forEach((src: string) => {
-          // get asset
-          const {
-            id,
-            srcRel,
-            srcAttr,
-            width,
-            height,
-            ratio,
-            query
-          } = getAssetConfig(srcDir, src, assetsPattern, imageFlags)
+      // return
+      return srcAttr
+    }
 
-          // tell content to ignore file
-          // @ts-ignore
-          nuxt.options.content.ignores.push(id)
-
-          // target file path
-          const trg = Path.join(publicPath, assetsDir, srcAttr)
-
-          // add assets to config
-          assets[srcRel] = {
-            src,
-            trg,
-            config: {
-              srcAttr: Path.join(assetsDir, srcAttr),
-              width,
-              height,
-              ratio,
-              query
-            }
-          }
-        })
+    /**
+     * Callback for when assets change
+     */
+    function watchAsset (event: 'update' | 'remove', absTrg: string) {
+      const srcAttr = event === 'update'
+        ? updateAsset(absTrg)
+        : removeAsset(absTrg)
+      if (socket) {
+        socket.send({ event: 'update', src: srcAttr })
       }
     }
 
-    nuxt.hook('build:before', function () {
+    /**
+     * Debounced handler to save assets config
+     */
+    const saveAssets = debounce(() => {
+      writeFile(indexPath, assets)
+    }, 50)
+
+    // store asset data
+    const assets: Record<string, AssetConfig> = {}
+
+    // create source managers
+    const managers: Record<string, SourceManager> = {}
+    for (const [key, source] of Object.entries(sources)) {
       // debug
       if (options.debug) {
-        dump('assets', assets)
+        log(`Creating source "${key}"`)
       }
 
-      // debug
-      if (options.debug) {
-        log(`Copying ${Object.keys(assets).length} assets...`)
-      }
+      // create manager
+      managers[key] = makeSourceManager(key, source, publicPath, watchAsset)
+    }
 
-      // loop over all assets and copy
-      const copied: string[] = []
-      const failed: string[] = []
-      for (const [key, { src, trg }] of Object.entries(assets)) {
-        if (Fs.existsSync(src)) {
-          copyFile(src, trg)
-          copied.push(key)
-        }
-        else {
-          failed.push(key)
-        }
-      }
+    // ---------------------------------------------------------------------------------------------------------------------
+    // build hook
+    // ---------------------------------------------------------------------------------------------------------------------
 
-      // debug
-      if (options.debug) {
-        if (copied.length) {
-          list('Copied', copied)
-        }
-        if (failed.length) {
-          list('Failed to copy', failed)
+    // copy assets to public folder
+    nuxt.hook('build:before', async function () {
+      for (const [key, manager] of Object.entries(managers)) {
+        // copy assets
+        const paths = await manager.init()
+
+        // update assets config
+        paths.forEach(path => updateAsset(path))
+
+        // debug
+        if (options.debug) {
+          list(`Copied "${key}" assets`, paths.map(path => Path.relative(publicPath, path)))
         }
       }
     })
 
     // ---------------------------------------------------------------------------------------------------------------------
-    // nitro plugin
+    // nitro hook
     // ---------------------------------------------------------------------------------------------------------------------
-
-    // convert assets for nitro
-    const nitroAssets = Object.entries(assets).reduce((output, [key, value]) => {
-      output[key] = value.config
-      return output
-    }, {} as any)
 
     // build config
     const virtualConfig = [
-      `export const assets = ${JSON.stringify(nitroAssets, null, '  ')}`,
+      // `export const assets = ${JSON.stringify(assets, null, '  ')}`,
+      `export const cachePath = '${cachePath}'`,
     ].join('\n')
-
-    // make config available to nuxt
-    // see https://discord.com/channels/473401852243869706/1075789688188698685/1075792884957192334
-    nuxt.options.alias[`#${moduleName}`] = addTemplate({
-      filename: `${moduleName}.mjs`,
-      getContents: () => virtualConfig,
-    }).dst
 
     // setup server plugin
     nuxt.hook('nitro:config', async (config) => {
@@ -251,7 +240,9 @@ export default defineNuxtModule<ModuleOptions>({
 
       // make config available to nitro
       config.virtual ||= {}
-      config.virtual[`#${moduleName}`] = virtualConfig
+      config.virtual[`#${moduleName}`] = () => {
+        return virtualConfig
+      }
 
       // serve public assets
       config.publicAssets ||= []

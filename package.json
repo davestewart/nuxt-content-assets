@@ -1,6 +1,6 @@
 {
   "name": "nuxt-content-assets",
-  "version": "0.8.0",
+  "version": "0.9.0-alpha",
   "description": "Enable locally-located assets in Nuxt Content",
   "repository": "davestewart/nuxt-content-assets",
   "license": "MIT",
@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@nuxt/kit": "^3.3.2",
+    "debounce": "^1.2.1",
     "glob": "^9.3.2",
     "image-size": "^1.0.2",
     "ohash": "^1.0.0",
@@ -47,6 +48,8 @@
     "@nuxt/module-builder": "^0.2.1",
     "@nuxt/schema": "^3.3.2",
     "@nuxt/test-utils": "^3.3.2",
+    "@types/debounce": "^1.2.1",
+    "@types/ws": "^8.5.4",
     "changelogen": "^0.5.1",
     "eslint": "^8.36.0",
     "nuxt": "^3.3.2",

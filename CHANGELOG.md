@@ -1,16 +1,20 @@
 # Changelog
 
+## v0.9.0-alpha
+
+- First draft of live reload using `unstorage` and local sockets
+
 ## v0.8.0
 
-- Removed requirement to explicitly configure asset extensions #2
+- Removed requirement to explicitly configure asset extensions [#2](../../issues/2)
 
 ## v0.7.0
 
-- Added support for multiple sources #5
+- Added support for multiple sources [#5](../../issues/5)
 
 ## v0.6.1
 
-- Fixed first-run issues #4
+- Fixed first-run issues [#4](../../issues/4)
 
 ## v0.6.0
 

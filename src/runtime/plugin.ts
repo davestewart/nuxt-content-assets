@@ -1,11 +1,38 @@
 import Path from 'path'
 import { visit } from 'unist-util-visit'
 import type { NitroApp, NitroAppPlugin } from 'nitropack'
-import { isValidAsset, walk } from './utils'
+import { deKey, isValidAsset, readFile, toPath, walk } from './utils'
 import { tags } from './options'
 
 // @ts-ignore – options injected via module.ts
-import { assets } from '#nuxt-content-assets'
+import { cachePath } from '#nuxt-content-assets'
+import { makeStorage } from './services'
+import type { AssetConfig } from './services'
+
+// ---------------------------------------------------------------------------------------------------------------------
+// assets
+// ---------------------------------------------------------------------------------------------------------------------
+
+async function updateAssets () {
+  assets = await storage.getItem('assets.json') as Record<string, AssetConfig>
+  // console.log(`Assets has ${Object.values(assets).length} keys}!`)
+}
+
+// storage
+const storage = makeStorage(cachePath)
+storage.watch(async (event: string, key: string) => {
+  if (event === 'update' && key === 'assets.json') {
+    await updateAssets()
+  }
+})
+
+// assets
+let assets: Record<string, AssetConfig> = {}
+void updateAssets()
+
+// ---------------------------------------------------------------------------------------------------------------------
+// plugin
+// ---------------------------------------------------------------------------------------------------------------------
 
 /**
  * Get asset config based on absolute path
@@ -22,7 +49,7 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
   nitro.hooks.hook('content:file:afterParse', async (file) => {
     if (file._id.endsWith('.md')) {
       // location
-      const srcDoc = file._id.split(':').join('/')
+      const srcDoc = toPath(deKey(file._id))
 
       // walk front matter
       const filter = (value: any, key?: string | number) => !(String(key).startsWith('_') || key === 'body')

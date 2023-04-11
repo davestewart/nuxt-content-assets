@@ -4,7 +4,7 @@ import { isImage, warn } from '../utils'
 import { interpolatePattern } from './paths'
 
 export type AssetConfig = {
-  id: string
+  id?: string
   srcRel: string
   srcAttr: string
   width?: number
@@ -49,10 +49,11 @@ export function getAssetConfig (srcDir: string, srcAbs: string, pattern: string,
   }
 
   // relative asset path
-  const srcRel = Path.basename(srcDir) + srcAbs.substring(srcDir.length)
+  const srcRel = Path.relative(srcDir, srcAbs)
 
   // interpolated public path
-  const srcAttr = interpolatePattern(pattern, srcRel)
+  // const srcAttr = interpolatePattern(pattern, srcRel)
+  const srcAttr = '/' + srcRel
 
   // content id
   const id = srcRel.replaceAll('/', ':')

@@ -1,71 +1,168 @@
-import * as Fs from 'fs'
 import * as Path from 'path'
-import { Blob } from 'buffer'
-import glob from 'glob'
-import { createStorage } from 'unstorage'
-import githubDriver from 'unstorage/drivers/github'
+import { createStorage, WatchEvent, Storage } from 'unstorage'
+import githubDriver, { GithubOptions } from 'unstorage/drivers/github'
+import fsDriver, { FSStorageOptions } from 'unstorage/drivers/fs'
 import { MountOptions } from '@nuxt/content'
-import { warn, isAsset } from '../utils'
+import { warn, isAsset, toPath, removeFile, copyFile, writeBlob, writeFile, toKey, log, deKey } from '../utils'
 
-export async function getGithubAssets (key: string, source: MountOptions, tempPath: string): Promise<string[]> {
-  // storage
+/**
+ * Make a Storage instance
+ */
+export function makeStorage (source: MountOptions | string, key = ''): Storage {
   const storage = createStorage()
-  storage.mount(key, githubDriver({
-    branch: 'main',
-    dir: '/',
-    ...source
-  } as any))
+  const options = typeof source === 'string'
+    ? { driver: 'fs', base: source }
+    : source
+  switch (options.driver) {
+    case 'fs':
+      storage.mount(key, fsDriver({
+        ...options,
+        ignore: ['[^:]+?\\.md'],
+      } as FSStorageOptions))
+      break
 
-  // get assets
-  const keys = await storage.getKeys()
-  const assetKeys = keys.filter(isAsset)
-  const assetItems = await Promise.all(assetKeys.map(async id => {
-    try {
-      const data = await storage.getItem(id)
-      return { id, data }
-    }
-    catch (err: any) {
-      warn(err.message)
-      return { id }
-    }
-  }))
+    case 'github':
+      storage.mount(key, githubDriver({
+        branch: 'main',
+        dir: '/',
+        ...options,
+      } as unknown as GithubOptions))
+      break
+  }
+  return storage
+}
 
-  // variables
-  const prefix = source.prefix || ''
+export interface SourceManager {
+  storage: Storage,
+  init: () => Promise<string[]>
+  keys: () => Promise<string[]>
+}
 
-  // copy assets to temp path
-  const paths: string[] = []
-  for (const { id, data } of assetItems) {
-    if (data) {
-      // variables
-      const path = id.replaceAll(':', '/')
-      const absPath = Path.join(tempPath, path.replace(key, `${key}/${prefix}`))
-      const absFolder = Path.dirname(absPath)
-
-      // save file
-      const buffer = data.constructor.name === 'Blob'
-        ? Buffer.from(await (data as Blob).arrayBuffer())
-        : typeof data === 'object'
-          ? JSON.stringify(data, null, '  ')
-          : String(data)
-      Fs.mkdirSync(absFolder, { recursive: true })
-      Fs.writeFileSync(absPath, buffer)
-
-      // update paths
-      paths.push(absPath)
+/**
+ * Make a SourceManager instance
+ *
+ * Each Source Manager is responsible for mirroring source files to the public folder
+ *
+ * @param key
+ * @param source
+ * @param publicPath
+ * @param callback
+ */
+export function makeSourceManager (key: string, source: MountOptions, publicPath: string, callback?: (event: WatchEvent, path: string) => void): SourceManager {
+  // only fs will trigger watch events
+  async function onWatch (event: WatchEvent, key: string) {
+    if (isAsset(key)) {
+      const path = event === 'update'
+        ? await copyItem(key)
+        : removeItem(key)
+      if (callback) {
+        callback(event, path)
+      }
     }
   }
 
-  // return
-  return paths
-}
+  // relative source file path from key
+  function getRelSrc(key: string) {
+    return toPath(key)
+      .replace(/\w+/, '')
+      .replace(source.prefix || '', '')
+  }
 
-export function getFsAssets (path: string) {
-  const pattern = `${path}/**/*.*`
-  return glob.globSync(pattern, {
-    nodir: true,
-    ignore: {
-      ignored: p => !isAsset(p.name)
+  // absolute source file path from key
+  function getAbsSrc(key: string) {
+    return Path.join(source.base, getRelSrc(key))
+  }
+
+  // relative target file path from key
+  function getRelTrg(key: string) {
+    return Path.join(source.prefix || '', toPath(deKey(key)))
+  }
+
+  // absolute target file path from key
+  function getAbsTrg (key: string) {
+    return Path.join(publicPath, getRelTrg(key))
+  }
+
+  /**
+   * Remove storage item from public folder
+   * @param key
+   */
+  function removeItem (key: string): string {
+    const absTrg = getAbsTrg(key)
+    removeFile(absTrg)
+    return absTrg
+  }
+
+  /**
+   * Copy storage item to public folder
+   */
+  async function copyItem (key: string): Promise<string> {
+    // variables
+    const absTrg = getAbsTrg(key)
+    const driver = source.driver
+
+    // fs
+    if (driver === 'fs') {
+      const absSrc = getAbsSrc(key)
+      copyFile(absSrc, absTrg)
     }
-  }) || []
+
+    // github
+    else if (driver === 'github') {
+      try {
+        const data = await storage.getItem(key)
+        if (data) {
+          data?.constructor.name === 'Blob'
+            ? await writeBlob(absTrg, data as object)
+            : writeFile(absTrg, data)
+        }
+        else {
+          warn(`No data for key "${key}"`)
+        }
+      }
+      catch (err: any) {
+        warn(err.message)
+      }
+    }
+
+    // return paths
+    return absTrg
+  }
+
+  /**
+   * Get only asset keys
+   */
+  async function getKeys () {
+    const keys = await storage.getKeys()
+    return keys.filter(isAsset)
+  }
+
+  /**
+   * Copy all files from source to public folder
+   */
+  async function init () {
+    // variables
+    const keys = await getKeys()
+    const paths: string[] = []
+
+    // copy assets to temp path
+    for (const key of keys) {
+      const path = await copyItem(key)
+      paths.push(path)
+    }
+
+    // return
+    return paths
+  }
+
+  // storage
+  const storage = makeStorage(source, key)
+  storage.watch(onWatch)
+
+  // return
+  return {
+    storage,
+    init,
+    keys: getKeys,
+  }
 }
