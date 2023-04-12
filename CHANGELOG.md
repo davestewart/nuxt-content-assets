@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.9.0-beta
+
+- Refactor of live reload
+- Fixed ignore yaml issue [#9](../../issues/5)
+
 ## v0.9.0-alpha
 
 - First draft of live reload using `unstorage` and local sockets
