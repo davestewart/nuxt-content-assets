@@ -173,11 +173,11 @@ export default defineNuxtModule<ModuleOptions>({
      * Callback for when assets change
      */
     function watchAsset (event: 'update' | 'remove', absTrg: string) {
-      const srcAttr = event === 'update'
+      const src = event === 'update'
         ? updateAsset(absTrg)
         : removeAsset(absTrg)
       if (socket) {
-        socket.send({ event: 'update', src: srcAttr })
+        socket.send({ event, src })
       }
     }
 

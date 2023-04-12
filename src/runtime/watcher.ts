@@ -14,10 +14,11 @@ export default defineNuxtPlugin(async () => {
         const isUpdate = event === 'update'
         document
           .querySelectorAll(`img[src^="${src}"]`)
-          .forEach((img) => {
-            (img as HTMLElement).style.opacity = isUpdate ? '1' : '0.2'
+          .forEach((el: Element) => {
+            const img = el as HTMLImageElement
+            img.style.opacity = isUpdate ? '1' : '0.2'
             if (isUpdate) {
-              img.setAttribute('src', src)
+              img.setAttribute('src', `${src}?${new Date().getTime()}`)
             }
           })
       }
