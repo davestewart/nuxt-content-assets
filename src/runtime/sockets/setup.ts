@@ -1,7 +1,7 @@
 import { Callback, SocketInstance } from '../../types'
 import { createWebSocket } from './factory'
 
-let client = createWebSocket()
+const client = createWebSocket()
 
 export function setupSocketClient (channel: string, callback?: Callback): SocketInstance | null{
   const instance: SocketInstance = {

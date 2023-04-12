@@ -36,8 +36,6 @@ function makeChannelBroker (ws: SocketServer) {
   }
 }
 
-let initialized = false
-
 const ws = createWebSocket()
 
 const broker = makeChannelBroker(ws)
