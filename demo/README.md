@@ -8,10 +8,11 @@ The demo shows off the module's main features:
 - using inline and `frontmatter` image paths
 - image, link, video, iframe, and embed examples
 - local and [external](https://content.nuxtjs.org/api/configuration#sources) sources
+- live reload; edit, crop or move images
 
 Additionally, configuration:
 
-- `output`: custom output path
+[//]: # (- `output`: custom output path)
 - `imageSize`: image sizes passed by URL in frontmatter
 - `debug`: see what the module is doing
 
@@ -33,13 +34,6 @@ To view the demo online, visit:
 - https://stackblitz.com/github/davestewart/nuxt-content-assets?file=demo%2Fapp.vue
 
 ## Features
-
-### Output path
-
-The `output` path is configured to exactly mirror the `content/` folder:
-
-- the content index file is named `main.md` so to not conflict with the site `/index.html`
-- the `<ContentDoc>` is passed `/main` on `/` and the route path on any other page 
 
 ### Prose components
 

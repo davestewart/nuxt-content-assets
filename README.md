@@ -43,7 +43,7 @@ Almost as much as being in the sea!
 <video src="media/seaside.mp4"></video>
 ```
 
-That's it!
+The module [processes assets](#how-it-works) and serves them together with your content, adding features such as [image sizing](#image-sizing) and [live-reload](#live-reload).  
 
 ## Demo
 
@@ -95,7 +95,7 @@ Use relative paths anywhere within your documents:
 <video src="media/video.mp4" />
 ```
 
-Relative paths can be defined in frontmatter, as long as they are the only value:
+Relative paths can be defined in frontmatter – as long as they are the only value:
 
 ```mdx
 ---
@@ -110,13 +110,19 @@ images:
 These values can then be passed to components:
 
 ```markdown
-::gallery{:data="images"}
+::ImageGallery{:data="images"}
 ::
 ```
 
-See the [Demo](demo/content/recipes/index.md) for a component example.
+See the Demo for [markup](demo/content/recipes/index.md) and [Demo](demo/components/content/ImageGallery.vue) examples.
 
-### Images
+### Live reload
+
+From version `0.9.0-alpha` assets are watched and live-reloaded!
+
+Any additions, moves or deletes, or modifications to image content will be updated in the browser automatically.
+
+### Image sizing
 
 The module can prevent content jumps by optionally writing image size information to generated `<img>` tags:
 
@@ -142,129 +148,19 @@ export default {
 
 For more information see the [configuration](#image-size) section and [Demo](demo/components/temp/ProseImg.vue) for an example.
 
-## Configuration
-
-The module will run happily without configuration, but should you need to:
-
-```ts
-// nuxt.config.ts
-export default defineNuxtConfig({
-  'content-assets': {
-    // where to generate and serve the assets from
-    output: 'assets/content/[path]/[file]',
-    
-    // use aspect-ratio rather than attributes
-    imageSize: 'style',
-    
-    // print debug messages to the console
-    debug: true,
-  }
-})
-```
-
-### Output
-
-The output path can be customised using a template string:
-
-```
-assets/[name]-[hash].[ext]
-```
-
-The first part of the path is where you want content assets to be served from:
-
-```
-assets/
-```
-
-The optional second part of the path indicates the relative location of each asset.
-
-The table below shows replacements for the asset `content/posts/2023-01-01/featured.jpg`:
-
-| Token       | Description                                                                                        | Example                    |
-|-------------|----------------------------------------------------------------------------------------------------|----------------------------|
-| `[key]`     | The config key of the source (see [sources](https://content.nuxtjs.org/api/configuration#sources)) | `content`                  |
-| `[path]`    | The relative path of the source                                                                    | `content/posts/2023-01-01` |
-| `[folder]`  | The relative path of the file's folder                                                             | `posts/2023-01-01`         |
-| `[file]`    | The full filename of the file                                                                      | `featured.jpg`             |
-| `[name]`    | The name of the file without the extension                                                         | `featured`                 |
-| `[hash]`    | A hash of the absolute source path                                                                 | `9M00N4l9A0`               |
-| `[extname]` | The full extension with the dot                                                                    | `.jpg`                     |
-| `[ext]`     | The extension without the dot                                                                      | `jpg`                      |
-
-For example:
-
-| Template                     | Output                                         |
-|------------------------------|------------------------------------------------|
-| `assets/[path]/[file]`       | `assets/content/posts/2023-01-01/featured.jpg` |
-| `assets/[folder]/[file]`     | `assets/posts/2023-01-01/featured.jpg`         |
-| `assets/[name]-[hash].[ext]` | `assets/featured-9M00N4l9A0.jpg`               |
-| `assets/[hash].[ext]`        | `assets/9M00N4l9A0.jpg`                        |
-
-Note that the module defaults to:
-
-```
-/assets/[path]/[file]
-```
-
-### Image size
-
-You can add image size hints to the generated images via attributes, style, or the URL.
-
-To add `style` aspect-ratio:
-
-```ts
-{
-  imageSize: 'style'
-}
-```
-
-To add `width` and `height` attributes:
-
-```ts
-{
-  imageSize: 'attrs'
-}
-```
-
-If you add `attributes` only, include the following CSS in your app:
-
-```css
-img {
-  max-width: 100%;
-  height: auto;
-}
-```
-
-To pass size hints as parameters in the URL (frontmatter only, see [Demo](demo/components/content/Gallery.vue)):
-
-```ts
-{
-  imageSize: 'url'
-}
-```
-
-Note that you can one, some or all keywords, i.e. `attrs url`.
-
-### Debug
-
-If you want to see what the module does as it runs, set `debug` to true:
-
-```ts
-{
-  debug: true
-}
-```
-
 ## How it works
+
+Nuxt Content Assets works by serving a _copy_ of your assets using [Nitro](https://nitro.unjs.io/guide/assets#custom-server-assets).
 
 When Nuxt builds, the following happens:
 
-- the module scans content source folders for assets
+- content sources are scanned for valid assets
 - found assets are copied to a temporary build folder
-- after markdown is parsed, matching paths are rewritten
-- finally, Nitro serves the copied assets via the new paths
+- any relative asset paths are rewritten as absolute
+- metadata such as image size is written to a lookup file
+- finally, Nitro serves the folder for public access
 
-Note only specific tags and attributes are targeted for rewriting:
+Note that in the rewriting phase, only specific tags and attributes are targeted :
 
 ```html
 <a href="...">
@@ -276,7 +172,61 @@ Note only specific tags and attributes are targeted for rewriting:
 <iframe src="...">
 ```
 
-If you modify any assets, you'll need to re-run the dev server / build (there is an [issue](https://github.com/davestewart/nuxt-content-assets/issues/1) open to look at this).
+## Configuration
+
+You can configure the module like so:
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  'content-assets': {    
+    // use aspect-ratio rather than attributes
+    imageSize: 'style',
+    
+    // print debug messages to the console
+    debug: true,
+  }
+})
+```
+
+Note that from version `0.9.0-alpha` the `output` location is no longer configurable; images are copied relative to their original locations. 
+
+### Image size
+
+You can add one or more image size hints to the generated images:
+
+```ts
+{
+  imageSize: 'attrs url'
+}
+```
+
+Pick from the following switches:
+
+| Switch  | What it does                                                                 |
+|---------|------------------------------------------------------------------------------|
+| `style` | Adds `style="aspect-ratio:..."` to any `<img>` tag                           |
+| `attrs` | Adds `width` and `height` attributes to any `<img>` tag                      |
+| `url`   | Adds the `?width=...&height=...` query string to image frontmatter variables |
+
+Note: if you add `attrs` only, include the following CSS in your app:
+
+```css
+img {
+  max-width: 100%;
+  height: auto;
+}
+```
+
+### Debug
+
+If you want to see what the module does as it runs, set `debug` to true:
+
+```ts
+{
+  debug: true
+}
+```
 
 ## Development
 

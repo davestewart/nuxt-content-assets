@@ -29,6 +29,7 @@ export default defineNuxtConfig({
   modules: [
     '../src/module',
     '@nuxt/content',
+    // '@nuxt/devtools',
   ],
 
   // https://content.nuxtjs.org/api/configuration
@@ -40,9 +41,6 @@ export default defineNuxtConfig({
   },
 
   'content-assets': {
-    // serve assets using sub-folder structure
-    output: '/assets/[folder]/[file]',
-
     // add image size hints
     imageSize: 'attrs url',
 
