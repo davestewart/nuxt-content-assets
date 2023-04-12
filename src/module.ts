@@ -9,7 +9,7 @@ import { getAssetConfig, interpolatePattern, makeSourceManager } from './runtime
 import { list, log, matchWords, removeFolder, writeFile, } from './runtime/utils'
 import { moduleKey, moduleName } from './runtime/config'
 import { defaults } from './runtime/options'
-import { useSocketServer } from './runtime/services/sockets/server'
+import { setupSocketServer } from './build/sockets/setup'
 
 const resolve = createResolver(import.meta.url).resolve
 
@@ -72,7 +72,7 @@ export default defineNuxtModule<ModuleOptions>({
     if (nuxt.options.content) {
       nuxt.options.content.ignores ||= []
     }
-    nuxt.options.content?.ignores.push('^((?!(md|json|yaml|csv)).)*$')
+    nuxt.options.content?.ignores.push('^((?!(mdx?|json|ya?ml|csv)).)*$')
 
     // ---------------------------------------------------------------------------------------------------------------------
     // options
@@ -119,9 +119,9 @@ export default defineNuxtModule<ModuleOptions>({
     // image reloading
     // ---------------------------------------------------------------------------------------------------------------------
 
-    addPlugin(resolve('./runtime/watcher'))
+    addPlugin(resolve('./runtime/sockets/plugin'))
     const socket = nuxt.options.dev
-      ? useSocketServer(nuxt as any, 'content-assets')
+      ? await setupSocketServer('content-assets')
       : null
 
     // ---------------------------------------------------------------------------------------------------------------------

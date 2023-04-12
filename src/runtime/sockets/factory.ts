@@ -1,4 +1,5 @@
 import { useRuntimeConfig } from '#app'
+import { Callback } from '../../types'
 
 const plugin = '[Content Assets]'
 const logger = {
@@ -10,10 +11,10 @@ const logger = {
 
 let ws: WebSocket | undefined
 
-export function useSocket (channel: string, callback: (data: any) => void) {
+export function createWebSocket () {
   if (!window.WebSocket) {
-    logger.warn('Unable to hot-reload images, your browser does not support WebSocket')
-    return
+    logger.warn('Your browser does not support WebSocket')
+    return null
   }
 
   const onOpen = () => logger.log('WS connected!')
@@ -24,7 +25,7 @@ export function useSocket (channel: string, callback: (data: any) => void) {
         connect(true)
         break
       default:
-        logger.warn('WS Error:', e)
+        logger.warn('Socket error:', e)
         break
     }
   }
@@ -33,7 +34,7 @@ export function useSocket (channel: string, callback: (data: any) => void) {
     // https://tools.ietf.org/html/rfc6455#section-11.7
     if (e.code === 1000 || e.code === 1005) {
       // normal close
-      logger.log('WS closed!')
+      logger.log('Socket closed')
     }
     else {
       // unknown error
@@ -41,21 +42,26 @@ export function useSocket (channel: string, callback: (data: any) => void) {
     }
   }
 
+  const handlers: Callback[] = []
   const onMessage = (message: any) => {
+    let data: any
     try {
-      const data = JSON.parse(message.data)
-      if (channel === data.channel) {
-        return callback(data)
-      }
+      data = JSON.parse(message.data)
     }
     catch (err) {
       logger.warn('Error parsing message:', message.data)
+      return
     }
+    handlers.forEach(handler => {
+      if (typeof handler === 'function') {
+        handler(data)
+      }
+    })
   }
 
   const send = (data: any) => {
     if (ws) {
-      ws.send(JSON.stringify({ channel, data }))
+      ws.send(JSON.stringify(data))
     }
   }
 
@@ -82,7 +88,7 @@ export function useSocket (channel: string, callback: (data: any) => void) {
       const wsUrl = `${url}ws`
 
       // debug
-      logger.log(`watching for image updates on ${wsUrl}`)
+      logger.log(`Running on ${wsUrl}`)
 
       // do it
       ws = new WebSocket(wsUrl)
@@ -94,10 +100,14 @@ export function useSocket (channel: string, callback: (data: any) => void) {
   }
 
   // automatically connect on use
-  connect()
+  if (!ws) {
+    connect()
+  }
 
   return {
-    connect,
     send,
+    addHandler (callback: Callback) {
+      handlers.push(callback)
+    },
   }
 }

@@ -43,7 +43,7 @@ Almost as much as being in the sea!
 <video src="media/seaside.mp4"></video>
 ```
 
-The module supports a variety of [common tags](#how-it-works) and has additional goodies such as [image sizing](#image-sizing) and [live-reload](#live-reload).  
+The module [processes assets](#how-it-works) and serves them together with your content, adding features such as [image sizing](#image-sizing) and [live-reload](#live-reload).  
 
 ## Demo
 
@@ -95,7 +95,7 @@ Use relative paths anywhere within your documents:
 <video src="media/video.mp4" />
 ```
 
-Relative paths can be defined in frontmatter, as long as they are the only value:
+Relative paths can be defined in frontmatter – as long as they are the only value:
 
 ```mdx
 ---
@@ -110,11 +110,11 @@ images:
 These values can then be passed to components:
 
 ```markdown
-::gallery{:data="images"}
+::ImageGallery{:data="images"}
 ::
 ```
 
-See the [Demo](demo/content/recipes/index.md) for a component example.
+See the Demo for [markup](demo/content/recipes/index.md) and [Demo](demo/components/content/ImageGallery.vue) examples.
 
 ### Live reload
 
@@ -154,13 +154,13 @@ Nuxt Content Assets works by serving a _copy_ of your assets using [Nitro](https
 
 When Nuxt builds, the following happens:
 
-- all content sources are scanned for valid assets
+- content sources are scanned for valid assets
 - found assets are copied to a temporary build folder
-- relative paths in markdown are rewritten to point at this folder
+- any relative asset paths are rewritten as absolute
 - metadata such as image size is written to a lookup file
 - finally, Nitro serves the folder for public access
 
-Note only specific tags and attributes are targeted in the parsing phase for rewriting:
+Note that in the rewriting phase, only specific tags and attributes are targeted :
 
 ```html
 <a href="...">

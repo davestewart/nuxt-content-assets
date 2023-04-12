@@ -31,7 +31,6 @@
     "release:dry": "npm run lint && npm run test && npm run build && npm publish --dry-run"
   },
   "dependencies": {
-    "@davestewart/nuxt-sockets": "^0.1.0",
     "@nuxt/kit": "^3.3.2",
     "debounce": "^1.2.1",
     "glob": "^9.3.2",

@@ -28,8 +28,6 @@ export default defineNuxtConfig({
 
   modules: [
     '../src/module',
-    '@davestewart/nuxt-sockets',
-    // '/Volumes/Data/Work/OpenSource/JavaScript/NuxtSockets/nuxt-sockets/src/module',
     '@nuxt/content',
     // '@nuxt/devtools',
   ],
@@ -43,9 +41,6 @@ export default defineNuxtConfig({
   },
 
   'content-assets': {
-    // serve assets using sub-folder structure
-    output: '/assets/[folder]/[file]',
-
     // add image size hints
     imageSize: 'attrs url',
 
