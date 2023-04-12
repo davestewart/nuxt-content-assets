@@ -7,21 +7,20 @@ assignees: ''
 
 ---
 
-### What is the feature you want?
+## Background
 
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+A bit of background to provide context
 
-
-### Describe the solution you'd like
-
-A clear and concise description of what you want to happen
+E.g. Right now this happens, and...
 
 
-### Describe alternatives you've considered
+## Proposal
 
-A clear and concise description of any alternative solutions or features you've considered
+A clear and concise description of what you think would be better
 
 
-### Additional context
+### Notes
 
-Add any other context or screenshots about the feature request here
+Any alternative solutions or ideas you've considered
+
+Any other context, links, screenshots, etc
