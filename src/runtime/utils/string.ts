@@ -3,17 +3,26 @@
  *
  * Tokens may be separated by space, comma or pipe
  */
-export function matchTokens (value?: string | unknown[]): string[] {
-  const tokens = typeof value === 'string'
-    ? value.match(/[^\s,|]+/g) || []
-    : Array.isArray(value)
-      ? value
-        .filter(value => typeof value === 'string')
-        .reduce((output, input) => {
-          return [ ...output, ...matchTokens(input)]
-        }, [])
-      : []
-  return Array.from(new Set(tokens))
+export function matchTokens (value: any): string[] {
+  let tokens: string[] = []
+  if (typeof value === 'string') {
+    tokens = value.match(/[^\s,|]+/g) || []
+  }
+  else if (Array.isArray(value)) {
+    tokens = value
+      .filter(value => typeof value === 'string')
+      .reduce((output: string[], input) => {
+        return [ ...output, ...matchTokens(input)]
+      }, [])
+  }
+  else if (!!value && typeof value === 'object') {
+    tokens = Object.values(value).reduce((output: string[], value) => {
+      return [...output, ...matchTokens(value)]
+    }, [])
+  }
+  return tokens.length
+    ? Array.from(new Set(tokens))
+    : tokens
 }
 
 export function toPath (key: string): string {

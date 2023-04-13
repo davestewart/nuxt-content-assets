@@ -214,8 +214,10 @@ export default defineNuxtModule<ModuleOptions>({
     // ---------------------------------------------------------------------------------------------------------------------
 
     // build config
+    const makeVar = (name: string, value: any) => `export const ${name} = ${JSON.stringify(value)};`
     const virtualConfig = [
-      `export const cachePath = '${cachePath}'`,
+      makeVar('cachePath', cachePath),
+      makeVar('debug', options.debug),
     ].join('\n')
 
     // setup server plugin

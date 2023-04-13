@@ -1,11 +1,11 @@
-import { moduleKey } from '../config'
+const label = '[content-assets]'
 
 export function log (...data: any[]): void {
-  console.info(`[${moduleKey}]`, ...data)
+  console.info(label, ...data)
 }
 
 export function warn (...data: any[]): void {
-  console.warn(`[${moduleKey}]`, ...data)
+  console.warn(label, ...data)
 }
 
 export function list(message: string, items: string[]) {
