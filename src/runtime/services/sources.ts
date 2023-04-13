@@ -17,7 +17,10 @@ export function makeStorage (source: MountOptions | string, key = ''): Storage {
     case 'fs':
       storage.mount(key, fsDriver({
         ...options,
-        ignore: ['[^:]+?\\.md'],
+        ignore: [
+          '[^:]+?\\.md',
+          '_dir\\.yml',
+        ],
       } as FSStorageOptions))
       break
 
@@ -51,7 +54,7 @@ export interface SourceManager {
 export function makeSourceManager (key: string, source: MountOptions, publicPath: string, callback?: (event: WatchEvent, path: string) => void): SourceManager {
   // only fs will trigger watch events
   async function onWatch (event: WatchEvent, key: string) {
-    if (isAsset(key)) {
+    if (isAsset(toPath(key))) {
       const path = event === 'update'
         ? await copyItem(key)
         : removeItem(key)
@@ -134,7 +137,9 @@ export function makeSourceManager (key: string, source: MountOptions, publicPath
    */
   async function getKeys () {
     const keys = await storage.getKeys()
-    return keys.filter(isAsset)
+    return keys
+      .map(toPath)
+      .filter(isAsset)
   }
 
   /**
