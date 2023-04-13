@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.10.0
+
+- Resolve paths for any element attribute [#5](../../issues/8)
+
 ## v0.9.0-beta
 
 - Refactor of live reload
