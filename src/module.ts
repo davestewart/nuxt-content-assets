@@ -5,17 +5,17 @@ import { MountOptions } from '@nuxt/content'
 import { Nuxt } from '@nuxt/schema'
 import debounce from 'debounce'
 import type { AssetConfig, SourceManager } from './runtime/services'
-import { list, log, matchWords, removeFolder, writeFile, } from './runtime/utils'
 import { getAssetPaths, getAssetSizes, makeSourceManager } from './runtime/services'
+import { list, log, matchTokens, removeFolder, writeFile, } from './runtime/utils'
 import { moduleKey, moduleName } from './runtime/config'
-import { defaults } from './runtime/options'
+import { defaults, getIgnores } from './runtime/options'
 import { setupSocketServer } from './build/sockets/setup'
 
 const resolve = createResolver(import.meta.url).resolve
 
 export interface ModuleOptions {
-  output?: string
-  imageSize?: string
+  imageSize?: string | string[]
+  contentExtensions: string | string[],
   debug?: boolean
 }
 
@@ -28,11 +28,7 @@ export default defineNuxtModule<ModuleOptions>({
     }
   },
 
-  defaults: {
-    output: `${defaults.assetsDir}/${defaults.assetsPattern}`,
-    imageSize: '',
-    debug: false,
-  },
+  defaults,
 
   async setup (options, nuxt: Nuxt) {
     // ---------------------------------------------------------------------------------------------------------------------
@@ -66,32 +62,21 @@ export default defineNuxtModule<ModuleOptions>({
     // clear images from previous run
     removeFolder(cachePath)
 
+    // ---------------------------------------------------------------------------------------------------------------------
+    // options
+    // ---------------------------------------------------------------------------------------------------------------------
+
     // @ts-ignore
     // set up content ignores
     nuxt.options.content ||= {}
     if (nuxt.options.content) {
       nuxt.options.content.ignores ||= []
     }
-    nuxt.options.content?.ignores.push('^((?!(mdx?|json|ya?ml|csv)).)*$')
-
-    // ---------------------------------------------------------------------------------------------------------------------
-    // options
-    // ---------------------------------------------------------------------------------------------------------------------
-
-    // generate assets patterns
-    const output = options.output || defaults.assetsDir
-    const matches = output.match(/([^[]+)(.*)?/)
-    // const assetsDir = matches
-    //   ? matches[1].replace(/^\/*/, '/').replace(/\/*$/, '')
-    //   : defaults.assetsDir
-    const assetsPattern = (matches ? matches[2] : '')
-      || defaults.assetsPattern
-
-    // test asset pattern for invalid tokens
-    interpolatePattern(assetsPattern, '', true)
+    const ignores = getIgnores(options.contentExtensions)
+    nuxt.options.content?.ignores.push(ignores)
 
     // convert image size hints to array
-    const imageFlags = matchWords(options.imageSize)
+    const imageFlags = matchTokens(options.imageSize)
 
     // collate sources
     const sources: Record<string, MountOptions> = nuxt.options._layers
