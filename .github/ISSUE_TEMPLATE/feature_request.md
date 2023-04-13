@@ -19,7 +19,7 @@ E.g. Right now this happens, and...
 A clear and concise description of what you think would be better
 
 
-### Notes
+## Notes
 
 Any alternative solutions or ideas you've considered
 

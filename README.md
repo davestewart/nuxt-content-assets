@@ -237,9 +237,9 @@ If you want to see what the module does as it runs, set `debug` to true:
 
 When Nuxt builds, the module scans all content sources for assets, copies them to an accessible public assets folder, and indexes path and image metadata.
 
-After Nuxt Content has run the parsed content is traversed, and both element attributes and frontmatter properties are checked to see if they resolve to the indexed asset paths.
+After Nuxt Content has run, the parsed content is traversed, and both element attributes and frontmatter properties are checked to see if they resolve to the indexed asset paths.
 
-If they do, then the attribute or property is rewritten with the absolute path. If the asset is an image, then the element or path is optionally updated with size attributes or size query string.
+If they do, then the attribute or property is rewritten with the absolute path. If the asset is an image, then the element or metadata is optionally updated with size attributes or a query string.
 
 Finally, Nitro serves the site, and any requests made to the transformed asset paths should be picked up and the *copied* asset served by the browser.
 

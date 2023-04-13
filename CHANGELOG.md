@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.10.2
+
+- Optimise AST parsing [#14](../../issues/14)
+
 ## v0.10.1
 
 - Respect ignored files and folders [#12](../../issues/12)
