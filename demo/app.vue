@@ -51,6 +51,10 @@ code {
   border-radius: 4px;
 }
 
+pre {
+  border-radius: 4px;
+}
+
 a:hover code {
   color: black;
 }

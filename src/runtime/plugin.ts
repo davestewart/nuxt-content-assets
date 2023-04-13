@@ -35,7 +35,7 @@ void updateAssets()
 // tags filters
 const tags = {
   // unlikely to contain assets
-  content: matchTokens({
+  exclude: matchTokens({
     container: 'pre code code-inline',
     formatting: 'acronym abbr address bdi bdo big center cite del dfn font ins kbd mark meter progress q rp rt ruby s samp small strike sub sup time tt u var wbr',
     headers: 'h1 h2 h3 h4 h5 h6',
@@ -46,7 +46,7 @@ const tags = {
   }),
 
   // may contain assets
-  props: matchTokens({
+  include: matchTokens({
     content: 'main header footer section article aside details dialog summary data object nav blockquote div span p',
     table: 'table caption th tr td thead tbody tfoot col colgroup',
     media: 'figcaption figure picture',
@@ -94,24 +94,19 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
         // variables
         const { tag, props } = node
 
-        // skip elements we know very-likely won't contain assets
-        const noContent = tags.content.includes(tag)
-        if (noContent) {
+        // skip containers we think won't contain assets
+        const excluded = tags.exclude.includes(tag)
+        if (excluded) {
           return SKIP
         }
 
-        // traverse containers, but don't process their props
-        const noProps = tags.props.includes(tag)
-        if (noProps) {
+        // traverse containers we think could contain assets
+        const included = tags.include.includes(tag)
+        if (included || !props) {
           return CONTINUE
         }
 
-        // bail if no props
-        if (!props) {
-          return CONTINUE
-        }
-
-        // process everything else!
+        // process attributes of everything else!
         for (const [prop, value] of Object.entries(props)) {
           // only process strings
           if (typeof value !== 'string') {
@@ -121,27 +116,35 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
           // parse value
           const { srcAttr, width, height, ratio } = getAsset(value)
 
-          // if we have an attribute
+          // if we resolved an asset
           if (srcAttr) {
-            // debug
-            updated.push(`page: ${tag}[${prop}] to "${srcAttr}"`)
-
-            // assign attribute
+            // assign src
             node.props[prop] = srcAttr
 
-            // check for height
-            if (width && height) {
-              node.props.width = width
-              node.props.height = height
-            }
-            if (ratio) {
-              node.props.style = `aspect-ratio:${ratio}`
+            // assign size
+            if (node.tag === 'img') {
+              if (width && height) {
+                node.props.width ||= width
+                node.props.height ||= height
+              }
+              if (ratio) {
+                if (typeof node.props.style === 'string') {
+                  node.props.style += `; aspect-ratio: ${ratio};`
+                }
+                else {
+                  node.props.style ||= {}
+                  node.props.style.aspectRatio = ratio
+                }
+              }
             }
 
-            // check for links
-            if (node.tag === 'a' && !node.props.target) {
-              node.props.target = '_blank'
+            // open links in new window
+            if (node.tag === 'a') {
+              node.props.target ||= '_blank'
             }
+
+            // debug
+            updated.push(`page: ${tag}[${prop}] to "${srcAttr}"`)
           }
         }
       })

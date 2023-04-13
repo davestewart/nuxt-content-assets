@@ -35,7 +35,10 @@ export default defineNuxtConfig({
   // https://content.nuxtjs.org/api/configuration
   content: {
     sources,
-    highlight: true,
+    highlight: {
+      theme: 'github-light',
+      preload: ['js']
+    },
     markdown: {
       anchorLinks: false,
     },
@@ -43,7 +46,7 @@ export default defineNuxtConfig({
 
   contentAssets: {
     // add image size hints
-    imageSize: 'attrs url',
+    imageSize: 'attrs style url',
 
     // show debug messages
     debug: true,
