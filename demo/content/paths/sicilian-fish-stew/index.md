@@ -2,7 +2,7 @@
 
 > Image in parent folder
 
-![Sicilian Fish Stew](../images/sicilian-fish-stew.jpg)
+![Sicilian Fish Stew](../../assets/images/sicilian-fish-stew.jpg)
 
 This Italian-inspired fish stew has real kick. Fiery red chilli, piquant garlic and zingy capers combine in a rich tomato sauce, studded with chunks of sustainably sourced fish. Lemon slices bring sunshiney freshness.
 

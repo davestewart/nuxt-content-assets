@@ -8,23 +8,23 @@ title: Nuxt Content Assets - Demo
 
 Paths:
 
-- [Image in same folder](/recipes/italian-bean-stew)
-- [Image in sub folder](/recipes/pesto-salmon-lentils)
-- [Image in parent folder](/recipes/sicilian-fish-stew)
+- [Image in same folder](paths/italian-bean-stew)
+- [Image in sub folder](paths/pesto-salmon-lentils)
+- [Image in parent folder](paths/sicilian-fish-stew)
 
 Advanced:
 
-- [Image `src` from `frontmatter` variable](/recipes/turkey-casserole)
-- [Custom gallery component using `frontmatter` data](/recipes) 
-- [Custom image component](/recipes/turkey-casserole/component)
+- [Image `src` from `frontmatter` variable](advanced/frontmatter)
+- [Custom gallery component using `frontmatter` data](advanced/gallery) 
+- [Custom image component](advanced/component)
 
 Sources:
 
-- [Content from GitHub](/external) (disabled in StackBlitz)
+- [Content from GitHub](external) (disabled in StackBlitz)
 
-Media:
+Assets:
 
-- [Media and files](/media)
+- [Media and file assets](assets)
 
 GitHub:
 

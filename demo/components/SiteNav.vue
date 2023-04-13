@@ -24,32 +24,21 @@ function link (href: string, text: string) {
   return { href, text }
 }
 
-const links = [
-  link('/', 'Home'),
-  link('/:slug', ':slug'),
-  link('/recipes/:slug', ':slug'),
-]
-
 export default defineNuxtComponent({
   computed: {
     links () {
+      const links = [
+        link('/', 'Home'),
+      ]
       const path = this.$route.path
-      if (path === '/') {
-        return links.slice(0, 1)
-      }
-      const depth = path.split('/').length
       const segments = path.split('/')
-      return links
-        .slice(0, depth)
-        .map((link, index) => {
-          if (index === 0) {
-            return link
-          }
-          return {
-            href: segments.slice(0, index + 1).join('/'),
-            text: segments[index].replace(/\W/g, ' ')
-          }
+      if (path !== '/') {
+        links.push({
+          href: path,
+          text: segments[segments.length - 1].replace(/\W/g, ' ')
         })
+      }
+      return links
     }
   }
 })
