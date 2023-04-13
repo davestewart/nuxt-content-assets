@@ -35,7 +35,10 @@ export default defineNuxtConfig({
   // https://content.nuxtjs.org/api/configuration
   content: {
     sources,
-    highlight: true,
+    highlight: {
+      theme: 'github-light',
+      preload: ['js']
+    },
     markdown: {
       anchorLinks: false,
     },
