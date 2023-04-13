@@ -1,6 +1,6 @@
 {
   "name": "nuxt-content-assets",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Enable locally-located assets in Nuxt Content",
   "repository": "davestewart/nuxt-content-assets",
   "license": "MIT",

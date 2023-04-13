@@ -1,13 +1,17 @@
 # Changelog
 
+## v0.10.1
+
+- Respect ignored files and folders [#12](../../issues/12)
+
 ## v0.10.0
 
-- Resolve paths for any element attribute [#5](../../issues/8)
+- Resolve paths for any element attribute [#5](../../issues/5)
 
 ## v0.9.0-beta
 
 - Refactor of live reload
-- Fixed ignore yaml issue [#9](../../issues/5)
+- Fixed ignore yaml issue [#9](../../issues/9)
 
 ## v0.9.0-alpha
 
