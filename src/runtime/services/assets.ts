@@ -13,14 +13,36 @@ export type AssetConfig = {
 }
 
 /**
- * Get config for asset
+ * Parse asset paths from absolute path
  *
  * @param srcDir    The absolute path to the asset's source folder
  * @param srcAbs    The absolute path to the asset itself
- * @param pattern   The user-defined pattern to create the public src attribute
+ */
+export function getAssetPaths (srcDir: string, srcAbs: string) {
+  // relative asset path
+  const srcRel = Path.relative(srcDir, srcAbs)
+
+  // interpolated public path
+  const srcAttr = '/' + srcRel
+
+  // content id
+  const id = srcRel.replaceAll('/', ':')
+
+  // return
+  return {
+    id,
+    srcRel,
+    srcAttr,
+  }
+}
+
+/**
+ * Get asset image sizes
+ *
+ * @param srcAbs    The absolute path to the asset itself
  * @param hints     A list of named image size hints, i.e. 'style', 'attrs', etc
  */
-export function getAssetConfig (srcDir: string, srcAbs: string, pattern: string, hints: string[]): AssetConfig {
+export function getAssetSizes (srcAbs: string, hints: string[]) {
   // variables
   let width: number | undefined = undefined
   let height: number | undefined = undefined
@@ -47,16 +69,10 @@ export function getAssetConfig (srcDir: string, srcAbs: string, pattern: string,
     }
   }
 
-  // relative asset path
-  const srcRel = Path.relative(srcDir, srcAbs)
-
-  // interpolated public path
-  // const srcAttr = interpolatePattern(pattern, srcRel)
-  const srcAttr = '/' + srcRel
-
-  // content id
-  const id = srcRel.replaceAll('/', ':')
-
-  // return
-  return { id, srcRel, srcAttr, width, height, ratio, query }
+  return {
+    width,
+    height,
+    ratio,
+    query,
+  }
 }
