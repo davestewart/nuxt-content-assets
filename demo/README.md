@@ -5,10 +5,10 @@
 The demo shows off the module's main features:
 
 - various relative path locations
-- using inline and `frontmatter` image paths
+- local and [external](https://content.nuxtjs.org/api/configuration#sources) content sources
+- inline and `frontmatter` image paths
 - image, link, video, iframe, and embed examples
-- local and [external](https://content.nuxtjs.org/api/configuration#sources) sources
-- live reload; edit, crop or move images
+- live reload; edit, crop or move images, video, embeds, etc
 
 Additionally, configuration:
 
@@ -18,7 +18,7 @@ Additionally, configuration:
 
 And, components:
 
-- example `<Gallery>` component
+- example `<ContentGallery>` and `<ContentImage>` components
 - example `<ProseImg />` component
 
 ## Running the demo

@@ -1,28 +1,27 @@
 ---
 recipes:
   -
-    route: /recipes/italian-bean-stew
     title: Italian Bean Stew, Rainbow Chard & Quinoa
+    route: /recipes/italian-bean-stew
     image: italian-bean-stew/italian-bean-stew.jpg
   -
-    route: /recipes/pesto-salmon-lentils
     title: Pesto Salmon & Mediterranean-style lentils
+    route: /recipes/pesto-salmon-lentils
     image: pesto-salmon-lentils/images/pesto-salmon-lentils.jpg
   -
-    route: /recipes/sicilian-fish-stew
     title: Sicilian Fish Stew with Lemony Courgette Salad
+    route: /recipes/sicilian-fish-stew
     image: images/sicilian-fish-stew.jpg
   -
-    route: /recipes/turkey-casserole
     title: Creamy Turkey & Tomato Pesto Casserole
+    route: /recipes/turkey-casserole
     image: turkey-casserole/turkey-casserole.jpg
 ---
 
 # Recipes
 
-> Gallery example, passing transformed frontmatter data to component
+> Custom gallery component using `frontmatter` data
  
 Here are four delicious recipes:
 
-::ImageGallery{:data="recipes"}
-::
+:content-gallery{:data="recipes"}
