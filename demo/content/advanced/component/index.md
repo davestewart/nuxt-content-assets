@@ -2,7 +2,7 @@
 
 > Custom image component 
 
-:content-image{src="../frontmatter/turkey-casserole.jpg" alt="Turkey & Pesto Casserole"}
+:content-image{image="../frontmatter/turkey-casserole.jpg" alt="Turkey & Pesto Casserole"}
 
 Free-range British turkey coated in velvety coconut yoghurt and fragrant red pesto. Served over a bed of fibre-packed brown rice, studded with vitamin K-source spinach. An easy and comforting midweek meal for those busy days.
 

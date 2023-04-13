@@ -3,7 +3,26 @@ import { createStorage, WatchEvent, Storage } from 'unstorage'
 import githubDriver, { GithubOptions } from 'unstorage/drivers/github'
 import fsDriver, { FSStorageOptions } from 'unstorage/drivers/fs'
 import { MountOptions } from '@nuxt/content'
-import { warn, isAsset, toPath, removeFile, copyFile, writeBlob, writeFile, deKey } from '../utils'
+import {
+  warn,
+  isAsset,
+  toPath,
+  removeFile,
+  copyFile,
+  writeBlob,
+  writeFile,
+  deKey,
+  isExcluded,
+} from '../utils'
+
+/**
+ * Helper function to determine valid ids
+ * @param id
+ */
+function isAssetId (id: string) {
+  const path = toPath(id)
+  return !isExcluded(path) && isAsset(path)
+}
 
 /**
  * Make a Storage instance
@@ -54,7 +73,7 @@ export interface SourceManager {
 export function makeSourceManager (key: string, source: MountOptions, publicPath: string, callback?: (event: WatchEvent, path: string) => void): SourceManager {
   // only fs will trigger watch events
   async function onWatch (event: WatchEvent, key: string) {
-    if (isAsset(toPath(key))) {
+    if (isAssetId(key)) {
       const path = event === 'update'
         ? await copyItem(key)
         : removeItem(key)
@@ -137,9 +156,7 @@ export function makeSourceManager (key: string, source: MountOptions, publicPath
    */
   async function getKeys () {
     const keys = await storage.getKeys()
-    return keys
-      .map(toPath)
-      .filter(isAsset)
+    return keys.filter(isAssetId)
   }
 
   /**

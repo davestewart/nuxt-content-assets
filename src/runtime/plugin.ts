@@ -1,10 +1,10 @@
 import Path from 'path'
-import { visit } from 'unist-util-visit'
+import { visit, SKIP, CONTINUE } from 'unist-util-visit'
 import type { NitroApp, NitroAppPlugin } from 'nitropack'
-import { deKey, isValidAsset, toPath, walk } from './utils'
+import { deKey, isValidAsset, list, matchTokens, toPath, walk } from './utils'
 
 // @ts-ignore – options injected via module.ts
-import { cachePath } from '#nuxt-content-assets'
+import { debug, cachePath } from '#nuxt-content-assets'
 import { makeStorage } from './services'
 import type { AssetConfig } from './services'
 
@@ -32,46 +32,100 @@ void updateAssets()
 // plugin
 // ---------------------------------------------------------------------------------------------------------------------
 
-/**
- * Get asset config based on absolute path
- *
- * @param srcDoc    Document path
- * @param relAsset  Relative image path
- */
-function getAsset (srcDoc: string, relAsset: string) {
-  const srcAsset = Path.join(Path.dirname(srcDoc), relAsset)
-  return assets[srcAsset] || {}
+// tags filters
+const tags = {
+  // unlikely to contain assets
+  content: matchTokens({
+    container: 'pre code code-inline',
+    formatting: 'acronym abbr address bdi bdo big center cite del dfn font ins kbd mark meter progress q rp rt ruby s samp small strike sub sup time tt u var wbr',
+    headers: 'h1 h2 h3 h4 h5 h6',
+    controls: 'input textarea button select optgroup option label legend datalist output',
+    media: 'map area canvas svg',
+    other: 'style script noscript template',
+    empty: 'hr br',
+  }),
+
+  // may contain assets
+  props: matchTokens({
+    content: 'main header footer section article aside details dialog summary data object nav blockquote div span p',
+    table: 'table caption th tr td thead tbody tfoot col colgroup',
+    media: 'figcaption figure picture',
+    form: 'form fieldset',
+    list: 'ul ol li dir dl dt dd',
+    formatting: 'strong b em i',
+  }),
+
+  // assets
+  assets: 'a img audio source track video embed',
 }
 
 const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
   nitro.hooks.hook('content:file:afterParse', async (file) => {
-    if (file._id.endsWith('.md')) {
+    const { _id } = file
+    if (_id.endsWith('.md')) {
       // location
-      const srcDoc = toPath(deKey(file._id))
+      const srcDoc = toPath(deKey(_id))
+      const srcDir = Path.dirname(srcDoc)
+      const updated: string[] = []
 
-      // walk front matter
+      // helper
+      const getAsset = (relAsset: string) => {
+        const srcAsset = Path.join(srcDir, relAsset)
+        return assets[srcAsset] || {}
+      }
+
+      // debug
+      // console.log('Processing:', srcDoc)
+
+      // walk meta
       const filter = (value: any, key?: string | number) => !(String(key).startsWith('_') || key === 'body')
       walk(file, (value: any, parent: any, key: any) => {
         if (isValidAsset(value)) {
-          const { srcAttr, query } = getAsset(srcDoc, value)
+          const { srcAttr, query } = getAsset(value)
           if (srcAttr) {
             parent[key] = srcAttr + (query || '')
+            updated.push(`meta: ${key} to "${srcAttr}"`)
           }
         }
       }, filter)
 
       // walk body
       visit(file.body, (node: any) => node.type === 'element', (node) => {
-        for (const [prop, value] of Object.entries(node.props)) {
+        // variables
+        const { tag, props } = node
+
+        // skip elements we know very-likely won't contain assets
+        const noContent = tags.content.includes(tag)
+        if (noContent) {
+          return SKIP
+        }
+
+        // traverse containers, but don't process their props
+        const noProps = tags.props.includes(tag)
+        if (noProps) {
+          return CONTINUE
+        }
+
+        // bail if no props
+        if (!props) {
+          return CONTINUE
+        }
+
+        // process everything else!
+        for (const [prop, value] of Object.entries(props)) {
+          // only process strings
           if (typeof value !== 'string') {
             return
           }
 
           // parse value
-          const { srcAttr, width, height, ratio } = getAsset(srcDoc, value)
+          const { srcAttr, width, height, ratio } = getAsset(value)
 
           // if we have an attribute
           if (srcAttr) {
+            // debug
+            updated.push(`page: ${tag}[${prop}] to "${srcAttr}"`)
+
             // assign attribute
             node.props[prop] = srcAttr
 
@@ -91,6 +145,12 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
           }
         }
       })
+
+      // debug
+      if (debug && updated.length) {
+        list(`Processed "/${srcDoc}"`, updated)
+        console.log()
+      }
     }
   })
 }

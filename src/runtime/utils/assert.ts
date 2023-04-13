@@ -35,7 +35,7 @@ export function isArticle (path: string): boolean {
  * Test path is asset
  */
 export function isAsset (path: string): boolean {
-  return !isExcluded(path) && !isArticle(path)
+  return !isArticle(path)
 }
 
 /**

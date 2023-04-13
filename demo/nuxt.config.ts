@@ -35,6 +35,7 @@ export default defineNuxtConfig({
   // https://content.nuxtjs.org/api/configuration
   content: {
     sources,
+    highlight: true,
     markdown: {
       anchorLinks: false,
     },
