@@ -9,7 +9,15 @@ export function isRelative (path: string): boolean {
 }
 
 /**
- * Test path or id for image extension
+ * Test if path is excluded (_partial or .ignored)
+ * @param path
+ */
+export function isExcluded (path: string) {
+  return path.split('/').some(segment => segment.startsWith('.') || segment.startsWith('_'))
+}
+
+/**
+ * Test path for image extension
  */
 export function isImage (path: string): boolean {
   const ext = Path.extname(path).substring(1)
@@ -17,18 +25,17 @@ export function isImage (path: string): boolean {
 }
 
 /**
- * Test path or id is markdown
+ * Test path is markdown
  */
 export function isArticle (path: string): boolean {
-  return /\.mdx?$/.test(path)
+  return path.endsWith('.md')
 }
 
 /**
- * Test path or id is asset
+ * Test path is asset
  */
 export function isAsset (path: string): boolean {
-  const ext = Path.extname(path)
-  return !!ext && ext !== '.DS_Store' && !isArticle(path)
+  return !isExcluded(path) && !isArticle(path)
 }
 
 /**
@@ -37,3 +44,4 @@ export function isAsset (path: string): boolean {
 export function isValidAsset (value?: string): boolean {
   return typeof value === 'string' && isAsset(value) && isRelative(value)
 }
+
