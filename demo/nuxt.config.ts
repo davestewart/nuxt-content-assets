@@ -40,7 +40,7 @@ export default defineNuxtConfig({
     },
   },
 
-  'content-assets': {
+  contentAssets: {
     // add image size hints
     imageSize: 'attrs url',
 

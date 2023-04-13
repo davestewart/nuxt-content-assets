@@ -40,10 +40,10 @@ I loved being in the mountains.
 
 Almost as much as being in the sea!
 
-<video src="media/seaside.mp4"></video>
+:video{src="media/seaside.mp4"}
 ```
 
-The module [processes assets](#how-it-works) and serves them together with your content, adding features such as [image sizing](#image-sizing) and [live-reload](#live-reload).  
+At build time the module [collates and serves](#how-it-works) assets and content together.
 
 ## Demo
 
@@ -82,8 +82,6 @@ export default defineNuxtConfig({
 
 Run the dev server or build and local assets should now be served alongside markdown content.
 
-See the [How it works](#how-it-works) section for more information.
-
 ## Usage
 
 ### Overview
@@ -91,15 +89,24 @@ See the [How it works](#how-it-works) section for more information.
 Use relative paths anywhere within your documents:
 
 ```mdx
+Images
 ![image](image.jpg)
-<video src="media/video.mp4" />
+
+Links
+[link](docs/article.txt)
+
+Elements / components
+:video{src="media/video.mp4"}
+
+HTML
+<iframe src="media/example.html" />
 ```
 
 Relative paths can be defined in frontmatter – as long as they are the only value:
 
 ```mdx
 ---
-title: Portfolio Item 1
+title: Portfolio
 images:
   - assets/image-1.jpg
   - assets/image-2.jpg
@@ -110,27 +117,32 @@ images:
 These values can then be passed to components:
 
 ```markdown
-::ImageGallery{:data="images"}
-::
+:image-gallery{:data="images"}
 ```
 
-See the Demo for [markup](demo/content/recipes/index.md) and [Demo](demo/components/content/ImageGallery.vue) examples.
+See the Demo for [markup](demo/content/advanced/gallery.md) and [component](demo/components/content/ContentGallery.vue) examples.
 
 ### Live reload
 
-From version `0.9.0-alpha` assets are watched and live-reloaded!
+In development, the module watches for asset additions, moves and deletes, and will update the browser live.
 
-Any additions, moves or deletes, or modifications to image content will be updated in the browser automatically.
+If you delete an asset, it will be greyed out in the browser until you replace the file or modify the path to it.
+
+If you edit an image, video, embed or iframe source, the content will update immediately, which is useful if you're looking to get that design just right!
 
 ### Image sizing
 
-The module can prevent content jumps by optionally writing image size information to generated `<img>` tags:
+You can [configure](#image-size) the module to add image size attributes to generated `<img>` tags:
 
 ```html
-<img src="/image.jpg?width=640&height=480" width="640" height="480" style="aspect-ratio:640/480">
+<img src="/image.jpg"
+     style="aspect-ratio:640/480"
+     width="640"
+     height="480"
+>
 ```
 
-If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can hook into these values via the `$attrs` property:
+If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can [hook into these values](demo/components/temp/ProseImg.vue) via the `$attrs` property:
 
 ```vue
 <template>
@@ -146,50 +158,31 @@ export default {
 </script>
 ```
 
-For more information see the [configuration](#image-size) section and [Demo](demo/components/temp/ProseImg.vue) for an example.
+If you pass [frontmatter](demo/content/advanced/gallery.md) to [custom components](demo/components/content/ContentImage.vue) set the `'url'` configuration option to encode size in the URL:
 
-## How it works
-
-Nuxt Content Assets works by serving a _copy_ of your assets using [Nitro](https://nitro.unjs.io/guide/assets#custom-server-assets).
-
-When Nuxt builds, the following happens:
-
-- content sources are scanned for valid assets
-- found assets are copied to a temporary build folder
-- any relative asset paths are rewritten as absolute
-- metadata such as image size is written to a lookup file
-- finally, Nitro serves the folder for public access
-
-Note that in the rewriting phase, only specific tags and attributes are targeted :
-
-```html
-<a href="...">
-<img src="...">
-<video src="...">
-<audio src="...">
-<source src="...">
-<embed src="...">
-<iframe src="...">
+```
+:image-gallery={:data="images"}
 ```
 
 ## Configuration
 
-You can configure the module like so:
+The module can be configured in your Nuxt configuration file:
 
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
-  'content-assets': {    
-    // use aspect-ratio rather than attributes
+  contentAssets: {    
+    // inject image sizes into the rendered html
     imageSize: 'style',
     
-    // print debug messages to the console
+    // treat these extensions as content
+    contentExtensions: 'mdx? csv ya?ml json',
+    
+    // output debug messages
     debug: true,
   }
 })
 ```
-
-Note that from version `0.9.0-alpha` the `output` location is no longer configurable; images are copied relative to their original locations. 
 
 ### Image size
 
@@ -203,11 +196,11 @@ You can add one or more image size hints to the generated images:
 
 Pick from the following switches:
 
-| Switch  | What it does                                                                 |
-|---------|------------------------------------------------------------------------------|
-| `style` | Adds `style="aspect-ratio:..."` to any `<img>` tag                           |
-| `attrs` | Adds `width` and `height` attributes to any `<img>` tag                      |
-| `url`   | Adds the `?width=...&height=...` query string to image frontmatter variables |
+| Switch  | What it does                                                 |
+| ------- | ------------------------------------------------------------ |
+| `style` | Adds `style="aspect-ratio:..."` to any `<img>` tag           |
+| `attrs` | Adds `width` and `height` attributes to any `<img>` tag      |
+| `url`   | Adds a `?width=...&height=...` query string to image paths in frontmatter |
 
 Note: if you add `attrs` only, include the following CSS in your app:
 
@@ -218,6 +211,18 @@ img {
 }
 ```
 
+### Content extensions
+
+This setting tells Nuxt Content to ignore anything that is **not** one of these file extensions:
+
+```
+mdx? csv ya?ml json
+```
+
+This way, you can use any **other** file type as an asset, without needing to explicitly configure extensions.
+
+Generally, you shouldn't need to touch this setting.
+
 ### Debug
 
 If you want to see what the module does as it runs, set `debug` to true:
@@ -227,6 +232,16 @@ If you want to see what the module does as it runs, set `debug` to true:
   debug: true
 }
 ```
+
+## How it works
+
+When Nuxt builds, the module scans all content sources for assets, copies them to an accessible public assets folder, and indexes path and image metadata.
+
+After Nuxt Content has run the parsed content is traversed, and both element attributes and frontmatter properties are checked to see if they resolve to the indexed asset paths.
+
+If they do, then the attribute or property is rewritten with the absolute path. If the asset is an image, then the element or path is optionally updated with size attributes or size query string.
+
+Finally, Nitro serves the site, and any requests made to the transformed asset paths should be picked up and the *copied* asset served by the browser.
 
 ## Development
 

@@ -52,11 +52,7 @@ export function createWebSocket () {
       logger.warn('Error parsing message:', message.data)
       return
     }
-    handlers.forEach(handler => {
-      if (typeof handler === 'function') {
-        handler(data)
-      }
-    })
+    handlers.forEach(handler => handler(data))
   }
 
   const send = (data: any) => {
@@ -107,7 +103,9 @@ export function createWebSocket () {
   return {
     send,
     addHandler (callback: Callback) {
-      handlers.push(callback)
+      if (typeof callback === 'function') {
+        handlers.push(callback)
+      }
     },
   }
 }

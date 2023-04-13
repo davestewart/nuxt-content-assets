@@ -1,6 +1,6 @@
 import { Server } from 'http'
+import { listen } from 'listhen'
 import { useNuxt } from '@nuxt/kit'
-import { listen, ListenOptions } from 'listhen'
 import { Callback, SocketInstance, Handler } from '../../types'
 import { createWebSocket } from './factory'
 
@@ -40,21 +40,17 @@ const ws = createWebSocket()
 
 const broker = makeChannelBroker(ws)
 
-const defaults: Partial<ListenOptions> = {
-  port: {
-    port: 4001,
-    portRange: [4001, 4040]
-  },
-  hostname: 'localhost',
-  showURL: false
-}
-
 export async function setupSocketServer (channel: string, handler?: Callback): Promise<SocketInstance> {
   const nuxt = useNuxt()
   nuxt.hook('nitro:init', async (nitro) => {
     if (!nuxt._socketServer) {
       // server
-      const { server, url } = await listen(() => 'Nuxt Sockets', defaults)
+      const defaults = nuxt.options.runtimeConfig.content.watch.ws
+      const { server, url } = await listen(() => 'Nuxt Content Assets', {
+        port: defaults.port.port + 1,
+        hostname: defaults.hostname,
+        showURL: false
+      })
 
       // set initialized
       nuxt._socketServer = server

@@ -7,27 +7,23 @@ assignees: ''
 
 ---
 
-### Describe the bug
+## Description
 
-A clear and concise description of what the bug is
+A clear and concise description of the bug
+
+Include any steps to reproduce
 
 
-### Expected behaviour
+## Expected
 
 A clear and concise description of what you expected to happen
 
 
-### To Reproduce
+## Notes
 
-Steps to reproduce
+Any other context, links, screenshots, etc
 
-
-### Additional context
-
-Add any other context about the problem here
-
-
-### Software versions:
+### Environment info
 
 Run the code below and replace with the output:
 

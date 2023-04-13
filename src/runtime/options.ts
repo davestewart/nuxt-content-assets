@@ -1,14 +1,25 @@
-// must target utils/string; otherwise, circular dependency!
-import { matchWords } from './utils/string'
+// must target utils/string; otherwise, circular dependency from utils/index!
+import { matchTokens } from './utils/string'
 
 export const defaults = {
-  assetsDir: '/assets/',
-  assetsPattern: '[path]/[file]'
+  // inject image size into the rendered html
+  imageSize: 'attrs',
+
+  // treat these extensions as content
+  contentExtensions: 'mdx? csv ya?ml json',
+
+  // output debug messages
+  debug: false,
 }
 
-export const tags = ['img', 'video', 'audio', 'source', 'embed', 'iframe', 'a']
-
 export const extensions = {
-  image: matchWords('png jpg jpeg gif svg webp ico'),
-  media: matchWords('mp3 m4a wav mp4 mov webm ogg avi flv avchd'),
+  // used to get image size
+  image: matchTokens('png jpg jpeg gif svg webp ico'),
+
+  // unused for now
+  media: matchTokens('mp3 m4a wav mp4 mov webm ogg avi flv avchd'),
+}
+
+export function getIgnores (extensions: string | string[]): string {
+  return `^((?!(${matchTokens(extensions).join('|')})).)*$`
 }

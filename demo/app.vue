@@ -43,4 +43,15 @@ a, .breadcrumb a {
 img + p {
   margin-top: 1rem;
 }
+
+code {
+  color: var(--green);
+  font-size: 1em;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+a:hover code {
+  color: black;
+}
 </style>

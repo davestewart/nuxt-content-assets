@@ -2,7 +2,6 @@ import Path from 'path'
 import { visit } from 'unist-util-visit'
 import type { NitroApp, NitroAppPlugin } from 'nitropack'
 import { deKey, isValidAsset, toPath, walk } from './utils'
-import { tags } from './options'
 
 // @ts-ignore – options injected via module.ts
 import { cachePath } from '#nuxt-content-assets'
@@ -15,7 +14,6 @@ import type { AssetConfig } from './services'
 
 async function updateAssets () {
   assets = await storage.getItem('assets.json') as Record<string, AssetConfig>
-  // console.log(`Assets has ${Object.values(assets).length} keys}!`)
 }
 
 // storage
@@ -63,12 +61,21 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
       }, filter)
 
       // walk body
-      visit(file.body, (n: any) => tags.includes(n.tag), (node) => {
-        // media
-        if (node.props.src) {
-          const { srcAttr, width, height, ratio } = getAsset(srcDoc, node.props.src)
+      visit(file.body, (node: any) => node.type === 'element', (node) => {
+        for (const [prop, value] of Object.entries(node.props)) {
+          if (typeof value !== 'string') {
+            return
+          }
+
+          // parse value
+          const { srcAttr, width, height, ratio } = getAsset(srcDoc, value)
+
+          // if we have an attribute
           if (srcAttr) {
-            node.props.src = srcAttr
+            // assign attribute
+            node.props[prop] = srcAttr
+
+            // check for height
             if (width && height) {
               node.props.width = width
               node.props.height = height
@@ -76,15 +83,9 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
             if (ratio) {
               node.props.style = `aspect-ratio:${ratio}`
             }
-          }
-        }
 
-        // links
-        else if (node.tag === 'a') {
-          if (node.props.href) {
-            const { srcAttr } = getAsset(srcDoc, node.props.href)
-            if (srcAttr) {
-              node.props.href = srcAttr
+            // check for links
+            if (node.tag === 'a' && !node.props.target) {
               node.props.target = '_blank'
             }
           }
