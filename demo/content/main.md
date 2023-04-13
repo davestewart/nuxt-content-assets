@@ -12,6 +12,10 @@ Paths:
 - [Image in sub folder](paths/pesto-salmon-lentils)
 - [Image in parent folder](paths/sicilian-fish-stew)
 
+Assets:
+
+- [Media and file assets](assets)
+
 Advanced:
 
 - [Image `src` from `frontmatter` variable](advanced/frontmatter)
@@ -22,9 +26,9 @@ Sources:
 
 - [Content from GitHub](external) (disabled in StackBlitz)
 
-Assets:
+Internal:
 
-- [Media and file assets](assets)
+- [Path replacement skips invalid elements](internal/traversal)
 
 GitHub:
 

@@ -25,3 +25,4 @@ Framed content displays directly:
 Display PDFs or other embeddable content:
 
 <embed src="media/sample.pdf" width="100%" height="500"></embed>
+

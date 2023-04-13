@@ -30,7 +30,6 @@ Slathered in peppery basil pesto, sprinkled with pine nuts and baked until irres
 
 ## Instructions
 
-
 Preheat the oven to 200C / fan 180C / gas mark 6. 
 
 Thinly slice the courgette into half-moons. Cut the pepper into 3-4cm squares. 
