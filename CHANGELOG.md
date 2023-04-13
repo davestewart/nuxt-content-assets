@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.10.3
+
+- Prevent overwriting existing image size attributes [#16](../../issues/16)
+
 ## v0.10.2
 
 - Optimise AST parsing [#14](../../issues/14)
