@@ -6,7 +6,7 @@ export const defaults = {
   imageSize: 'attrs',
 
   // treat these extensions as content
-  contentExtensions: 'mdx? csv ya?ml json',
+  contentExtensions: 'md csv ya?ml json',
 
   // output debug messages
   debug: false,
