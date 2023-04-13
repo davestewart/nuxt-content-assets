@@ -31,7 +31,7 @@ export default defineNuxtComponent({
         link('/', 'Home'),
       ]
       const path = this.$route.path
-      const segments = path.split('/')
+      const segments = path.replace(/\/$/, '').split('/')
       if (path !== '/') {
         links.push({
           href: path,

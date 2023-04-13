@@ -29,7 +29,7 @@ export default defineNuxtConfig({
   modules: [
     '../src/module',
     '@nuxt/content',
-    '@nuxt/devtools',
+    // '@nuxt/devtools',
   ],
 
   // https://content.nuxtjs.org/api/configuration
