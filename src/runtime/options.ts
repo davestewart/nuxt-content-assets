@@ -3,7 +3,7 @@ import { matchTokens } from './utils/string'
 
 export const defaults = {
   // inject image size into the rendered html
-  imageSize: 'attrs',
+  imageSize: 'style',
 
   // treat these extensions as content
   contentExtensions: 'md csv ya?ml json',
