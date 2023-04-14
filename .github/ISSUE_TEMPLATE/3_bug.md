@@ -1,5 +1,5 @@
 ---
-name: Bug report
+name: Bug
 about: Report a potential bug
 title: ''
 labels: bug
@@ -11,19 +11,23 @@ assignees: ''
 
 A clear and concise description of the bug
 
-Include any steps to reproduce
+To reproduce:
+
+- Add steps as required
 
 
-## Expected
+## Context
 
-A clear and concise description of what you expected to happen
+Add context here, such as:
 
+- relevant code snippets
+- what you expected to happen
+- what you think might be the problem
+- etc...
 
-## Notes
+Include relevant links, screenshots, etc...
 
-Any other context, links, screenshots, etc
-
-### Environment info
+## Environment info
 
 Run the code below and replace with the output:
 

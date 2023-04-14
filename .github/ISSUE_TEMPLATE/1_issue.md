@@ -1,6 +1,6 @@
 ---
-name: General issue
-about: Any other question, comment or issue
+name: Issue
+about: Ask a general question 
 title: ''
 labels: ''
 assignees: ''
