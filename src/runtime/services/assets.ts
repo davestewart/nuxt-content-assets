@@ -61,7 +61,7 @@ export function getAssetSizes (srcAbs: string, hints: string[]) {
         ratio = `${size.width}/${size.height}`
       }
       if (hints.includes('src') || hints.includes('url')) { // changed in v1.1.0 to src
-        query = `?width=${size.width}&height=${size.height}`
+        query = `width=${size.width}&height=${size.height}`
       }
     }
     catch (err) {
