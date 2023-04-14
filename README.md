@@ -65,17 +65,22 @@ Developer experience:
 
 ## Demo
 
-To view the demo locally, run:
+To clone and run the demo locally:
 
-```
+```bash
+git clone https://github.com/davestewart/nuxt-content-assets.git
+cd nuxt-content-assets
+npm install
 npm run dev
 ```
 
-To view the demo online, visit:
+Then open the demo in your browser at <a href="http://localhost:3000" target="_blank">localhost:3000</a>.
+
+To run the demo online, visit:
 
 - https://stackblitz.com/github/davestewart/nuxt-content-assets?file=demo%2Fapp.vue
 
-You can browse the demo files in:
+To browse the demo folder:
 
 - https://github.com/davestewart/nuxt-content-assets/tree/main/demo
 
@@ -162,11 +167,11 @@ The module is [preconfigured](#image-size) to pass image size hints (by default 
 <img src="/image.jpg" width="640" height="480">
 ```
 
-You can turn this off if you don't want it, but it's recommended to keep it on to prevent content jumps as your page loads.
+Keeping this on prevents content jumps as your page loads.
 
 #### Prose components
 
-If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can [hook into these values](demo/components/temp/ProseImg.vue) via the `$attrs` property:
+If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can [hook into](demo/components/temp/ProseImg.vue) image size hints via the `$attrs` property:
 
 ```vue
 <template>
@@ -182,29 +187,25 @@ export default {
 </script>
 ```
 
-Use `imageSize: 'attrs'` to grab `width` and `height`.
-
 #### Frontmatter
 
-If you pass [frontmatter](demo/content/advanced/gallery.md) to [custom components](demo/components/content/ContentImage.vue) configure `imageSize` as `'src'` to encode the size in the `src` property:
+If you pass [frontmatter](demo/content/advanced/gallery.md) to [custom components](demo/components/content/ContentImage.vue) set `imageSize` to `'src'` to encode values in `src`:
 
 ```
 :image-content{:src="image"}
 ```
 
-The component will receive the `src ` value with dimensions encoded:
+The component will receive the size information as a query string which you can extract and apply:
 
 ```html
 <img class="image-content" src="/image.jpg?width=640&height=480">
 ```
 
-You can then parse the string to implement sizing as you see fit.
-
 See demo component [here](demo/components/content/ContentImage.vue).
 
 ## Configuration
 
-The module can be configured in your Nuxt configuration file:
+The module has the following options:
 
 ```ts
 // nuxt.config.ts
@@ -234,13 +235,14 @@ You can add one or more image size hints to the generated images:
 
 Pick from the following switches:
 
-| Switch  | What it does                                                 |
-| ------- | ------------------------------------------------------------ |
-| `style` | Adds `style="aspect-ratio:..."` to any `<img>` tag           |
-| `attrs` | Adds `width` and `height` attributes to any `<img>` tag      |
-| `src`   | Adds `?width=...&height=...` to `src` attribute (frontmatter only) |
+| Switch    | What it does                                                 |
+| --------- | ------------------------------------------------------------ |
+| `'style'` | Adds `style="aspect-ratio:..."` to any `<img>` tag           |
+| `'attrs'` | Adds `width` and `height` attributes to any `<img>` tag      |
+| `'src'`   | Adds `?width=...&height=...` to `src` attribute (frontmatter only) |
+| `false`   | Disable image size hints                                     |
 
-Note: if you add *only* `attrs` include the following CSS in your app:
+Note: if you add *only* `attrs`, include the following CSS in your app:
 
 ```css
 img {
@@ -249,9 +251,9 @@ img {
 }
 ```
 
-To disable, pass `false`.
-
 ### Content extensions
+
+> Generally, you shouldn't need to touch this setting
 
 This setting tells Nuxt Content to ignore anything that is **not** one of these file extensions:
 
@@ -260,8 +262,6 @@ md csv ya?ml json
 ```
 
 This way, you can use any **other** file type as an asset, without needing to explicitly configure extensions.
-
-Generally, you shouldn't need to touch this setting.
 
 ### Debug
 
