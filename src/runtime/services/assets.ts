@@ -53,15 +53,15 @@ export function getAssetSizes (srcAbs: string, hints: string[]) {
   if (hints.length && isImage(srcAbs)) {
     try {
       const size = getImageSize(srcAbs)
-      if (hints.includes('style')) {
-        ratio = `${size.width}/${size.height}`
-      }
       if (hints.includes('attrs')) {
         width = size.width
         height = size.height
       }
+      if (hints.includes('style')) {
+        ratio = `${size.width}/${size.height}`
+      }
       if (hints.includes('url')) {
-        query = `?width=${width}&height=${height}`
+        query = `?width=${size.width}&height=${size.height}`
       }
     }
     catch (err) {

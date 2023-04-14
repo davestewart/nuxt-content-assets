@@ -61,10 +61,18 @@ export function createWebSocket () {
     }
   }
 
+  let retries = 0
+  const url = useRuntimeConfig().public.sockets?.wsUrl
   const connect = (retry = false) => {
     if (retry) {
-      logger.log('WS reconnecting..')
-      setTimeout(connect, 1000)
+      retries++
+      if (retries < 5) {
+        logger.log('Reconnecting...')
+        setTimeout(connect, 1000)
+      }
+      else {
+        logger.warn('Giving up!')
+      }
       return
     }
 
@@ -79,12 +87,11 @@ export function createWebSocket () {
     }
 
     // websocket base url
-    const url = useRuntimeConfig().public.sockets?.wsUrl
     if (url) {
       const wsUrl = `${url}ws`
 
       // debug
-      logger.log(`Running on ${wsUrl}`)
+      logger.log(`WS connect to ${wsUrl}`)
 
       // do it
       ws = new WebSocket(wsUrl)
@@ -101,6 +108,7 @@ export function createWebSocket () {
   }
 
   return {
+    connect,
     send,
     addHandler (callback: Callback) {
       if (typeof callback === 'function') {
