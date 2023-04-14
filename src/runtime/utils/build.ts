@@ -5,7 +5,8 @@ export function buildStyle (...expr: string[]) {
   return expr
     .map(expr => expr.replace(/^[; ]+|[; ]+$/g, ''))
     .filter(s => s)
-    .join('; ') + ';'
+    .join(';')
+    .replace(/\s*;\s*/g, '; ') + ';'
 }
 
 /**
