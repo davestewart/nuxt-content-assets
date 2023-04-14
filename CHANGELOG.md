@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.0
+
+- Change config `imageSize` option from `url` to `src`
+- Allow disabling of config `imageSize` by passing `false`
+- Improve style and query string addition to respect existing properties 
+
 ## v1.0.0
 
 - Default to `aspect-ratio` for image size hints

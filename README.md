@@ -47,16 +47,19 @@ At build time the module [collates and serves](#how-it-works) assets and content
 
 ### Features
 
+Built on top of [Nuxt Content](https://github.com/nuxt/content/) and compatible with any Nuxt Content project or theme, including [Docus](https://github.com/nuxt-themes/docus).
+
 User experience:
 
 - co-locate assets with content files
-- write relative paths to see preview in editor
+- reference assets using relative paths
+- supports any format (image, video, doc)
 
 Developer experience:
 
-- works for tags and custom components
+- works with tags and custom components
 - works in markdown and frontmatter
-- file watching and live reload
+- file watching and asset live-reload
 - image size injection
 - zero config
 
@@ -147,15 +150,21 @@ If you edit an image, video, embed or iframe source, the content will update imm
 
 ### Image sizing
 
-You can [configure](#image-size) the module to add image size attributes to generated `<img>` tags:
+#### HTML
+
+The module is [preconfigured](#image-size) to pass image size hints (by default `style`) to generated `<img>` tags:
 
 ```html
-<img src="/image.jpg"
-     style="aspect-ratio:640/480"
-     width="640"
-     height="480"
->
+<!-- imageSize: 'style' -->
+<img src="/image.jpg" style="aspect-ratio:640/480">
+
+<!-- imageSize: 'attrs' -->
+<img src="/image.jpg" width="640" height="480">
 ```
+
+You can turn this off if you don't want it, but it's recommended to keep it on to prevent content jumps as your page loads.
+
+#### Prose components
 
 If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can [hook into these values](demo/components/temp/ProseImg.vue) via the `$attrs` property:
 
@@ -173,11 +182,25 @@ export default {
 </script>
 ```
 
-If you pass [frontmatter](demo/content/advanced/gallery.md) to [custom components](demo/components/content/ContentImage.vue) set the `'url'` configuration option to encode size in the URL:
+Use `imageSize: 'attrs'` to grab `width` and `height`.
+
+#### Frontmatter
+
+If you pass [frontmatter](demo/content/advanced/gallery.md) to [custom components](demo/components/content/ContentImage.vue) configure `imageSize` as `'src'` to encode the size in the `src` property:
 
 ```
-:image-gallery={:data="images"}
+:image-content{:src="image"}
 ```
+
+The component will receive the `src ` value with dimensions encoded:
+
+```html
+<img class="image-content" src="/image.jpg?width=640&height=480">
+```
+
+You can then parse the string to implement sizing as you see fit.
+
+See demo component [here](demo/components/content/ContentImage.vue).
 
 ## Configuration
 
@@ -205,19 +228,19 @@ You can add one or more image size hints to the generated images:
 
 ```ts
 {
-  imageSize: 'attrs url'
+  imageSize: 'style attrs src'
 }
 ```
 
 Pick from the following switches:
 
-| Switch  | What it does                                                              |
-|---------|---------------------------------------------------------------------------|
-| `style` | Adds `style="aspect-ratio:..."` to any `<img>` tag                        |
-| `attrs` | Adds `width` and `height` attributes to any `<img>` tag                   |
-| `url`   | Adds a `?width=...&height=...` query string to image paths in frontmatter |
+| Switch  | What it does                                                 |
+| ------- | ------------------------------------------------------------ |
+| `style` | Adds `style="aspect-ratio:..."` to any `<img>` tag           |
+| `attrs` | Adds `width` and `height` attributes to any `<img>` tag      |
+| `src`   | Adds `?width=...&height=...` to `src` attribute (frontmatter only) |
 
-Note: if you add `attrs` only, include the following CSS in your app:
+Note: if you add *only* `attrs` include the following CSS in your app:
 
 ```css
 img {
@@ -225,6 +248,8 @@ img {
   height: auto;
 }
 ```
+
+To disable, pass `false`.
 
 ### Content extensions
 
