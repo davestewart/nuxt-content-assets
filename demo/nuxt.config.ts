@@ -45,8 +45,8 @@ export default defineNuxtConfig({
   },
 
   contentAssets: {
-    // add image size hints
-    imageSize: 'style url',
+    // add all image size hints
+    imageSize: 'style attrs src',
 
     // show debug messages
     debug: true,

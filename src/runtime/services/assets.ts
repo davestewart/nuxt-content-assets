@@ -40,7 +40,7 @@ export function getAssetPaths (srcDir: string, srcAbs: string) {
  * Get asset image sizes
  *
  * @param srcAbs    The absolute path to the asset itself
- * @param hints     A list of named image size hints, i.e. 'style', 'attrs', etc
+ * @param hints     A list of named image size hints, one of 'attrs', 'style', or 'src'
  */
 export function getAssetSizes (srcAbs: string, hints: string[]) {
   // variables
@@ -60,8 +60,8 @@ export function getAssetSizes (srcAbs: string, hints: string[]) {
       if (hints.includes('style')) {
         ratio = `${size.width}/${size.height}`
       }
-      if (hints.includes('url')) {
-        query = `?width=${size.width}&height=${size.height}`
+      if (hints.includes('src') || hints.includes('url')) { // changed in v1.1.0 to src
+        query = `width=${size.width}&height=${size.height}`
       }
     }
     catch (err) {

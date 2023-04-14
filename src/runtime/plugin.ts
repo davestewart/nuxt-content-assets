@@ -1,7 +1,18 @@
 import Path from 'path'
 import { visit, SKIP, CONTINUE } from 'unist-util-visit'
 import type { NitroApp, NitroAppPlugin } from 'nitropack'
-import { deKey, isValidAsset, list, matchTokens, toPath, walk } from './utils'
+import {
+  buildStyle,
+  deKey,
+  isValidAsset,
+  list,
+  matchTokens,
+  toPath,
+  walk,
+  removeQuery,
+  buildQuery,
+  parseQuery
+} from './utils'
 
 // @ts-ignore – options injected via module.ts
 import { debug, cachePath } from '#nuxt-content-assets'
@@ -81,10 +92,13 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
       const filter = (value: any, key?: string | number) => !(String(key).startsWith('_') || key === 'body')
       walk(file, (value: any, parent: any, key: any) => {
         if (isValidAsset(value)) {
-          const { srcAttr, query } = getAsset(value)
+          const { srcAttr, query } = getAsset(removeQuery(value))
           if (srcAttr) {
-            parent[key] = srcAttr + (query || '')
-            updated.push(`meta: ${key} to "${srcAttr}"`)
+            const srcUrl = query
+              ? buildQuery(srcAttr, parseQuery(value), query)
+              : srcAttr
+            parent[key] = srcUrl
+            updated.push(`meta: ${key} to "${srcUrl}"`)
           }
         }
       }, filter)
@@ -129,7 +143,7 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
               }
               if (ratio) {
                 if (typeof node.props.style === 'string') {
-                  node.props.style += `; aspect-ratio: ${ratio};`
+                  node.props.style = buildStyle(node.props.style, `aspect-ratio: ${ratio}`)
                 }
                 else {
                   node.props.style ||= {}

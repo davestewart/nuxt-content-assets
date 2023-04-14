@@ -14,7 +14,7 @@ import { setupSocketServer } from './build/sockets/setup'
 const resolve = createResolver(import.meta.url).resolve
 
 export interface ModuleOptions {
-  imageSize?: string | string[]
+  imageSize?: string | string[] | false
   contentExtensions: string | string[],
   debug?: boolean
 }

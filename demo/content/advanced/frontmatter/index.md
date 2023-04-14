@@ -1,11 +1,13 @@
 ---
-image: ./turkey-casserole.jpg
+image: ./turkey-casserole.jpg?a=1&b=2
 ---
 
 # Creamy Turkey & Sundried Tomato Pesto Casserole
 
 > Image `src` from `frontmatter` variable
 
+
+<!-- use the demo content-image component to convert the size query string to width and height --> 
 :img{:src="image" alt="Turkey & Pesto Casserole"}
 
 Free-range British turkey coated in velvety coconut yoghurt and fragrant red pesto. Served over a bed of fibre-packed brown rice, studded with vitamin K-source spinach. An easy and comforting midweek meal for those busy days.
