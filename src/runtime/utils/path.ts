@@ -2,6 +2,23 @@ import Path from 'path'
 import { extensions } from '../options'
 
 /**
+ * Parses the query string from a path
+ */
+export function parseQuery (path: string): string {
+  const matches = path.match(/\?.+$/)
+  return matches
+    ? matches[0]
+    : ''
+}
+
+/**
+ * Removes the query string from a path
+ */
+export function removeQuery (path: string): string {
+  return path.replace(/\?.*$/, '')
+}
+
+/**
  * Test path to be relative
  */
 export function isRelative (path: string): boolean {
@@ -28,7 +45,7 @@ export function isImage (path: string): boolean {
  * Test path is markdown
  */
 export function isArticle (path: string): boolean {
-  return path.endsWith('.md')
+  return removeQuery(path).endsWith('.md')
 }
 
 /**

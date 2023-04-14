@@ -36,3 +36,4 @@ export function toKey (path: string) {
 export function deKey (path: string) {
   return path.replace(/^[^:]+:/, '')
 }
+
