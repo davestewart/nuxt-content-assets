@@ -3,6 +3,7 @@ import { listen } from 'listhen'
 import { useNuxt } from '@nuxt/kit'
 import { Callback, SocketInstance, Handler } from '../../types'
 import { createWebSocket } from './factory'
+import { log } from '../../runtime/utils'
 
 type SocketServer = ReturnType<typeof createWebSocket>
 
@@ -59,8 +60,10 @@ export async function setupSocketServer (channel: string, handler?: Callback): P
       server.on('upgrade', ws.serve)
 
       // share URL
+      const wsUrl = url.replace('http', 'ws')
+      log(`Websocket listening on "${wsUrl}"`)
       nitro.options.runtimeConfig.public.sockets = {
-        wsUrl: url.replace('http', 'ws')
+        wsUrl
       }
 
       // close on nuxt close
