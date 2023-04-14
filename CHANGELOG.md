@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.0
+
+- Default to `aspect-ratio` for image size hints
+- Fix bug with frontmatter size hints
+- Retry websocket connection a maximum of 5 times in the client
+- Log websocket url in build
+
 ## v0.10.3
 
 - Prevent overwriting existing image size attributes [#16](../../issues/16)

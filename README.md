@@ -45,6 +45,21 @@ Almost as much as being in the sea!
 
 At build time the module [collates and serves](#how-it-works) assets and content together.
 
+### Features
+
+User experience:
+
+- co-locate assets with content files
+- write relative paths to see preview in editor
+
+Developer experience:
+
+- works for tags and custom components
+- works in markdown and frontmatter
+- file watching and live reload
+- image size injection
+- zero config
+
 ## Demo
 
 To view the demo locally, run:
@@ -88,7 +103,7 @@ Run the dev server or build and local assets should now be served alongside mark
 
 Use relative paths anywhere within your documents:
 
-```mdx
+```md
 Images
 ![image](image.jpg)
 
@@ -104,7 +119,7 @@ HTML
 
 Relative paths can be defined in frontmatter – as long as they are the only value:
 
-```mdx
+```md
 ---
 title: Portfolio
 images:
@@ -176,10 +191,10 @@ export default defineNuxtConfig({
     imageSize: 'style',
     
     // treat these extensions as content
-    contentExtensions: 'mdx? csv ya?ml json',
+    contentExtensions: 'md csv ya?ml json',
     
     // output debug messages
-    debug: true,
+    debug: false,
   }
 })
 ```
@@ -196,10 +211,10 @@ You can add one or more image size hints to the generated images:
 
 Pick from the following switches:
 
-| Switch  | What it does                                                 |
-| ------- | ------------------------------------------------------------ |
-| `style` | Adds `style="aspect-ratio:..."` to any `<img>` tag           |
-| `attrs` | Adds `width` and `height` attributes to any `<img>` tag      |
+| Switch  | What it does                                                              |
+|---------|---------------------------------------------------------------------------|
+| `style` | Adds `style="aspect-ratio:..."` to any `<img>` tag                        |
+| `attrs` | Adds `width` and `height` attributes to any `<img>` tag                   |
 | `url`   | Adds a `?width=...&height=...` query string to image paths in frontmatter |
 
 Note: if you add `attrs` only, include the following CSS in your app:
@@ -216,7 +231,7 @@ img {
 This setting tells Nuxt Content to ignore anything that is **not** one of these file extensions:
 
 ```
-mdx? csv ya?ml json
+md csv ya?ml json
 ```
 
 This way, you can use any **other** file type as an asset, without needing to explicitly configure extensions.
