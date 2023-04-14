@@ -3,7 +3,7 @@ recipes:
   -
     title: Italian Bean Stew, Rainbow Chard & Quinoa
     route: /paths/italian-bean-stew
-    image: ../paths/italian-bean-stew/italian-bean-stew.jpg
+    image: ../paths/italian-bean-stew/italian-bean-stew.jpg?a=1
   -
     title: Pesto Salmon & Mediterranean-style lentils
     route: /paths/pesto-salmon-lentils

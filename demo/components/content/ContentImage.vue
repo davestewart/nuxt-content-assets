@@ -1,5 +1,6 @@
 <template>
   <img
+    class="content-image"
     :src="info.src"
     :width="info.width"
     :height="info.height"
