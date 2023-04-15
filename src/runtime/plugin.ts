@@ -15,7 +15,7 @@ import {
 } from './utils'
 
 // @ts-ignore – options injected via module.ts
-import { debug, cachePath } from '#nuxt-content-assets'
+import { cachePath, imageFlags, debug } from '#nuxt-content-assets'
 import { makeStorage } from './services'
 import type { AssetConfig } from './services'
 
@@ -92,8 +92,11 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
       const filter = (value: any, key?: string | number) => !(String(key).startsWith('_') || key === 'body')
       walk(file, (value: any, parent: any, key: any) => {
         if (isValidAsset(value)) {
-          const { srcAttr, query } = getAsset(removeQuery(value))
+          const { srcAttr, width, height } = getAsset(removeQuery(value))
           if (srcAttr) {
+            const query = width && height && (imageFlags.includes('src') || imageFlags.includes('url'))
+              ? `width=${width}&height=${height}`
+              : ''
             const srcUrl = query
               ? buildQuery(srcAttr, parseQuery(value), query)
               : srcAttr
@@ -128,7 +131,7 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
           }
 
           // parse value
-          const { srcAttr, width, height, ratio } = getAsset(value)
+          const { srcAttr, width, height } = getAsset(value)
 
           // if we resolved an asset
           if (srcAttr) {
@@ -138,22 +141,25 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
             // assign size
             if (node.tag === 'img') {
               if (width && height) {
-                node.props.width ||= width
-                node.props.height ||= height
-              }
-              if (ratio) {
-                if (typeof node.props.style === 'string') {
-                  node.props.style = buildStyle(node.props.style, `aspect-ratio: ${ratio}`)
+                if (imageFlags.includes('attrs')) {
+                  node.props.width ||= width
+                  node.props.height ||= height
                 }
-                else {
-                  node.props.style ||= {}
-                  node.props.style.aspectRatio = ratio
+                if (imageFlags.includes('style')) {
+                  const ratio = `${width}/${height}`
+                  if (typeof node.props.style === 'string') {
+                    node.props.style = buildStyle(node.props.style, `aspect-ratio: ${ratio}`)
+                  }
+                  else {
+                    node.props.style ||= {}
+                    node.props.style.aspectRatio = ratio
+                  }
                 }
               }
             }
 
             // open links in new window
-            if (node.tag === 'a') {
+            else if (node.tag === 'a') {
               node.props.target ||= '_blank'
             }
 
