@@ -3,13 +3,9 @@ import getImageSize from 'image-size'
 import { isImage, warn } from '../utils'
 
 export type AssetConfig = {
-  id?: string
-  srcRel: string
   srcAttr: string
   width?: number
   height?: number
-  ratio?: string
-  query?: string
 }
 
 /**
@@ -40,39 +36,15 @@ export function getAssetPaths (srcDir: string, srcAbs: string) {
  * Get asset image sizes
  *
  * @param srcAbs    The absolute path to the asset itself
- * @param hints     A list of named image size hints, one of 'attrs', 'style', or 'src'
  */
-export function getAssetSizes (srcAbs: string, hints: string[]) {
-  // variables
-  let width: number | undefined = undefined
-  let height: number | undefined = undefined
-  let ratio: string | undefined = undefined
-  let query: string | undefined = undefined
-
-  // image dimensions
-  if (hints.length && isImage(srcAbs)) {
+export function getAssetSizes (srcAbs: string): { width?: number, height?: number } {
+  if (isImage(srcAbs)) {
     try {
-      const size = getImageSize(srcAbs)
-      if (hints.includes('attrs')) {
-        width = size.width
-        height = size.height
-      }
-      if (hints.includes('style')) {
-        ratio = `${size.width}/${size.height}`
-      }
-      if (hints.includes('src') || hints.includes('url')) { // changed in v1.1.0 to src
-        query = `width=${size.width}&height=${size.height}`
-      }
+      return getImageSize(srcAbs)
     }
     catch (err) {
       warn(`could not read image "${srcAbs}`)
     }
   }
-
-  return {
-    width,
-    height,
-    ratio,
-    query,
-  }
+  return {}
 }

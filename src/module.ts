@@ -110,16 +110,13 @@ export default defineNuxtModule<ModuleOptions>({
     function updateAsset (src: string) {
       // variables
       const { srcRel, srcAttr } = getAssetPaths(publicPath, src)
-      const { width, height, ratio, query } = getAssetSizes(src, imageFlags)
+      const { width, height } = getAssetSizes(src)
 
       // add assets to config
       assets[srcRel] = {
-        srcRel,
         srcAttr,
         width,
         height,
-        ratio,
-        query
       }
 
       // update
@@ -217,6 +214,7 @@ export default defineNuxtModule<ModuleOptions>({
     const makeVar = (name: string, value: any) => `export const ${name} = ${JSON.stringify(value)};`
     const virtualConfig = [
       makeVar('cachePath', cachePath),
+      makeVar('imageFlags', imageFlags),
       makeVar('debug', options.debug),
     ].join('\n')
 
