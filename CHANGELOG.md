@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.1
+
+- Optimise image size hint processing [#25](../../issues/25)
+
 ## v1.1.0
 
 - Change config `imageSize` option from `url` to `src`
