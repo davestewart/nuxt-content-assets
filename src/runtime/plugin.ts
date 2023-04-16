@@ -82,7 +82,19 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
       // helper
       const getAsset = (relAsset: string) => {
         const srcAsset = Path.join(srcDir, relAsset)
-        return assets[srcAsset] || {}
+        const asset = assets[srcAsset]
+        if (asset) {
+          setDocument(srcAsset, srcDoc)
+        }
+        return asset || {}
+      }
+
+      const setDocument = (srcAsset: string, srcDoc: string) => {
+        const asset = assets[srcAsset]
+        if (!asset.documents.includes(srcDoc)) {
+          asset.documents.push(srcDoc)
+          storage.setItem('assets.json', assets)
+        }
       }
 
       // debug

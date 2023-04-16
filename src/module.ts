@@ -113,7 +113,9 @@ export default defineNuxtModule<ModuleOptions>({
       const { width, height } = getAssetSizes(src)
 
       // add assets to config
+      const asset = assets[srcRel]
       assets[srcRel] = {
+        documents: asset?.documents || [],
         srcAttr,
         width,
         height,

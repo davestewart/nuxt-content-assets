@@ -3,6 +3,7 @@ import getImageSize from 'image-size'
 import { isImage, warn } from '../utils'
 
 export type AssetConfig = {
+  documents: string[],
   srcAttr: string
   width?: number
   height?: number
