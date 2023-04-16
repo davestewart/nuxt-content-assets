@@ -36,7 +36,7 @@ export default defineNuxtModule<ModuleOptions>({
     // ---------------------------------------------------------------------------------------------------------------------
 
     // local paths
-    const pluginPath = resolve('./runtime/plugin')
+    const pluginPath = resolve('./runtime/content/plugin')
 
     // build folders
     const buildPath = nuxt.options.buildDir

@@ -12,12 +12,12 @@ import {
   removeQuery,
   buildQuery,
   parseQuery
-} from './utils'
+} from '../utils'
 
 // @ts-ignore – options injected via module.ts
 import { cachePath, imageFlags, debug } from '#nuxt-content-assets'
-import { makeStorage } from './services'
-import type { AssetConfig } from './services'
+import { makeStorage } from '../services'
+import type { AssetConfig } from '../services'
 
 // ---------------------------------------------------------------------------------------------------------------------
 // assets
