@@ -38,7 +38,7 @@ export function getAssetPaths (srcDir: string, srcAbs: string) {
  *
  * @param srcAbs    The absolute path to the asset itself
  */
-export function getAssetSizes (srcAbs: string): { width?: number, height?: number } {
+export function getAssetSize (srcAbs: string): { width?: number, height?: number } {
   if (isImage(srcAbs)) {
     try {
       return getImageSize(srcAbs)

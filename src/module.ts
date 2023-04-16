@@ -3,13 +3,13 @@ import * as Path from 'path'
 import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { MountOptions } from '@nuxt/content'
 import { Nuxt } from '@nuxt/schema'
-import debounce from 'debounce'
-import type { AssetConfig, SourceManager } from './runtime/services'
-import { getAssetPaths, getAssetSizes, makeSourceManager } from './runtime/services'
+import type { SourceManager } from './runtime/services'
 import { list, log, matchTokens, removeFolder, writeFile, } from './runtime/utils'
+import { makeSourceManager } from './runtime/services'
 import { moduleKey, moduleName } from './runtime/config'
 import { defaults, getIgnores } from './runtime/options'
 import { setupSocketServer } from './build/sockets/setup'
+import { makeAssetsManager } from './runtime/assets/cache'
 
 const resolve = createResolver(import.meta.url).resolve
 
@@ -36,13 +36,12 @@ export default defineNuxtModule<ModuleOptions>({
     // ---------------------------------------------------------------------------------------------------------------------
 
     // local paths
-    const pluginPath = resolve('./runtime/content/plugin')
+    const pluginPath = resolve('./runtime/assets/plugin')
 
     // build folders
     const buildPath = nuxt.options.buildDir
     const cachePath = Path.join(buildPath, 'content-assets')
     const publicPath = Path.join(cachePath, 'public')
-    const indexPath = Path.join(cachePath, 'assets.json')
 
     // dump to file helper
     // eslint-disable-next-line
@@ -101,72 +100,68 @@ export default defineNuxtModule<ModuleOptions>({
     }
 
     // ---------------------------------------------------------------------------------------------------------------------
-    // asset setup
+    // assets
     // ---------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Set asset config
+     * Assets manager
      */
-    function updateAsset (src: string) {
-      // variables
-      const { srcRel, srcAttr } = getAssetPaths(publicPath, src)
-      const { width, height } = getAssetSizes(src)
-
-      // add assets to config
-      const asset = assets[srcRel]
-      assets[srcRel] = {
-        documents: asset?.documents || [],
-        srcAttr,
-        width,
-        height,
-      }
-
-      // update
-      saveAssets()
-
-      // return
-      return srcAttr
-    }
-
-    /**
-     * Remove asset config
-     */
-    function removeAsset (src: string) {
-      const { srcRel, srcAttr } = getAssetPaths(publicPath, src)
-      delete assets[srcRel]
-      saveAssets()
-      return srcAttr
-    }
-
-    /**
-     * Debounced handler to save assets config
-     */
-    const saveAssets = debounce(() => {
-      writeFile(indexPath, assets)
-    }, 50)
-
-    /**
-     * Asset data
-     */
-    const assets: Record<string, AssetConfig> = {}
-
-    // ---------------------------------------------------------------------------------------------------------------------
-    // asset reloading
-    // ---------------------------------------------------------------------------------------------------------------------
+    const assets = makeAssetsManager(cachePath, publicPath)
 
     /**
      * Callback for when assets change
      */
     function onAssetChange (event: 'update' | 'remove', absTrg: string) {
-      const src = event === 'update'
-        ? updateAsset(absTrg)
-        : removeAsset(absTrg)
-      if (socket) {
-        socket.send({ event, src })
+      let src: string = ''
+      let width: number | undefined
+      let height: number | undefined
+
+      // update
+      if (event === 'update') {
+        // assets
+        const oldAsset = imageFlags.length ? assets.getAsset(absTrg) : null
+        const newAsset = assets.updateAsset(absTrg)
+
+        // check for image size change
+        if (oldAsset) {
+          // check image sizes
+          console.log('assets:', { oldAsset, newAsset })
+          if (oldAsset.width !== newAsset.width || oldAsset.height !== newAsset.height ) {
+            // set sizes
+            width = newAsset.width
+            height = newAsset.height
+
+            // rebuild docs
+            console.log('rebuilding pages:', oldAsset.documents)
+
+            // refresh page
+            if (socket) {
+              // socket.send({ event: 'refresh' })
+            }
+          }
+        }
+
+        // set src
+        src = newAsset.srcAttr
+      }
+
+      // remove
+      else {
+        const asset = assets.removeAsset(absTrg)
+        if (asset) {
+          src = asset.srcAttr
+        }
+      }
+
+      // sockets
+      if (src && socket) {
+        socket.send({ event, src, width, height })
       }
     }
 
-    // asset live reload
+    /**
+     * Socket to communicate changes to client
+     */
     addPlugin(resolve('./runtime/sockets/plugin'))
     const socket = nuxt.options.dev
       ? await setupSocketServer('content-assets')
@@ -199,7 +194,7 @@ export default defineNuxtModule<ModuleOptions>({
         const paths = await manager.init()
 
         // update assets config
-        paths.forEach(path => updateAsset(path))
+        paths.forEach(path => assets.updateAsset(path))
 
         // debug
         if (options.debug) {
@@ -216,6 +211,7 @@ export default defineNuxtModule<ModuleOptions>({
     const makeVar = (name: string, value: any) => `export const ${name} = ${JSON.stringify(value)};`
     const virtualConfig = [
       makeVar('cachePath', cachePath),
+      makeVar('publicPath', publicPath),
       makeVar('imageFlags', imageFlags),
       makeVar('debug', options.debug),
     ].join('\n')
