@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.2
+
+- Fix non-default watch port [#28](../../issues/28)
+
 ## v1.1.1
 
 - Optimise image size hint processing [#25](../../issues/25)

@@ -47,9 +47,15 @@ export async function setupSocketServer (channel: string, handler?: Callback): P
     if (!nuxt._socketServer) {
       // server
       const defaults = nuxt.options.runtimeConfig.content.watch.ws
+      const port = defaults.port.port
       const { server, url } = await listen(() => 'Nuxt Content Assets', {
-        port: defaults.port.port + 1,
         hostname: defaults.hostname,
+        port: {
+          port:  port + 1,
+          portRange: [
+            port + 1, port + 40
+          ],
+        },
         showURL: false
       })
 

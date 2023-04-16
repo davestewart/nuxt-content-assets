@@ -9,19 +9,21 @@ assignees: ''
 
 ## Description
 
-A clear and concise description of the bug
+A clear and concise description of the bug.
 
 To reproduce:
 
-- Add steps as required
+- add steps as required
 
+Expected result:
+
+- result
 
 ## Context
 
 Add context here, such as:
 
 - relevant code snippets
-- what you expected to happen
 - what you think might be the problem
 - etc...
 
