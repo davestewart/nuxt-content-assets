@@ -3,13 +3,22 @@ import * as Path from 'path'
 import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { MountOptions } from '@nuxt/content'
 import { Nuxt } from '@nuxt/schema'
-import type { SourceManager } from './runtime/services'
-import { list, log, matchTokens, removeFolder, writeFile, } from './runtime/utils'
-import { makeSourceManager } from './runtime/services'
+import type { SourceManager } from './runtime/sources/manager'
+import {
+  log,
+  list,
+  isImage,
+  matchTokens,
+  removeFolder,
+  toPath,
+} from './runtime/utils'
+import { defaults } from './runtime/options'
 import { moduleKey, moduleName } from './runtime/config'
-import { defaults, getIgnores } from './runtime/options'
 import { setupSocketServer } from './build/sockets/setup'
-import { makeAssetsManager } from './runtime/assets/cache'
+import { makeSourceManager } from './runtime/sources/manager'
+import { makeAssetsManager } from './runtime/assets/manager'
+import { rewriteContent } from './runtime/assets/content'
+import { ImageSize } from './types'
 
 const resolve = createResolver(import.meta.url).resolve
 
@@ -40,16 +49,11 @@ export default defineNuxtModule<ModuleOptions>({
 
     // build folders
     const buildPath = nuxt.options.buildDir
-    const cachePath = Path.join(buildPath, 'content-assets')
-    const publicPath = Path.join(cachePath, 'public')
+    const assetsPath = Path.join(buildPath, 'content-assets')
+    const publicPath = Path.join(assetsPath, 'public')
 
-    // dump to file helper
-    // eslint-disable-next-line
-    const dump = (name: string, data: any): void => {
-      const path = `${cachePath}/debug/${name}.json`
-      log(`Dumping "${Path.relative('', path)}"`)
-      writeFile(path, data)
-    }
+    // cached content
+    const contentPath = Path.join(buildPath, 'content-cache/parsed')
 
     // clear caches
     if (options.debug) {
@@ -59,7 +63,7 @@ export default defineNuxtModule<ModuleOptions>({
     removeFolder(Path.join(buildPath, 'content-cache'))
 
     // clear images from previous run
-    removeFolder(cachePath)
+    removeFolder(assetsPath)
 
     // ---------------------------------------------------------------------------------------------------------------------
     // options
@@ -75,7 +79,7 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.content?.ignores.push(ignores)
 
     // convert image size hints to array
-    const imageFlags = matchTokens(options.imageSize)
+    const imageFlags: ImageSize = matchTokens(options.imageSize) as ImageSize
 
     // collate sources
     const sources: Record<string, MountOptions> = nuxt.options._layers
@@ -106,38 +110,47 @@ export default defineNuxtModule<ModuleOptions>({
     /**
      * Assets manager
      */
-    const assets = makeAssetsManager(cachePath, publicPath)
+    const assets = makeAssetsManager(publicPath)
 
     /**
      * Callback for when assets change
+     *
+     * - if the asset is updated or deleted, we tell the browser to update the asset's properties
+     * - if the asset is an image and changes size, we potentially rewrite the cached content
+     *
+     * @param event   The type of update
+     * @param absTrg  The absolute path to the copied asset
      */
     function onAssetChange (event: 'update' | 'remove', absTrg: string) {
       let src: string = ''
       let width: number | undefined
       let height: number | undefined
+      let resize = false
 
       // update
       if (event === 'update') {
-        // assets
-        const oldAsset = imageFlags.length ? assets.getAsset(absTrg) : null
-        const newAsset = assets.updateAsset(absTrg)
+        // 1. the old asset
+        const oldAsset = isImage(absTrg) && imageFlags.length
+          ? assets.getAsset(absTrg)
+          : null
+
+        // 1. the new asset; this HAS to go second, as it overwrites image size
+        const newAsset = assets.setAsset(absTrg)
+
+        // sizes
+        width = newAsset.width
+        height = newAsset.height
 
         // check for image size change
         if (oldAsset) {
-          // check image sizes
-          console.log('assets:', { oldAsset, newAsset })
-          if (oldAsset.width !== newAsset.width || oldAsset.height !== newAsset.height ) {
-            // set sizes
-            width = newAsset.width
-            height = newAsset.height
-
-            // rebuild docs
-            console.log('rebuilding pages:', oldAsset.documents)
-
-            // refresh page
-            if (socket) {
-              // socket.send({ event: 'refresh' })
-            }
+          // special behaviour for image size change!
+          // we rewrite cached content directly so it displays
+          if (oldAsset.width !== newAsset.width || oldAsset.height !== newAsset.height) {
+            resize = true
+            newAsset.content.forEach(async (id: string) => {
+              const path = Path.join(contentPath, toPath(id))
+              rewriteContent(path, newAsset)
+            })
           }
         }
 
@@ -156,6 +169,9 @@ export default defineNuxtModule<ModuleOptions>({
       // sockets
       if (src && socket) {
         socket.send({ event, src, width, height })
+        if (resize) {
+          // socket.send({ event: 'refresh' })
+        }
       }
     }
 
@@ -194,7 +210,7 @@ export default defineNuxtModule<ModuleOptions>({
         const paths = await manager.init()
 
         // update assets config
-        paths.forEach(path => assets.updateAsset(path))
+        paths.forEach(path => assets.setAsset(path))
 
         // debug
         if (options.debug) {
@@ -210,7 +226,6 @@ export default defineNuxtModule<ModuleOptions>({
     // build config
     const makeVar = (name: string, value: any) => `export const ${name} = ${JSON.stringify(value)};`
     const virtualConfig = [
-      makeVar('cachePath', cachePath),
       makeVar('publicPath', publicPath),
       makeVar('imageFlags', imageFlags),
       makeVar('debug', options.debug),

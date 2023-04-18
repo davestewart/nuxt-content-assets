@@ -1,56 +1,18 @@
-import { CONTINUE, SKIP, visit } from 'unist-util-visit'
 import type { NitroApp, NitroAppPlugin } from 'nitropack'
-import type { ParsedContent } from '../../types'
-import { buildQuery, buildStyle, isValidAsset, list, matchTokens, parseQuery, removeQuery, walk } from '../utils'
-import { makeAssetsManager } from './cache'
-
+import type { ImageSize, ParsedContent } from '../../types'
+import { buildQuery, buildStyle, isValidAsset, list, parseQuery, removeQuery } from '../utils'
+import { makeAssetsManager } from './manager'
+import { walkBody, walkMeta } from './utils'
 // @ts-ignore – options injected via module.ts
-import { cachePath, debug, imageFlags, publicPath } from '#nuxt-content-assets'
-
-// ---------------------------------------------------------------------------------------------------------------------
-// config
-// ---------------------------------------------------------------------------------------------------------------------
-
-const { getDocumentAsset } = makeAssetsManager(cachePath, publicPath)
-
-export const tags = {
-  // unlikely to contain assets
-  exclude: matchTokens({
-    container: 'pre code code-inline',
-    formatting: 'acronym abbr address bdi bdo big center cite del dfn font ins kbd mark meter progress q rp rt ruby s samp small strike sub sup time tt u var wbr',
-    headers: 'h1 h2 h3 h4 h5 h6',
-    controls: 'input textarea button select optgroup option label legend datalist output',
-    media: 'map area canvas svg',
-    other: 'style script noscript template',
-    empty: 'hr br',
-  }),
-
-  // may contain assets
-  include: matchTokens({
-    content: 'main header footer section article aside details dialog summary data object nav blockquote div span p',
-    table: 'table caption th tr td thead tbody tfoot col colgroup',
-    media: 'figcaption figure picture',
-    form: 'form fieldset',
-    list: 'ul ol li dir dl dt dd',
-    formatting: 'strong b em i',
-  }),
-
-  // assets
-  assets: 'a img audio source track video embed',
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-// plugin
-// ---------------------------------------------------------------------------------------------------------------------
+import { debug, imageFlags, publicPath } from '#nuxt-content-assets'
 
 /**
  * Walk the parsed frontmatter and check properties as paths
  */
-function processMeta (content: ParsedContent, updated: string[]) {
-  const filter = (value: any, key?: string | number) => !(String(key).startsWith('_') || key === 'body')
-  walk(content, (value: any, parent: any, key: any) => {
+function processMeta (content: ParsedContent, imageFlags: ImageSize = [], updated: string[] = []) {
+  walkMeta(content, (value, parent, key) => {
     if (isValidAsset(value)) {
-      const { srcAttr, width, height } = getDocumentAsset(content._file, removeQuery(value), true)
+      const { srcAttr, width, height } = resolveAsset(content, removeQuery(value), true)
       if (srcAttr) {
         const query = width && height && (imageFlags.includes('src') || imageFlags.includes('url'))
           ? `width=${width}&height=${height}`
@@ -62,30 +24,15 @@ function processMeta (content: ParsedContent, updated: string[]) {
         updated.push(`meta: ${key} to "${srcUrl}"`)
       }
     }
-  }, filter)
+  })
 }
 
 /**
  * Walk the parsed content and check potential attributes as paths
  */
-function processBody (content: ParsedContent, updated: string[]) {
-  visit(content.body, (node: any) => node.type === 'element', (node) => {
-    // variables
+function processBody (content: ParsedContent, imageFlags: ImageSize = [], updated: string[] = []) {
+  walkBody(content, function (node: any) {
     const { tag, props } = node
-
-    // skip containers we think won't contain assets
-    const excluded = tags.exclude.includes(tag)
-    if (excluded) {
-      return SKIP
-    }
-
-    // traverse containers we think could contain assets
-    const included = tags.include.includes(tag)
-    if (included || !props) {
-      return CONTINUE
-    }
-
-    // process attributes of everything else!
     for (const [prop, value] of Object.entries(props)) {
       // only process strings
       if (typeof value !== 'string') {
@@ -93,7 +40,7 @@ function processBody (content: ParsedContent, updated: string[]) {
       }
 
       // parse value
-      const { srcAttr, width, height } = getDocumentAsset(content._file, value, true)
+      const { srcAttr, width, height } = resolveAsset(content, value, true)
 
       // if we resolved an asset
       if (srcAttr) {
@@ -132,26 +79,20 @@ function processBody (content: ParsedContent, updated: string[]) {
   })
 }
 
-async function processContent (content: ParsedContent) {
-  // debug
-  // console.log('Processing:', srcDoc)
-
-  if (content._extension === 'md') {
-    // process
-    const updated: string[] = []
-    processMeta(content, updated)
-    processBody(content, updated)
-
-    // debug
-    if (debug && updated.length) {
-      list(`Processed "/${content._file}"`, updated)
-      console.log()
-    }
-  }
-}
+const { resolveAsset } = makeAssetsManager(publicPath)
 
 const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
-  nitro.hooks.hook('content:file:afterParse', processContent)
+  nitro.hooks.hook('content:file:afterParse', function (content: ParsedContent) {
+    if (content._extension === 'md') {
+      const updated: string[] = []
+      processMeta(content, imageFlags, updated)
+      processBody(content, imageFlags, updated)
+      if (debug && updated.length) {
+        list(`Processed "/${content._file}"`, updated)
+        console.log()
+      }
+    }
+  })
 }
 
 export default plugin
