@@ -1,17 +1,15 @@
-import { useRuntimeConfig } from '#app'
 import { Callback } from '../../types'
 
-const plugin = '[Content Assets]'
-const logger = {
-  // eslint-disable-next-line no-console
-  log: (...args: any[]) => console.log(plugin, ...args),
-  // eslint-disable-next-line no-console
-  warn: (...args: any[]) => console.warn(plugin, ...args)
+export interface Logger {
+  log: (...args: any[]) => void
+  warn: (...args: any[]) => void
 }
 
 let ws: WebSocket | undefined
 
-export function createWebSocket () {
+function log (..._args: any[]) {}
+
+export function createWebSocket (url: string, logger: Logger = { log, warn: log }) {
   if (!window.WebSocket) {
     logger.warn('Your browser does not support WebSocket')
     return null
@@ -62,7 +60,6 @@ export function createWebSocket () {
   }
 
   let retries = 0
-  const url = useRuntimeConfig().public.sockets?.wsUrl
   const connect = (retry = false) => {
     if (retry) {
       retries++
