@@ -3,40 +3,42 @@ import * as Path from 'path'
 import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { MountOptions } from '@nuxt/content'
 import { Nuxt } from '@nuxt/schema'
-import type { SourceManager } from './runtime/assets/source'
-import {
-  log,
-  list,
-  isImage,
-  makeIgnores,
-  matchTokens,
-  removeFolder,
-  toPath,
-} from './runtime/utils'
-import { defaults } from './runtime/options'
-import { moduleKey, moduleName } from './runtime/config'
+import { log, list, isImage, makeIgnores, matchTokens, removeFolder, toPath } from './runtime/utils'
 import { setupSocketServer } from './build/sockets/setup'
 import { makeSourceManager } from './runtime/assets/source'
 import { makeAssetsManager } from './runtime/assets/public'
 import { rewriteContent } from './runtime/content/parsed'
-import { ImageSize } from './types'
+import type { ImageSize } from './types'
 
 const resolve = createResolver(import.meta.url).resolve
 
+const meta = {
+  moduleName: 'nuxt-content-assets',
+  moduleKey: 'contentAssets',
+  compatibility: {
+    nuxt: '^3.0.0'
+  }
+}
+
+const defaults: ModuleOptions = {
+  // inject image size into the rendered html
+  imageSize: 'style',
+
+  // treat these extensions as content
+  contentExtensions: 'md csv ya?ml json',
+
+  // output debug messages
+  debug: false,
+}
+
 export interface ModuleOptions {
   imageSize?: string | string[] | false
-  contentExtensions: string | string[],
+  contentExtensions?: string | string[],
   debug?: boolean
 }
 
 export default defineNuxtModule<ModuleOptions>({
-  meta: {
-    name: moduleName,
-    configKey: moduleKey,
-    compatibility: {
-      nuxt: '^3.0.0'
-    }
-  },
+  meta,
 
   defaults,
 
@@ -67,14 +69,17 @@ export default defineNuxtModule<ModuleOptions>({
     // options
     // ---------------------------------------------------------------------------------------------------------------------
 
-    // @ts-ignore
     // set up content ignores
-    nuxt.options.content ||= {}
-    if (nuxt.options.content) {
-      nuxt.options.content.ignores ||= []
+    const { contentExtensions } = options
+    if (contentExtensions) {
+      // @ts-ignore
+      nuxt.options.content ||= {}
+      if (nuxt.options.content) {
+        nuxt.options.content.ignores ||= []
+      }
+      const ignores = makeIgnores(contentExtensions)
+      nuxt.options.content?.ignores.push(ignores)
     }
-    const ignores = makeIgnores(options.contentExtensions)
-    nuxt.options.content?.ignores.push(ignores)
 
     // convert image size hints to array
     const imageFlags: ImageSize = matchTokens(options.imageSize) as ImageSize
@@ -132,7 +137,7 @@ export default defineNuxtModule<ModuleOptions>({
           ? assets.getAsset(absTrg)
           : null
 
-        // 1. the new asset; this HAS to go second, as it overwrites image size
+        // 2. the new asset; this HAS to go second, as it overwrites image size
         const newAsset = assets.setAsset(absTrg)
 
         // sizes
@@ -182,11 +187,11 @@ export default defineNuxtModule<ModuleOptions>({
       : null
 
     // ---------------------------------------------------------------------------------------------------------------------
-    // sources setup
+    // sources
     // ---------------------------------------------------------------------------------------------------------------------
 
     // create source managers
-    const managers: Record<string, SourceManager> = {}
+    const managers: Record<string, ReturnType<typeof makeSourceManager>> = {}
     for (const [key, source] of Object.entries(sources)) {
       // debug
       if (options.debug) {
@@ -240,7 +245,7 @@ export default defineNuxtModule<ModuleOptions>({
 
       // make config available to nitro
       config.virtual ||= {}
-      config.virtual[`#${moduleName}`] = () => {
+      config.virtual[`#${meta.moduleName}`] = () => {
         return virtualConfig
       }
 

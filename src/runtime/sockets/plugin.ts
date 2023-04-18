@@ -1,11 +1,5 @@
 import { defineNuxtPlugin, refreshNuxtData, useRuntimeConfig } from '#imports'
-
-interface AssetMessage {
-  event: string
-  src: string
-  width?: string
-  height?: string
-}
+import { AssetMessage } from '../../types'
 
 /**
  * Clientside plugin to receive socket messages

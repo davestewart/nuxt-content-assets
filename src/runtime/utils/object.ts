@@ -27,7 +27,7 @@ export function walk (node: any, callback: WalkCallback, filter?: WalkFilter): v
         visit(value, callback, node, index)
       })
     }
-    else if (typeof node === 'object' && node !== null) {
+    else if (isObject(node)) {
       Object.keys(node).forEach(key => {
         visit(node[key], callback, node, key)
       })
@@ -43,3 +43,6 @@ export function walk (node: any, callback: WalkCallback, filter?: WalkFilter): v
   visit(node, callback, { node }, 'node')
 }
 
+export function isObject (data: any) {
+  return data && typeof data === 'object' && !Array.isArray(data)
+}

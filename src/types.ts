@@ -1,10 +1,5 @@
 export type Callback = (data: any) => void
 
-export type Handler = {
-  channel: string
-  callback: Callback
-}
-
 export interface SocketInstance {
   send: (data: any) => SocketInstance
   addHandler: (handler: Callback) => SocketInstance
@@ -17,6 +12,14 @@ export type AssetConfig = {
   content: string[],
   width?: number
   height?: number
+}
+
+
+export interface AssetMessage {
+  event: 'update' | 'remove' | 'refresh'
+  src?: string
+  width?: string
+  height?: string
 }
 
 export interface ParsedContent {

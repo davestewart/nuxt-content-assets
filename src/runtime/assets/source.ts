@@ -1,23 +1,12 @@
 import * as Path from 'path'
-import { createStorage, WatchEvent, Storage } from 'unstorage'
+import { MountOptions } from '@nuxt/content'
 import githubDriver, { GithubOptions } from 'unstorage/drivers/github'
 import fsDriver, { FSStorageOptions } from 'unstorage/drivers/fs'
-import { MountOptions } from '@nuxt/content'
-import {
-  warn,
-  isAsset,
-  toPath,
-  removeFile,
-  copyFile,
-  writeBlob,
-  writeFile,
-  deKey,
-  isExcluded,
-} from '../utils'
+import { createStorage, WatchEvent, Storage } from 'unstorage'
+import { warn, isAsset, toPath, removeFile, copyFile, writeBlob, writeFile, deKey, isExcluded } from '../utils'
 
 /**
  * Helper function to determine valid ids
- * @param id
  */
 function isAssetId (id: string) {
   const path = toPath(id)
@@ -84,19 +73,19 @@ export function makeSourceManager (key: string, source: MountOptions, publicPath
   }
 
   // relative source file path from key
-  function getRelSrc(key: string) {
+  function getRelSrc (key: string) {
     return toPath(key)
       .replace(/\w+/, '')
       .replace(source.prefix || '', '')
   }
 
   // absolute source file path from key
-  function getAbsSrc(key: string) {
+  function getAbsSrc (key: string) {
     return Path.join(source.base, getRelSrc(key))
   }
 
   // relative target file path from key
-  function getRelTrg(key: string) {
+  function getRelTrg (key: string) {
     return Path.join(source.prefix || '', toPath(deKey(key)))
   }
 
@@ -167,7 +156,7 @@ export function makeSourceManager (key: string, source: MountOptions, publicPath
     const keys = await getKeys()
     const paths: string[] = []
 
-    // copy assets to temp path
+    // copy assets to public path
     for (const key of keys) {
       const path = await copyItem(key)
       paths.push(path)

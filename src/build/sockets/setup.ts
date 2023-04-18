@@ -1,14 +1,15 @@
 import { Server } from 'http'
 import { listen } from 'listhen'
 import { useNuxt } from '@nuxt/kit'
-import { Callback, SocketInstance, Handler } from '../../types'
+import { Callback, SocketInstance } from '../../types'
 import { createWebSocket } from './factory'
-import { log } from '../../runtime/utils'
+import { isObject, log } from '../../runtime/utils'
 
 type SocketServer = ReturnType<typeof createWebSocket>
 
-function isObject (data: any) {
-  return data && typeof data === 'object' && !Array.isArray(data)
+type Handler = {
+  channel: string
+  callback: Callback
 }
 
 function makeChannelBroker (ws: SocketServer) {

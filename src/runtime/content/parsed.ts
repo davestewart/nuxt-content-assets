@@ -25,7 +25,6 @@ export function rewriteContent (path: string, asset: AssetConfig): ParsedContent
     const { tag, props } = node
     if (tag === 'img' && props?.src?.startsWith(srcAttr)) {
       props.src = buildQuery(srcAttr, `time=${Date.now()}`)
-      console.log(props.src)
       if (props.width) {
         props.width = width
       }
