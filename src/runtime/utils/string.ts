@@ -37,3 +37,11 @@ export function deKey (path: string) {
   return path.replace(/^[^:]+:/, '')
 }
 
+/**
+ * Create a Nuxt Content ignore string
+ */
+export function makeIgnores (extensions: string | string[]): string {
+  const matched = matchTokens(extensions)
+  const ignored = matched.join('|')
+  return `[^:]+\\.(?!(${ignored})$)`
+}

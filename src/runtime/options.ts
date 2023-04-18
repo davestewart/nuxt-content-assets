@@ -20,6 +20,3 @@ export const extensions = {
   media: matchTokens('mp3 m4a wav mp4 mov webm ogg avi flv avchd'),
 }
 
-export function getIgnores (extensions: string | string[]): string {
-  return `^((?!(${matchTokens(extensions).join('|')})).)*$`
-}

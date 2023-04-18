@@ -8,6 +8,7 @@ import {
   log,
   list,
   isImage,
+  makeIgnores,
   matchTokens,
   removeFolder,
   toPath,
@@ -75,7 +76,7 @@ export default defineNuxtModule<ModuleOptions>({
     if (nuxt.options.content) {
       nuxt.options.content.ignores ||= []
     }
-    const ignores = getIgnores(options.contentExtensions)
+    const ignores = makeIgnores(options.contentExtensions)
     nuxt.options.content?.ignores.push(ignores)
 
     // convert image size hints to array
