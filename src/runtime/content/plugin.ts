@@ -1,8 +1,7 @@
 import type { NitroApp, NitroAppPlugin } from 'nitropack'
 import type { ImageSize, ParsedContent } from '../../types'
-import { buildQuery, buildStyle, isValidAsset, list, parseQuery, removeQuery } from '../utils'
-import { makeAssetsManager } from './manager'
-import { walkBody, walkMeta } from './utils'
+import { buildQuery, buildStyle, isValidAsset, list, parseQuery, removeQuery, walkBody, walkMeta } from '../utils'
+import { makeAssetsManager } from '../assets/public'
 // @ts-ignore – options injected via module.ts
 import { debug, imageFlags, publicPath } from '#nuxt-content-assets'
 

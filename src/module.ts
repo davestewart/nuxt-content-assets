@@ -3,7 +3,7 @@ import * as Path from 'path'
 import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { MountOptions } from '@nuxt/content'
 import { Nuxt } from '@nuxt/schema'
-import type { SourceManager } from './runtime/sources/manager'
+import type { SourceManager } from './runtime/assets/source'
 import {
   log,
   list,
@@ -16,9 +16,9 @@ import {
 import { defaults } from './runtime/options'
 import { moduleKey, moduleName } from './runtime/config'
 import { setupSocketServer } from './build/sockets/setup'
-import { makeSourceManager } from './runtime/sources/manager'
-import { makeAssetsManager } from './runtime/assets/manager'
-import { rewriteContent } from './runtime/assets/content'
+import { makeSourceManager } from './runtime/assets/source'
+import { makeAssetsManager } from './runtime/assets/public'
+import { rewriteContent } from './runtime/content/parsed'
 import { ImageSize } from './types'
 
 const resolve = createResolver(import.meta.url).resolve
@@ -44,9 +44,6 @@ export default defineNuxtModule<ModuleOptions>({
     // ---------------------------------------------------------------------------------------------------------------------
     // setup
     // ---------------------------------------------------------------------------------------------------------------------
-
-    // local paths
-    const pluginPath = resolve('./runtime/assets/plugin')
 
     // build folders
     const buildPath = nuxt.options.buildDir
@@ -224,7 +221,10 @@ export default defineNuxtModule<ModuleOptions>({
     // nitro hook
     // ---------------------------------------------------------------------------------------------------------------------
 
-    // build config
+    // plugin
+    const pluginPath = resolve('./runtime/content/plugin')
+
+    // config
     const makeVar = (name: string, value: any) => `export const ${name} = ${JSON.stringify(value)};`
     const virtualConfig = [
       makeVar('publicPath', publicPath),

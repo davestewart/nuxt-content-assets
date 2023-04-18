@@ -1,6 +1,5 @@
 import type { AssetConfig, ParsedContent } from '../../types'
-import { walkBody, walkMeta } from './utils'
-import { buildQuery, readFile } from '../utils'
+import { walkBody, walkMeta, buildQuery, readFile } from '../utils'
 
 /**
  * Helper function to rewrite cached content with updated image sizes

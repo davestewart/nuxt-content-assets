@@ -1,4 +1,5 @@
 export * from './path'
+export * from './content'
 export * from './debug'
 export * from './build'
 export * from './fs'

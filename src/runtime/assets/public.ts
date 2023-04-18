@@ -1,12 +1,13 @@
+import * as Path from 'path'
 import getImageSize from 'image-size'
 import debounce from 'debounce'
-import * as Path from 'path'
+import { hash } from 'ohash'
 import { ParsedContent, AssetConfig } from '../../types'
-import { makeSourceStorage } from '../sources/manager'
-import { isImage, warn } from '../utils'
+import { makeSourceStorage } from './source'
+import { isImage, warn, log } from '../utils'
 
 /**
- * Manages the saved assets index
+ * Manages the public assets
  */
 export function makeAssetsManager (publicPath: string) {
 
@@ -132,6 +133,45 @@ export function makeAssetsManager (publicPath: string) {
   }
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+// utils
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**
+ * Hash of replacer functions
+ */
+export const replacers: Record<string, (src: string) => string> = {
+  key: (src: string) => Path.dirname(src).split('/').filter(e => e).shift() || '',
+  path: (src: string) => Path.dirname(src),
+  folder: (src: string) => Path.dirname(src).replace(/[^/]+\//, ''),
+  file: (src: string) => Path.basename(src),
+  name: (src: string) => Path.basename(src, Path.extname(src)),
+  extname: (src: string) => Path.extname(src),
+  ext: (src: string) => Path.extname(src).substring(1),
+  hash: (src: string) => hash({ src }),
+}
+
+/**
+ * Interpolate assets path pattern
+ *
+ * @param pattern   A path pattern with tokens
+ * @param src       The relative path to a src asset
+ * @param warn      An optional flag to warn for unknown tokens
+ */
+export function interpolatePattern (pattern: string, src: string, warn = false): string {
+  return Path.join(pattern.replace(/\[\w+]/g, (match: string) => {
+    const name = match.substring(1, match.length - 1)
+    const fn = replacers[name]
+    if (fn) {
+      return fn(src)
+    }
+    if (warn) {
+      log(`Unknown output token ${match}`, true)
+    }
+    return match
+  }))
+}
+
 /**
  * Parse asset paths from absolute path
  *
@@ -145,12 +185,8 @@ export function getAssetPaths (srcDir: string, srcAbs: string) {
   // interpolated public path
   const srcAttr = '/' + srcRel
 
-  // content id
-  const id = srcRel.replaceAll('/', ':')
-
   // return
   return {
-    id,
     srcRel,
     srcAttr,
   }

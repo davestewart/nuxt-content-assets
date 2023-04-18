@@ -1,6 +1,7 @@
 import { CONTINUE, SKIP, visit } from 'unist-util-visit'
-import { WalkCallback, matchTokens, walk } from '../utils'
 import { ParsedContent } from '../../types'
+import { WalkCallback, walk } from './object'
+import { matchTokens } from './string'
 
 /**
  * Walk parsed content meta, only processing relevant properties
