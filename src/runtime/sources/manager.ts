@@ -25,9 +25,9 @@ function isAssetId (id: string) {
 }
 
 /**
- * Make a Storage instance
+ * Make a Storage instance that monitors assets from a single source
  */
-export function makeStorage (source: MountOptions | string, key = ''): Storage {
+export function makeSourceStorage (source: MountOptions | string, key = ''): Storage {
   const storage = createStorage()
   const options = typeof source === 'string'
     ? { driver: 'fs', base: source }
@@ -63,7 +63,7 @@ export interface SourceManager {
 /**
  * Make a SourceManager instance
  *
- * Each Source Manager is responsible for mirroring source files to the public folder
+ * Each Source Manager is responsible for watching and mirroring source assets to the public assets folder
  *
  * @param key
  * @param source
@@ -178,7 +178,7 @@ export function makeSourceManager (key: string, source: MountOptions, publicPath
   }
 
   // storage
-  const storage = makeStorage(source, key)
+  const storage = makeSourceStorage(source, key)
   storage.watch(onWatch)
 
   // return
