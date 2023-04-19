@@ -1,8 +1,8 @@
 import { defineNuxtPlugin, refreshNuxtData, useRuntimeConfig } from '#imports'
-import { AssetMessage } from '../../types'
+import type { AssetMessage } from '../../types'
 
 /**
- * Clientside plugin to receive socket messages
+ * Client-side plugin to support asset live-reload
  */
 export default defineNuxtPlugin(async () => {
   if (process.client) {
@@ -44,15 +44,21 @@ export default defineNuxtPlugin(async () => {
 
                 // size
                 if (width && height) {
-                  el.style.aspectRatio = `${width} / ${height}`
-                  if (el.width && el.height) {
-                    el.setAttribute('width', width)
-                    el.setAttribute('height', height)
-                  }
-                  if (params.get('width')) {
-                    params.set('width', width)
-                    params.set('height', height)
-                  }
+                  // update size on load
+                  el.addEventListener('load', function onLoad () {
+                    if (el.width && el.height) {
+                      el.setAttribute('width', width)
+                      el.setAttribute('height', height)
+                    }
+                    if (el.style.aspectRatio) {
+                      el.style.aspectRatio = `${width} / ${height}`
+                    }
+                    if (params.get('width')) {
+                      params.set('width', width)
+                      params.set('height', height)
+                    }
+                    el.removeEventListener('load', onLoad)
+                  })
                 }
 
                 // src

@@ -9,6 +9,7 @@ import { makeSourceManager } from './runtime/assets/source'
 import { makeAssetsManager } from './runtime/assets/public'
 import { rewriteContent } from './runtime/content/parsed'
 import type { ImageSize } from './types'
+import './module'
 
 const resolve = createResolver(import.meta.url).resolve
 
@@ -21,19 +22,34 @@ const meta = {
 }
 
 const defaults: ModuleOptions = {
-  // inject image size into the rendered html
   imageSize: 'style',
-
-  // treat these extensions as content
   contentExtensions: 'md csv ya?ml json',
-
-  // output debug messages
   debug: false,
 }
 
 export interface ModuleOptions {
+  /**
+   * Image size hints
+   *
+   * @example 'attrs style url'
+   * @default 'style'
+   */
   imageSize?: string | string[] | false
+
+  /**
+   * List of content extensions; anything else as an asset
+   *
+   * @example 'md'
+   * @default 'md csv ya?ml json'
+   */
   contentExtensions?: string | string[],
+
+  /**
+   * Display debug messages
+   *
+   * @example true
+   * @default false
+   */
   debug?: boolean
 }
 
@@ -85,10 +101,10 @@ export default defineNuxtModule<ModuleOptions>({
     const imageFlags: ImageSize = matchTokens(options.imageSize) as ImageSize
 
     // collate sources
-    const sources: Record<string, MountOptions> = nuxt.options._layers
-      // @ts-ignore
+    type Sources = Record<string, MountOptions>
+    const sources: Sources = Array.from(nuxt.options._layers)
       .map(layer => layer.config?.content?.sources)
-      .reduce((output, sources) => {
+      .reduce((output: Sources, sources) => {
         if (sources) {
           Object.assign(output, sources)
         }
@@ -119,7 +135,7 @@ export default defineNuxtModule<ModuleOptions>({
      * Callback for when assets change
      *
      * - if the asset is updated or deleted, we tell the browser to update the asset's properties
-     * - if the asset is an image and changes size, we potentially rewrite the cached content
+     * - if the asset is an image and changes size, we also rewrite the cached content
      *
      * @param event   The type of update
      * @param absTrg  The absolute path to the copied asset
@@ -128,16 +144,15 @@ export default defineNuxtModule<ModuleOptions>({
       let src: string = ''
       let width: number | undefined
       let height: number | undefined
-      let resize = false
 
       // update
       if (event === 'update') {
-        // 1. the old asset
+        // 1. get the old asset config first...
         const oldAsset = isImage(absTrg) && imageFlags.length
           ? assets.getAsset(absTrg)
           : null
 
-        // 2. the new asset; this HAS to go second, as it overwrites image size
+        // 2. ...before the asset overwrites the image size
         const newAsset = assets.setAsset(absTrg)
 
         // sizes
@@ -147,9 +162,8 @@ export default defineNuxtModule<ModuleOptions>({
         // check for image size change
         if (oldAsset) {
           // special behaviour for image size change!
-          // we rewrite cached content directly so it displays
+          // we rewrite cached content directly so image size changes are permanent
           if (oldAsset.width !== newAsset.width || oldAsset.height !== newAsset.height) {
-            resize = true
             newAsset.content.forEach(async (id: string) => {
               const path = Path.join(contentPath, toPath(id))
               rewriteContent(path, newAsset)
@@ -172,9 +186,6 @@ export default defineNuxtModule<ModuleOptions>({
       // sockets
       if (src && socket) {
         socket.send({ event, src, width, height })
-        if (resize) {
-          // socket.send({ event: 'refresh' })
-        }
       }
     }
 
@@ -258,3 +269,11 @@ export default defineNuxtModule<ModuleOptions>({
     })
   },
 })
+
+declare module '@nuxt/schema' {
+  interface ConfigSchema {
+    runtimeConfig: {
+      contentAssets?: ModuleOptions;
+    }
+  }
+}

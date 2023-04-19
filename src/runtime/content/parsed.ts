@@ -1,10 +1,8 @@
 import type { AssetConfig, ParsedContent } from '../../types'
-import { walkBody, walkMeta, buildQuery, readFile } from '../utils'
+import { walkBody, walkMeta, buildQuery, readFile, writeFile } from '../utils'
 
 /**
- * Helper function to rewrite cached content with updated image sizes
- *
- * @disabled until https://github.com/nuxt/content/pull/2022 is merged
+ * Rewrite cached content with updated image sizes
  */
 export function rewriteContent (path: string, asset: AssetConfig): ParsedContent {
   // load content
@@ -44,7 +42,7 @@ export function rewriteContent (path: string, asset: AssetConfig): ParsedContent
   })
 
   // save file
-  // writeFile(path, { module: true, parsed })
+  writeFile(path, { module: true, parsed })
 
   // return
   return parsed

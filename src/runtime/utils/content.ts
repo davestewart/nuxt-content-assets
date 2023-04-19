@@ -37,7 +37,7 @@ export function walkBody (content: ParsedContent, callback: (node: any) => void)
     }
 
     // process node
-    return callback(node)
+    callback(node)
   })
 }
 
