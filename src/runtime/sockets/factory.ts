@@ -7,7 +7,8 @@ export interface Logger {
 
 let ws: WebSocket | undefined
 
-function log (..._args: any[]) {}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function log (...args: any[]) {}
 
 export function createWebSocket (url: string, logger: Logger = { log, warn: log }) {
   if (!window.WebSocket) {
