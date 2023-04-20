@@ -1,4 +1,4 @@
-import { MountOptions } from '@nuxt/content'
+import type { MountOptions } from '@nuxt/content'
 
 // @ts-ignore
 const isStackblitz = process.env.GIT_PROXY?.includes('stackblitz')
@@ -52,4 +52,3 @@ export default defineNuxtConfig({
     debug: true,
   },
 })
-

@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.0
+
+- Fix image size change and live-reload [#30](../../issues/30)
+
 ## v1.1.2
 
 - Fix non-default watch port [#28](../../issues/28)
