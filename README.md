@@ -283,6 +283,8 @@ If they do, then the attribute or property is rewritten with the absolute path. 
 
 Finally, Nitro serves the site, and any requests made to the transformed asset paths should be picked up and the *copied* asset served by the browser.
 
+In development, file watching propagates asset changes to the public folder, updates related cached content, and notifies the browser via web sockets to refresh any loaded images. 
+
 ## Development
 
 Should you wish to develop the project, the scripts are:

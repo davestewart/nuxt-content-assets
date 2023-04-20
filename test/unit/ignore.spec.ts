@@ -1,17 +1,19 @@
 import { describe, expect, it } from 'vitest'
 
+import { makeIgnores } from '../../src/runtime/utils'
+
 describe('ignore', () => {
   it('regexp should ignore non docs', () => {
-    // @see https://stackoverflow.com/a/15508679
-    const p = '^((?!(md|json|yaml|csv)).)*$'
+    const p = makeIgnores('md json yaml csv')
 
+    // @see https://github.com/nuxt/content/blob/main/src/module.ts#L651
     const rx = new RegExp(`^${p}|:${p}`)
 
     const files = [
       ':article.md',
       ':article.json',
       ':image.jpg',
-      ':image.png',
+      'content:paths:some-image.jpg',
     ]
 
     const results = files
@@ -24,7 +26,7 @@ describe('ignore', () => {
       ':article.md': false,
       ':article.json': false,
       ':image.jpg': true,
-      ':image.png': true
+      'content:paths:some-image.jpg': true,
     })
   })
 })

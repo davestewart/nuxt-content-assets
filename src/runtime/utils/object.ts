@@ -1,6 +1,8 @@
-export type Callback = (value: any, parent?: any, key?: string | number) => void
+export type Walkable = { [key: string | number]: any }
 
-export type Filter = (value: any, key?: string | number) => boolean | void
+export type WalkFilter = (value: any, key?: string | number) => boolean | void
+
+export type WalkCallback = (value: any, parent: Walkable, key: string | number) => void
 
 /**
  * Walk an object structure
@@ -9,8 +11,8 @@ export type Filter = (value: any, key?: string | number) => boolean | void
  * @param callback
  * @param filter
  */
-export function walk (node: any, callback: Callback, filter?: Filter): void {
-  function visit (node: any, callback: Callback, parent?: any, key?: string | number) {
+export function walk (node: any, callback: WalkCallback, filter?: WalkFilter): void {
+  function visit (node: any, callback: WalkCallback, parent: Walkable, key: string | number) {
     // filter
     if (filter) {
       const result = filter(node, key)
@@ -25,7 +27,7 @@ export function walk (node: any, callback: Callback, filter?: Filter): void {
         visit(value, callback, node, index)
       })
     }
-    else if (typeof node === 'object' && node !== null) {
+    else if (isObject(node)) {
       Object.keys(node).forEach(key => {
         visit(node[key], callback, node, key)
       })
@@ -38,6 +40,9 @@ export function walk (node: any, callback: Callback, filter?: Filter): void {
   }
 
   // begin
-  visit(node, callback)
+  visit(node, callback, { node }, 'node')
 }
 
+export function isObject (data: any) {
+  return data && typeof data === 'object' && !Array.isArray(data)
+}

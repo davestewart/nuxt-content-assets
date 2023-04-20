@@ -1,5 +1,6 @@
 import Path from 'path'
-import { extensions } from '../options'
+
+import { extensions } from './config'
 
 /**
  * Parses the query string from a path

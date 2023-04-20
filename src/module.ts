@@ -3,30 +3,58 @@ import * as Path from 'path'
 import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { MountOptions } from '@nuxt/content'
 import { Nuxt } from '@nuxt/schema'
-import debounce from 'debounce'
-import type { AssetConfig, SourceManager } from './runtime/services'
-import { getAssetPaths, getAssetSizes, makeSourceManager } from './runtime/services'
-import { list, log, matchTokens, removeFolder, writeFile, } from './runtime/utils'
-import { moduleKey, moduleName } from './runtime/config'
-import { defaults, getIgnores } from './runtime/options'
+import { log, list, isImage, makeIgnores, matchTokens, removeFolder, toPath } from './runtime/utils'
 import { setupSocketServer } from './build/sockets/setup'
+import { makeSourceManager } from './runtime/assets/source'
+import { makeAssetsManager } from './runtime/assets/public'
+import { rewriteContent } from './runtime/content/parsed'
+import type { ImageSize } from './types'
+import './module'
 
 const resolve = createResolver(import.meta.url).resolve
 
+const meta = {
+  moduleName: 'nuxt-content-assets',
+  moduleKey: 'contentAssets',
+  compatibility: {
+    nuxt: '^3.0.0'
+  }
+}
+
+const defaults: ModuleOptions = {
+  imageSize: 'style',
+  contentExtensions: 'md csv ya?ml json',
+  debug: false,
+}
+
 export interface ModuleOptions {
+  /**
+   * Image size hints
+   *
+   * @example 'attrs style url'
+   * @default 'style'
+   */
   imageSize?: string | string[] | false
-  contentExtensions: string | string[],
+
+  /**
+   * List of content extensions; anything else as an asset
+   *
+   * @example 'md'
+   * @default 'md csv ya?ml json'
+   */
+  contentExtensions?: string | string[],
+
+  /**
+   * Display debug messages
+   *
+   * @example true
+   * @default false
+   */
   debug?: boolean
 }
 
 export default defineNuxtModule<ModuleOptions>({
-  meta: {
-    name: moduleName,
-    configKey: moduleKey,
-    compatibility: {
-      nuxt: '^3.0.0'
-    }
-  },
+  meta,
 
   defaults,
 
@@ -35,22 +63,13 @@ export default defineNuxtModule<ModuleOptions>({
     // setup
     // ---------------------------------------------------------------------------------------------------------------------
 
-    // local paths
-    const pluginPath = resolve('./runtime/plugin')
-
     // build folders
     const buildPath = nuxt.options.buildDir
-    const cachePath = Path.join(buildPath, 'content-assets')
-    const publicPath = Path.join(cachePath, 'public')
-    const indexPath = Path.join(cachePath, 'assets.json')
+    const assetsPath = Path.join(buildPath, 'content-assets')
+    const publicPath = Path.join(assetsPath, 'public')
 
-    // dump to file helper
-    // eslint-disable-next-line
-    const dump = (name: string, data: any): void => {
-      const path = `${cachePath}/debug/${name}.json`
-      log(`Dumping "${Path.relative('', path)}"`)
-      writeFile(path, data)
-    }
+    // cached content
+    const contentPath = Path.join(buildPath, 'content-cache/parsed')
 
     // clear caches
     if (options.debug) {
@@ -60,29 +79,32 @@ export default defineNuxtModule<ModuleOptions>({
     removeFolder(Path.join(buildPath, 'content-cache'))
 
     // clear images from previous run
-    removeFolder(cachePath)
+    removeFolder(assetsPath)
 
     // ---------------------------------------------------------------------------------------------------------------------
     // options
     // ---------------------------------------------------------------------------------------------------------------------
 
-    // @ts-ignore
     // set up content ignores
-    nuxt.options.content ||= {}
-    if (nuxt.options.content) {
-      nuxt.options.content.ignores ||= []
+    const { contentExtensions } = options
+    if (contentExtensions) {
+      // @ts-ignore
+      nuxt.options.content ||= {}
+      if (nuxt.options.content) {
+        nuxt.options.content.ignores ||= []
+      }
+      const ignores = makeIgnores(contentExtensions)
+      nuxt.options.content?.ignores.push(ignores)
     }
-    const ignores = getIgnores(options.contentExtensions)
-    nuxt.options.content?.ignores.push(ignores)
 
     // convert image size hints to array
-    const imageFlags = matchTokens(options.imageSize)
+    const imageFlags: ImageSize = matchTokens(options.imageSize) as ImageSize
 
     // collate sources
-    const sources: Record<string, MountOptions> = nuxt.options._layers
-      // @ts-ignore
+    type Sources = Record<string, MountOptions>
+    const sources: Sources = Array.from(nuxt.options._layers)
       .map(layer => layer.config?.content?.sources)
-      .reduce((output, sources) => {
+      .reduce((output: Sources, sources) => {
         if (sources) {
           Object.assign(output, sources)
         }
@@ -101,81 +123,86 @@ export default defineNuxtModule<ModuleOptions>({
     }
 
     // ---------------------------------------------------------------------------------------------------------------------
-    // asset setup
+    // assets
     // ---------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Set asset config
+     * Assets manager
      */
-    function updateAsset (src: string) {
-      // variables
-      const { srcRel, srcAttr } = getAssetPaths(publicPath, src)
-      const { width, height } = getAssetSizes(src)
-
-      // add assets to config
-      assets[srcRel] = {
-        srcAttr,
-        width,
-        height,
-      }
-
-      // update
-      saveAssets()
-
-      // return
-      return srcAttr
-    }
-
-    /**
-     * Remove asset config
-     */
-    function removeAsset (src: string) {
-      const { srcRel, srcAttr } = getAssetPaths(publicPath, src)
-      delete assets[srcRel]
-      saveAssets()
-      return srcAttr
-    }
-
-    /**
-     * Debounced handler to save assets config
-     */
-    const saveAssets = debounce(() => {
-      writeFile(indexPath, assets)
-    }, 50)
-
-    /**
-     * Asset data
-     */
-    const assets: Record<string, AssetConfig> = {}
-
-    // ---------------------------------------------------------------------------------------------------------------------
-    // asset reloading
-    // ---------------------------------------------------------------------------------------------------------------------
+    const assets = makeAssetsManager(publicPath)
 
     /**
      * Callback for when assets change
+     *
+     * - if the asset is updated or deleted, we tell the browser to update the asset's properties
+     * - if the asset is an image and changes size, we also rewrite the cached content
+     *
+     * @param event   The type of update
+     * @param absTrg  The absolute path to the copied asset
      */
     function onAssetChange (event: 'update' | 'remove', absTrg: string) {
-      const src = event === 'update'
-        ? updateAsset(absTrg)
-        : removeAsset(absTrg)
-      if (socket) {
-        socket.send({ event, src })
+      let src: string = ''
+      let width: number | undefined
+      let height: number | undefined
+
+      // update
+      if (event === 'update') {
+        // 1. get the old asset config first...
+        const oldAsset = isImage(absTrg) && imageFlags.length
+          ? assets.getAsset(absTrg)
+          : null
+
+        // 2. ...before the asset overwrites the image size
+        const newAsset = assets.setAsset(absTrg)
+
+        // sizes
+        width = newAsset.width
+        height = newAsset.height
+
+        // check for image size change
+        if (oldAsset) {
+          // special behaviour for image size change!
+          // we rewrite cached content directly so image size changes are permanent
+          if (oldAsset.width !== newAsset.width || oldAsset.height !== newAsset.height) {
+            newAsset.content.forEach(async (id: string) => {
+              const path = Path.join(contentPath, toPath(id))
+              rewriteContent(path, newAsset)
+            })
+          }
+        }
+
+        // set src
+        src = newAsset.srcAttr
+      }
+
+      // remove
+      else {
+        const asset = assets.removeAsset(absTrg)
+        if (asset) {
+          src = asset.srcAttr
+        }
+      }
+
+      // sockets
+      if (src && socket) {
+        socket.send({ event, src, width, height })
       }
     }
 
-    // asset live reload
+    /**
+     * Socket to communicate changes to client
+     */
     addPlugin(resolve('./runtime/sockets/plugin'))
     const socket = nuxt.options.dev
       ? await setupSocketServer('content-assets')
       : null
 
     // ---------------------------------------------------------------------------------------------------------------------
-    // sources setup
+    // sources
     // ---------------------------------------------------------------------------------------------------------------------
 
     // create source managers
-    const managers: Record<string, SourceManager> = {}
+    const managers: Record<string, ReturnType<typeof makeSourceManager>> = {}
     for (const [key, source] of Object.entries(sources)) {
       // debug
       if (options.debug) {
@@ -197,7 +224,7 @@ export default defineNuxtModule<ModuleOptions>({
         const paths = await manager.init()
 
         // update assets config
-        paths.forEach(path => updateAsset(path))
+        paths.forEach(path => assets.setAsset(path))
 
         // debug
         if (options.debug) {
@@ -210,10 +237,13 @@ export default defineNuxtModule<ModuleOptions>({
     // nitro hook
     // ---------------------------------------------------------------------------------------------------------------------
 
-    // build config
+    // plugin
+    const pluginPath = resolve('./runtime/content/plugin')
+
+    // config
     const makeVar = (name: string, value: any) => `export const ${name} = ${JSON.stringify(value)};`
     const virtualConfig = [
-      makeVar('cachePath', cachePath),
+      makeVar('publicPath', publicPath),
       makeVar('imageFlags', imageFlags),
       makeVar('debug', options.debug),
     ].join('\n')
@@ -226,7 +256,7 @@ export default defineNuxtModule<ModuleOptions>({
 
       // make config available to nitro
       config.virtual ||= {}
-      config.virtual[`#${moduleName}`] = () => {
+      config.virtual[`#${meta.moduleName}`] = () => {
         return virtualConfig
       }
 
@@ -239,3 +269,11 @@ export default defineNuxtModule<ModuleOptions>({
     })
   },
 })
+
+declare module '@nuxt/schema' {
+  interface ConfigSchema {
+    runtimeConfig: {
+      contentAssets?: ModuleOptions;
+    }
+  }
+}
