@@ -15,6 +15,7 @@ Paths:
 Assets:
 
 - [Media and file assets](assets)
+- [Nuxt Image component](assets/nuxt-image.md)
 
 Advanced:
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.0
+
+- Make compatible with Nuxt Image
+
 ## v1.2.1
 
 - Fix broken user config

@@ -1,0 +1,8 @@
+{
+  "name": "nuxt-content-assets-demo",
+  "description": "Nuxt Content Assets Demo",
+  "devDependencies": {
+    "@nuxt/devtools": "^0.4.1",
+    "@nuxt/image-edge": "^1.0.0-28020728.5df24eb"
+  }
+}
