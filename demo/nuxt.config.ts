@@ -26,10 +26,12 @@ export default defineNuxtConfig({
     },
   },
 
+  // @ts-ignore
   modules: [
     '../src/module',
     '@nuxt/content',
-    // '@nuxt/devtools',
+    '@nuxt/image-edge',
+    '@nuxt/devtools',
   ],
 
   // https://content.nuxtjs.org/api/configuration
@@ -44,6 +46,7 @@ export default defineNuxtConfig({
     },
   },
 
+  // https://github.com/davestewart/nuxt-content-assets/#configuration
   contentAssets: {
     // add all image size hints
     imageSize: 'style attrs src',
@@ -51,4 +54,9 @@ export default defineNuxtConfig({
     // show debug messages
     debug: true,
   },
+
+  // https://v1.image.nuxtjs.org/configuration#dir
+  image: {
+    dir: '.nuxt/content-assets/public'
+  }
 })

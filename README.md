@@ -203,6 +203,35 @@ The component will receive the size information as a query string which you can 
 
 See demo component [here](demo/components/content/ContentImage.vue).
 
+### Nuxt Image compatibility
+
+Nuxt Content Assets works with [Nuxt Image](https://v1.image.nuxtjs.org/) with just a little configuration.
+
+First, configure Nuxt Image to use Nuxt Content Asset's public folder:
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  image: {
+    dir: '.nuxt/content-assets/public'
+  }
+}
+```
+
+Then, create a `ProseImg` component like so:
+
+```vue
+<!-- components/content/ProseImg.vue -->
+<template>
+  <nuxt-img />
+</template>
+```
+
+Any images rendered by Nuxt Content will now use Nuxt Image.
+
+> For a per-image solution, check the [override](demo/components/content/NuxtImg.ts) in the demo folder.
+
+
 ## Configuration
 
 The module has the following options:
