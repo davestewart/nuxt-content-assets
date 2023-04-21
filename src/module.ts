@@ -69,11 +69,12 @@ export default defineNuxtModule<ModuleOptions>({
     }
 
     // convert image size hints to array
-    const imageFlags: ImageSize = matchTokens(options.imageSize) as ImageSize
+    const imageSizes: ImageSize = matchTokens(options.imageSize) as ImageSize
 
     // collate sources
     type Sources = Record<string, MountOptions>
     const sources: Sources = Array.from(nuxt.options._layers)
+      // @ts-ignore
       .map(layer => layer.config?.content?.sources)
       .reduce((output: Sources, sources) => {
         if (sources) {
@@ -119,7 +120,7 @@ export default defineNuxtModule<ModuleOptions>({
       // update
       if (event === 'update') {
         // 1. get the old asset config first...
-        const oldAsset = isImage(absTrg) && imageFlags.length
+        const oldAsset = isImage(absTrg) && imageSizes.length
           ? assets.getAsset(absTrg)
           : null
 
@@ -215,7 +216,7 @@ export default defineNuxtModule<ModuleOptions>({
     const makeVar = (name: string, value: any) => `export const ${name} = ${JSON.stringify(value)};`
     const virtualConfig = [
       makeVar('publicPath', publicPath),
-      makeVar('imageFlags', imageFlags),
+      makeVar('imageSizes', imageSizes),
       makeVar('debug', options.debug),
     ].join('\n')
 
