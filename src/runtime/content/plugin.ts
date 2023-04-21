@@ -47,7 +47,7 @@ function processBody (content: ParsedContent, imageSizes: ImageSize = [], update
         node.props[prop] = srcAttr
 
         // assign size
-        if (node.tag === 'img') {
+        if (node.tag === 'img' || node.tag === 'nuxt-img') {
           if (width && height) {
             if (imageSizes.includes('attrs')) {
               node.props.width = width
