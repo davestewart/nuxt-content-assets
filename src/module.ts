@@ -1,62 +1,33 @@
 import * as Fs from 'fs'
 import * as Path from 'path'
 import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { ModuleMeta, Nuxt } from '@nuxt/schema'
 import { MountOptions } from '@nuxt/content'
-import { Nuxt } from '@nuxt/schema'
-import { log, list, isImage, makeIgnores, matchTokens, removeFolder, toPath } from './runtime/utils'
+import { isImage, list, log, makeIgnores, matchTokens, removeFolder, toPath } from './runtime/utils'
 import { setupSocketServer } from './build/sockets/setup'
 import { makeSourceManager } from './runtime/assets/source'
 import { makeAssetsManager } from './runtime/assets/public'
 import { rewriteContent } from './runtime/content/parsed'
-import type { ImageSize } from './types'
-import './module'
+import type { ImageSize, ModuleOptions } from './types'
 
 const resolve = createResolver(import.meta.url).resolve
 
-const meta = {
-  moduleName: 'nuxt-content-assets',
-  moduleKey: 'contentAssets',
+const meta: ModuleMeta = {
+  name: 'nuxt-content-assets',
+  configKey: 'contentAssets',
   compatibility: {
     nuxt: '^3.0.0'
   }
 }
 
-const defaults: ModuleOptions = {
-  imageSize: 'style',
-  contentExtensions: 'md csv ya?ml json',
-  debug: false,
-}
-
-export interface ModuleOptions {
-  /**
-   * Image size hints
-   *
-   * @example 'attrs style url'
-   * @default 'style'
-   */
-  imageSize?: string | string[] | false
-
-  /**
-   * List of content extensions; anything else as an asset
-   *
-   * @example 'md'
-   * @default 'md csv ya?ml json'
-   */
-  contentExtensions?: string | string[],
-
-  /**
-   * Display debug messages
-   *
-   * @example true
-   * @default false
-   */
-  debug?: boolean
-}
-
 export default defineNuxtModule<ModuleOptions>({
   meta,
 
-  defaults,
+  defaults: {
+    imageSize: 'style',
+    contentExtensions: 'md csv ya?ml json',
+    debug: false,
+  },
 
   async setup (options, nuxt: Nuxt) {
     // ---------------------------------------------------------------------------------------------------------------------

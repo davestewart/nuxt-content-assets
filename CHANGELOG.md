@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.1
+
+- Fix broken user config
+
 ## v1.2.0
 
 - Fix image size change and live-reload [#30](../../issues/30)
