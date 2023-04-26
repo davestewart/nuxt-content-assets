@@ -1,5 +1,5 @@
-import * as Path from 'path'
-import * as Fs from 'fs'
+import Path from 'crosspath'
+import Fs from 'fs'
 
 export function readFile (path: string, asJson = false) {
   const text = Fs.readFileSync(path, { encoding: 'utf8' })

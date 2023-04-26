@@ -1,4 +1,4 @@
-import * as Path from 'path'
+import Path from 'crosspath'
 import { MountOptions } from '@nuxt/content'
 import githubDriver, { GithubOptions } from 'unstorage/drivers/github'
 import fsDriver, { FSStorageOptions } from 'unstorage/drivers/fs'

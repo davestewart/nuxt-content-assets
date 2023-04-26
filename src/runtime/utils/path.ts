@@ -1,4 +1,4 @@
-import Path from 'path'
+import Path from 'crosspath'
 
 import { extensions } from './config'
 

@@ -1,5 +1,5 @@
-import * as Fs from 'fs'
-import * as Path from 'path'
+import Fs from 'fs'
+import Path from 'crosspath'
 import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { ModuleMeta, Nuxt } from '@nuxt/schema'
 import { MountOptions } from '@nuxt/content'

@@ -1,4 +1,4 @@
-import * as Path from 'path'
+import Path from 'crosspath'
 import getImageSize from 'image-size'
 import debounce from 'debounce'
 import { hash } from 'ohash'
@@ -20,7 +20,7 @@ export function makeAssetsManager (publicPath: string) {
 
   // storage
   const storage = makeSourceStorage(Path.join(publicPath, '..'))
-  storage.watch(async (event: string, key: string) => {
+  void storage.watch(async (event: string, key: string) => {
     if (event === 'update' && key === indexKey) {
       await load()
     }
@@ -36,7 +36,7 @@ export function makeAssetsManager (publicPath: string) {
 
   const save = debounce(function () {
     // console.log('save:', assets)
-    storage.setItem(indexKey, assets)
+    void storage.setItem(indexKey, assets)
   }, 50)
 
   // ---------------------------------------------------------------------------------------------------------------------

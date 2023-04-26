@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.2
+
+- Ensure paths always use forward slashes [#37](../../issues/37)
+
 ## v1.3.1
 
 - Fix `ignores` bug preventing ordered content from displaying [#36](../../issues/36)
