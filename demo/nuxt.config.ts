@@ -1,3 +1,4 @@
+import { defineNuxtConfig } from 'nuxt/config'
 import type { MountOptions } from '@nuxt/content'
 
 // @ts-ignore
