@@ -1,4 +1,4 @@
-import * as Path from 'path'
+import Path from 'crosspath'
 import getImageSize from 'image-size'
 import debounce from 'debounce'
 import { hash } from 'ohash'
