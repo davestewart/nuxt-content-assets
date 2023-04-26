@@ -13,9 +13,11 @@ export const extensions = {
 
 /**
  * Create a Nuxt Content ignore string
+ *
+ * @see https://stackoverflow.com/questions/10052032/regex-pattern-that-does-not-match-certain-extensions
+ * @see https://regex101.com/r/gC3HXz/1
  */
 export function makeIgnores (extensions: string | string[]): string {
-  const matched = matchTokens(extensions)
-  const ignored = matched.join('|')
-  return `[^:]+\\.(?!(${ignored})$)`
+  const included = matchTokens(extensions).join('|')
+  return `^(?:(?!(${included})).)+$`
 }

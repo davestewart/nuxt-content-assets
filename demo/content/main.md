@@ -30,6 +30,7 @@ Sources:
 Internal:
 
 - [Path replacement skips invalid elements](internal/traversal)
+- [Should include ordered files](internal/ordered)
 
 GitHub:
 
