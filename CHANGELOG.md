@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.1
+
+- Fix `ignores` bug preventing ordered content from displaying [#36](../../issues/36)
+
 ## v1.3.0
 
 - Make compatible with Nuxt Image
