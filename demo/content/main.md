@@ -11,6 +11,7 @@ Paths:
 - [Image in same folder](paths/same)
 - [Image in sub folder](paths/sub)
 - [Image in parent folder](paths/parent)
+- [Image on absolute path](paths/absolute)
 
 Assets:
 
