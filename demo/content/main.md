@@ -8,9 +8,10 @@ title: Nuxt Content Assets - Demo
 
 Paths:
 
-- [Image in same folder](paths/italian-bean-stew)
-- [Image in sub folder](paths/pesto-salmon-lentils)
-- [Image in parent folder](paths/sicilian-fish-stew)
+- [Image in same folder](paths/same)
+- [Image in sub folder](paths/sub)
+- [Image in parent folder](paths/parent)
+- [Image on absolute path](paths/absolute)
 
 Assets:
 
