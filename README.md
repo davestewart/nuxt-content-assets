@@ -205,7 +205,7 @@ See demo component [here](demo/components/content/ContentImage.vue).
 
 ### Nuxt Image compatibility
 
-Nuxt Content Assets works with [Nuxt Image](https://v1.image.nuxtjs.org/) with just a little configuration.
+Nuxt Content Assets works with [Nuxt Image](https://image.nuxtjs.org/) with just a little configuration.
 
 First, configure Nuxt Image to use Nuxt Content Asset's public folder:
 
