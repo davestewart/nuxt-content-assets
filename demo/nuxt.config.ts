@@ -31,7 +31,7 @@ export default defineNuxtConfig({
   modules: [
     '../src/module',
     '@nuxt/content',
-    '@nuxt/image-edge',
+    '@nuxt/image',
     '@nuxt/devtools',
   ],
 

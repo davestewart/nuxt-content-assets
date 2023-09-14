@@ -52,8 +52,8 @@
     "@types/debounce": "^1.2.1",
     "@types/ws": "^8.5.4",
     "eslint": "^8.36.0",
-    "nuxt": "^3.3.2",
-    "vitest": "^0.29.7"
+    "nuxt": "3.6.5",
+    "vitest": "^0.30.0"
   },
   "engines": {
     "node": ">=14.0.0"
