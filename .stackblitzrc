@@ -1,0 +1,3 @@
+{
+  "startCommand": "npm install && npm install --prefix ./demo && npm run dev"
+}
