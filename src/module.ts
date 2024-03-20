@@ -185,6 +185,12 @@ export default defineNuxtModule<ModuleOptions>({
       managers[key] = makeSourceManager(key, source, publicPath, onAssetChange)
     }
 
+    nuxt.hook('close', async () => {
+      for (const key in managers) {
+        await managers[key].storage.dispose()
+      }
+    })
+
     // ---------------------------------------------------------------------------------------------------------------------
     // build hook
     // ---------------------------------------------------------------------------------------------------------------------
