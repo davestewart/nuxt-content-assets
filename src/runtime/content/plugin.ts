@@ -80,7 +80,7 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
   }
 
 
-  const { resolveAsset, dispose } = makeAssetsManager(publicPath)
+  const { resolveAsset, dispose } = makeAssetsManager(publicPath, import.meta.dev)
 
   nitro.hooks.hook('content:file:afterParse', function (content: ParsedContent) {
     if (content._extension === 'md') {

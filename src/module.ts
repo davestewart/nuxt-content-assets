@@ -101,7 +101,7 @@ export default defineNuxtModule<ModuleOptions>({
     /**
      * Assets manager
      */
-    const assets = makeAssetsManager(publicPath)
+    const assets = makeAssetsManager(publicPath, nuxt.options.dev)
 
     nuxt.hooks.hook('close', () => assets.dispose())
 
