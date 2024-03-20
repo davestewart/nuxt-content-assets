@@ -103,6 +103,8 @@ export default defineNuxtModule<ModuleOptions>({
      */
     const assets = makeAssetsManager(publicPath)
 
+    nuxt.hooks.hook('close', () => assets.dispose())
+
     /**
      * Callback for when assets change
      *
@@ -187,6 +189,7 @@ export default defineNuxtModule<ModuleOptions>({
 
     nuxt.hook('close', async () => {
       for (const key in managers) {
+        await managers[key].storage.unwatch()
         await managers[key].storage.dispose()
       }
     })

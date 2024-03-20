@@ -130,6 +130,10 @@ export function makeAssetsManager (publicPath: string) {
     getAsset,
     removeAsset,
     resolveAsset,
+    dispose: async () => {
+      await storage.unwatch()
+      await storage.dispose()
+    }
   }
 }
 
