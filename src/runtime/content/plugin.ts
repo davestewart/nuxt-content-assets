@@ -81,6 +81,7 @@ function processBody (content: ParsedContent, imageSizes: ImageSize = [], update
 const { resolveAsset } = makeAssetsManager(publicPath)
 
 const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
+  // @ts-ignore
   nitro.hooks.hook('content:file:afterParse', function (content: ParsedContent) {
     if (content._extension === 'md') {
       const updated: string[] = []

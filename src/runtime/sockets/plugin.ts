@@ -7,6 +7,7 @@ import type { AssetMessage } from '../../types'
 export default defineNuxtPlugin(async () => {
   if (import.meta.client) {
     // sockets url
+    // @ts-ignore
     const url = useRuntimeConfig().public.sockets?.wsUrl
 
     // sockets

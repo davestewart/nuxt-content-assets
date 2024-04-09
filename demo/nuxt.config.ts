@@ -58,6 +58,6 @@ export default defineNuxtConfig({
 
   // https://image.nuxt.com/get-started/configuration#dir
   image: {
-    dir: './.nuxt/content-assets/public'
+    // dir: './.nuxt/content-assets/public'
   }
 })
