@@ -5,7 +5,7 @@ import type { AssetMessage } from '../../types'
  * Client-side plugin to support asset live-reload
  */
 export default defineNuxtPlugin(async () => {
-  if (process.client) {
+  if (import.meta.client) {
     // sockets url
     const url = useRuntimeConfig().public.sockets?.wsUrl
 
