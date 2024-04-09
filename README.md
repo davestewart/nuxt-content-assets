@@ -363,23 +363,6 @@ npm run release:dry
 
 Make sure to edit changelog and update `package.json` version first!
 
-## Troubleshooting
-
-### Prepare script hangs
-
-As of Nuxt `3.7` it seems there might be issues running prepare scripts for some modules:
-
-- [nuxt/cli / nuxt prepare step hangs](https://github.com/nuxt/cli/issues/169)
-
-If that's the case with you, fix Nuxt at `3.6.5` (if you can) and you should be fine.
-
-Failing that, watch that ticket (or these ones):
-
-- https://github.com/nuxt/cli/issues/185
-- https://github.com/davestewart/nuxt-content-assets/issues/49
-
-I'll update when there is more info.
-
 <!-- Badges -->
 [npm-version-src]: https://img.shields.io/npm/v/nuxt-content-assets/latest.svg?style=flat&colorA=18181B&colorB=28CF8D
 [npm-version-href]: https://npmjs.com/package/nuxt-content-assets

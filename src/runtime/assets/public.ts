@@ -9,7 +9,7 @@ import { isImage, warn, log } from '../utils'
 /**
  * Manages the public assets
  */
-export function makeAssetsManager (publicPath: string) {
+export function makeAssetsManager (publicPath: string, shouldWatch = true) {
 
   // ---------------------------------------------------------------------------------------------------------------------
   // storage - updates asset index, watches for changes from other processes
@@ -20,11 +20,13 @@ export function makeAssetsManager (publicPath: string) {
 
   // storage
   const storage = makeSourceStorage(Path.join(publicPath, '..'))
-  void storage.watch(async (event: string, key: string) => {
-    if (event === 'update' && key === indexKey) {
-      await load()
-    }
-  })
+  if (shouldWatch) {
+    void storage.watch(async (event: string, key: string) => {
+      if (event === 'update' && key === indexKey) {
+        await load()
+      }
+    })
+  }
 
   // assets
   const assets: Record<string, AssetConfig> = {}
@@ -130,6 +132,10 @@ export function makeAssetsManager (publicPath: string) {
     getAsset,
     removeAsset,
     resolveAsset,
+    dispose: async () => {
+      await storage.unwatch()
+      await storage.dispose()
+    }
   }
 }
 
