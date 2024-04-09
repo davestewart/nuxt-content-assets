@@ -1,6 +1,6 @@
 import { CONTINUE, SKIP, visit } from 'unist-util-visit'
-import { ParsedContent } from '../../types'
-import { WalkCallback, walk } from './object'
+import type { ParsedContent } from '../../types'
+import { type WalkCallback, walk } from './object'
 import { matchTokens } from './string'
 
 /**

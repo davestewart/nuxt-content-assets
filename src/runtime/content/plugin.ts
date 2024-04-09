@@ -80,8 +80,10 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
   }
 
 
-  const { resolveAsset, dispose } = makeAssetsManager(publicPath, import.meta.dev)
+const { resolveAsset, dispose } = makeAssetsManager(publicPath, import.meta.dev)
 
+const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
+  // @ts-ignore hook name
   nitro.hooks.hook('content:file:afterParse', function (content: ParsedContent) {
     if (content._extension === 'md') {
       const updated: string[] = []

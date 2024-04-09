@@ -1,8 +1,8 @@
 import Path from 'crosspath'
-import { MountOptions } from '@nuxt/content'
-import githubDriver, { GithubOptions } from 'unstorage/drivers/github'
-import fsDriver, { FSStorageOptions } from 'unstorage/drivers/fs'
-import { createStorage, WatchEvent, Storage } from 'unstorage'
+import { type MountOptions } from '@nuxt/content'
+import githubDriver, { type GithubOptions } from 'unstorage/drivers/github'
+import fsDriver, { type FSStorageOptions } from 'unstorage/drivers/fs'
+import { createStorage, type WatchEvent, type Storage } from 'unstorage'
 import { warn, isAsset, toPath, removeFile, copyFile, writeBlob, writeFile, deKey, isExcluded } from '../utils'
 
 /**

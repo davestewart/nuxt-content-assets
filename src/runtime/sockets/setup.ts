@@ -1,5 +1,5 @@
-import { Callback, SocketInstance } from '../../types'
-import { createWebSocket, Logger } from './factory'
+import type { Callback, SocketInstance } from '../../types'
+import { createWebSocket, type Logger } from './factory'
 
 let client: ReturnType<typeof createWebSocket>
 

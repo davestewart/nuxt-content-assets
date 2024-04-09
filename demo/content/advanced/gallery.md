@@ -3,11 +3,11 @@ recipes:
   -
     title: Italian Bean Stew, Rainbow Chard & Quinoa
     route: /paths/italian-bean-stew
-    image: ../paths/italian-bean-stew/italian-bean-stew.jpg?a=1
+    image: ../paths/same/italian-bean-stew.jpg?a=1
   -
     title: Pesto Salmon & Mediterranean-style lentils
     route: /paths/pesto-salmon-lentils
-    image: ../paths/pesto-salmon-lentils/images/pesto-salmon-lentils.jpg
+    image: ../paths/sub/images/pesto-salmon-lentils.jpg
   -
     title: Sicilian Fish Stew with Lemony Courgette Salad
     route: /paths/sicilian-fish-stew

@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { defineNuxtComponent } from '#app'
+import { defineNuxtComponent } from '#imports'
 
 function link (href: string, text: string) {
   return { href, text }

@@ -56,8 +56,8 @@ export default defineNuxtConfig({
     debug: true,
   },
 
-  // https://v1.image.nuxtjs.org/configuration#dir
+  // https://image.nuxt.com/get-started/configuration#dir
   image: {
-    dir: '.nuxt/content-assets/public'
+    // dir: './.nuxt/content-assets/public'
   }
 })

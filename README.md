@@ -70,7 +70,7 @@ To clone and run the demo locally:
 ```bash
 git clone https://github.com/davestewart/nuxt-content-assets.git
 cd nuxt-content-assets
-npm install
+npm install && npm install --prefix ./demo
 npm run dev
 ```
 
