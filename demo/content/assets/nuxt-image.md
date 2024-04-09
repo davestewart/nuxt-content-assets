@@ -2,7 +2,7 @@
 
 This is single example of using Nuxt Image:
 
-:nuxt-img{src="images/sicilian-fish-stew.jpg" :placeholder="20"}
+:nuxt-img{src="assets/images/sicilian-fish-stew.jpg" :placeholder="20"}
 
 It requires:
 

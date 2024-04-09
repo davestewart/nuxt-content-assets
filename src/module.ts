@@ -1,13 +1,13 @@
 import Fs from 'fs'
 import Path from 'crosspath'
 import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
-import { ModuleMeta, Nuxt } from '@nuxt/schema'
-import { MountOptions } from '@nuxt/content'
 import { isImage, list, log, makeIgnores, matchTokens, removeFolder, toPath } from './runtime/utils'
 import { setupSocketServer } from './build/sockets/setup'
 import { makeSourceManager } from './runtime/assets/source'
 import { makeAssetsManager } from './runtime/assets/public'
 import { rewriteContent } from './runtime/content/parsed'
+import type { ModuleMeta, Nuxt } from '@nuxt/schema'
+import type { MountOptions } from '@nuxt/content'
 import type { ImageSize, ModuleOptions } from './types'
 
 const resolve = createResolver(import.meta.url).resolve
