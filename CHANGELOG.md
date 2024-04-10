@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.3.7
+
+[compare changes](https://github.com/davestewart/nuxt-content-assets/compare/v1.3.4...v1.3.7)
+
+## v1.3.6
+
+[compare changes](https://github.com/davestewart/nuxt-content-assets/compare/v1.3.4...v1.3.6)
+
 ### v1.3.3
 
 - Fix Demo [#44](../../issues/44)
