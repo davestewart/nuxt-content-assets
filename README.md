@@ -318,13 +318,16 @@ In development, file watching propagates asset changes to the public folder, upd
 
 Should you wish to develop the project, the scripts are:
 
-Develop the module itself:
+Develop the module (running a demo which uses the live module code):
 
 ```bash
 # install dependencies
 npm install
 
-# develop (runs using the demo)
+# generate demo type stubs (for the first time)
+npm run dev:prepare
+
+# develop (runs the demo app)
 npm run dev
 
 # run eslint
@@ -335,33 +338,44 @@ npm run test
 npm run test:watch
 ```
 
-Build and check the demo:
+Build and check the demo (simulating users' final build choices):
 
 ```bash
-# generate demo type stubs
-npm run demo:prepare
-
-# generate the demo output
-npm run demo:generate
-
-# serve the demo output
-npm run demo:serve
+# generate the demo
+npm run dev:generate
 
 # build the demo
-npm run demo:build
+npm run dev:build
+
+# serve the built demo
+npm run dev:serve
 ```
 
-Make a new release:
+Make a new release (so users can install the module):
 
 ```bash
-# release new version
-npm run release
-
 # dry run the release
 npm run release:dry
+
+# release new version
+npm run release
 ```
 
-Make sure to edit changelog and update `package.json` version first!
+Make sure to edit changelog and update `package.json` version before releasing!
+
+## Maintenance
+
+This module was created using the Nuxt [Module Builder](https://github.com/nuxt/module-builder) command:
+
+```bash
+npx nuxi init -t module nuxt-content-assets
+```
+
+This created the module code from the starter template found here:
+
+- https://github.com/nuxt/starter/tree/module
+
+Both [Nuxi](https://github.com/nuxt/cli) and the module's dependencies and scripts are updated fairly regularly, so from time to time this module will / does need to be updated to keep in sync. So far, this has meant just updating the dependencies and scripts, which are found in the starter template code mentioned above.
 
 <!-- Badges -->
 [npm-version-src]: https://img.shields.io/npm/v/nuxt-content-assets/latest.svg?style=flat&colorA=18181B&colorB=28CF8D
