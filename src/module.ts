@@ -1,5 +1,5 @@
-import Fs from 'fs'
-import Path from 'crosspath'
+import * as Fs from 'fs'
+import * as Path from 'crosspath'
 import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { isImage, list, log, makeIgnores, matchTokens, removeFolder, toPath } from './runtime/utils'
 import { setupSocketServer } from './build/sockets/setup'
@@ -245,7 +245,7 @@ export default defineNuxtModule<ModuleOptions>({
       config.publicAssets ||= []
       config.publicAssets.push({
         dir: publicPath,
-        // maxAge: 60 * 60 * 24 * 365 // 1 year
+        maxAge: (60 * 60 * 24) * 7 // 7 days
       })
     })
   },

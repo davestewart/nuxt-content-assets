@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.3.7
+
+- Update module builder [#69](../../issues/69)
+
+## v1.3.5
+
+- Close storage drivers when nuxt is closing [#49](../../issues/49)
+
+## v1.3.4
+
+- Opt in to `import.meta.*` properties (#66)
+- Update Nuxt compatibility
+
 ### v1.3.3
 
 - Fix Demo [#44](../../issues/44)
