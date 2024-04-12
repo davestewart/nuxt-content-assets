@@ -18,11 +18,11 @@
     "dist"
   ],
   "scripts": {
-    "dev": "nuxi dev demo",
-    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare demo",
-    "dev:generate": "nuxi generate demo",
-    "dev:build": "nuxi build demo",
-    "dev:serve": "npx serve demo/dist",
+    "dev": "nuxi dev playground",
+    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
+    "dev:generate": "nuxi generate playground",
+    "dev:build": "nuxi build playground",
+    "dev:serve": "npx serve playground/dist",
     "release:dry": "npm run lint && npm run test && nuxt-module-build build && npm publish --dry-run",
     "release": "npm run lint && npm run test && nuxt-module-build build && changelogen --release && npm publish && git push --follow-tags",
     "lint": "eslint .",

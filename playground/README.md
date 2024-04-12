@@ -2,7 +2,7 @@
 
 ## Overview
 
-The demo shows off the module's main features:
+The playground shows off the module's main features:
 
 - various relative path locations
 - local and [external](https://content.nuxtjs.org/api/configuration#sources) content sources
@@ -21,17 +21,17 @@ And, components:
 - example `<ContentGallery>` and `<ContentImage>` components
 - example `<ProseImg />` component
 
-## Running the demo
+## Running the playground
 
-To view the demo locally, run:
+To view the playground locally, run:
 
 ```
 npm run dev
 ```
 
-To view the demo online, visit:
+To view the playground online, visit:
 
-- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=demo%2Fapp.vue
+- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=playground%2Fapp.vue
 
 ## Features
 
@@ -40,4 +40,4 @@ To view the demo online, visit:
 To view an example image [prose component](https://content.nuxtjs.org/api/components/prose/) passing generated attributes:
 
 - move `components/temp/ProseImg.vue` to `components/content`
-- restart the demo
+- restart the playground

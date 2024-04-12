@@ -1,10 +1,10 @@
 ---
-title: Nuxt Content Assets - Demo
+title: Nuxt Content Assets - Playground
 ---
 
 <img src="splash.png" style="margin: -20px 0">
 
-# Demo
+# Playground
 
 Paths:
 

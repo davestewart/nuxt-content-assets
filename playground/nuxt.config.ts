@@ -4,13 +4,13 @@ import type { MountOptions } from '@nuxt/content'
 // @ts-ignore
 const isStackblitz = process.env.GIT_PROXY?.includes('stackblitz')
 
-// no external demo in stackblitz (due to CORS)
+// no external playground in stackblitz (due to CORS)
 const sources: Record<string, MountOptions> = {}
 if (!isStackblitz) {
   sources.ds = {
     driver: 'github',
     repo: 'davestewart/nuxt-content-assets',
-    dir: '/demo/external',
+    dir: '/playground/external',
     prefix: '/external'
   }
 }
