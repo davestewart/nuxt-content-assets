@@ -117,8 +117,6 @@ export default defineNuxtModule<ModuleOptions>({
      */
     const assets = makeAssetsManager(publicPath, nuxt.options.dev)
 
-    nuxt.hooks.hook('close', () => assets.dispose())
-
     /**
      * Callback for when assets change
      *
@@ -201,15 +199,8 @@ export default defineNuxtModule<ModuleOptions>({
       managers[key] = makeSourceManager(key, source, publicPath, onAssetChange)
     }
 
-    nuxt.hook('close', async () => {
-      for (const key in managers) {
-        await managers[key].storage.unwatch()
-        await managers[key].storage.dispose()
-      }
-    })
-
     // ---------------------------------------------------------------------------------------------------------------------
-    // build hook
+    // nuxt hooks
     // ---------------------------------------------------------------------------------------------------------------------
 
     // copy assets to public folder
@@ -225,6 +216,14 @@ export default defineNuxtModule<ModuleOptions>({
         if (options.debug) {
           list(`Copied "${key}" assets`, paths.map(path => Path.relative(publicPath, path)))
         }
+      }
+    })
+
+    // cleanup when nuxt closes
+    nuxt.hook('close', async () => {
+      await assets.dispose()
+      for (const key in managers) {
+        await managers[key].dispose()
       }
     })
 
