@@ -1,7 +1,17 @@
-import * as Fs from 'fs'
-import * as Path from 'crosspath'
+import Fs from 'fs'
+import Path from 'crosspath'
 import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
-import { isImage, list, log, makeIgnores, matchTokens, removeFolder, toPath } from './runtime/utils'
+import {
+  createFolder,
+  isImage,
+  list,
+  log,
+  makeIgnores,
+  matchTokens,
+  removeFolder,
+  toPath,
+  writeFile,
+} from './runtime/utils'
 import { setupSocketServer } from './build/sockets/setup'
 import { makeSourceManager } from './runtime/assets/source'
 import { makeAssetsManager } from './runtime/assets/public'
@@ -29,7 +39,7 @@ export default defineNuxtModule<ModuleOptions>({
     debug: false,
   },
 
-  async setup (options, nuxt: Nuxt) {
+  async setup (options: ModuleOptions, nuxt: Nuxt) {
     // ---------------------------------------------------------------------------------------------------------------------
     // setup
     // ---------------------------------------------------------------------------------------------------------------------
@@ -51,6 +61,10 @@ export default defineNuxtModule<ModuleOptions>({
 
     // clear images from previous run
     removeFolder(assetsPath)
+
+    // set up layer
+    createFolder(`${assetsPath}/public`)
+    writeFile(`${assetsPath}/nuxt.config.ts`, 'export default defineNuxtConfig({})')
 
     // ---------------------------------------------------------------------------------------------------------------------
     // options
