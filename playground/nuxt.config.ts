@@ -4,15 +4,18 @@ import type { MountOptions } from '@nuxt/content'
 // @ts-ignore
 const isStackblitz = process.env.GIT_PROXY?.includes('stackblitz')
 
-// no external demo in stackblitz (due to CORS)
+// external source
+const external = {
+  driver: 'github',
+  repo: 'davestewart/nuxt-content-assets',
+  dir: '/playground/external',
+  prefix: '/external'
+}
+
+// no external playground in stackblitz (due to CORS)
 const sources: Record<string, MountOptions> = {}
 if (!isStackblitz) {
-  sources.ds = {
-    driver: 'github',
-    repo: 'davestewart/nuxt-content-assets',
-    dir: '/demo/external',
-    prefix: '/external'
-  }
+  sources.ds = external
 }
 
 export default defineNuxtConfig({
@@ -29,9 +32,9 @@ export default defineNuxtConfig({
 
   // @ts-ignore
   modules: [
+    '@nuxt/image',
     '../src/module',
     '@nuxt/content',
-    '@nuxt/image',
     '@nuxt/devtools',
   ],
 
@@ -56,8 +59,9 @@ export default defineNuxtConfig({
     debug: true,
   },
 
-  // https://image.nuxt.com/get-started/configuration#dir
-  image: {
-    // dir: './.nuxt/content-assets/public'
-  }
+  // use layers to support nuxt image
+  extends: [
+    // https://github.com/davestewart/nuxt-content-assets/#nuxt-image
+    '.nuxt/content-assets',
+  ],
 })

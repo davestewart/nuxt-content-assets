@@ -8,7 +8,7 @@
 > Enable locally-located assets in Nuxt Content
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/davestewart/nuxt-content-assets/main/demo/content/splash.png" alt="Nuxt Content Assets logo">
+  <img src="https://raw.githubusercontent.com/davestewart/nuxt-content-assets/main/playground/content/splash.png" alt="Nuxt Content Assets logo">
 </p>
 
 ## Overview
@@ -63,26 +63,28 @@ Developer experience:
 - image size injection
 - zero config
 
-## Demo
+## Playground
 
-To clone and run the demo locally:
+To test the module before installing, you can try out the Nuxt Content Assets playground.  
+
+To clone and run locally:
 
 ```bash
 git clone https://github.com/davestewart/nuxt-content-assets.git
 cd nuxt-content-assets
-npm install && npm install --prefix ./demo
+npm install && npm install --prefix ./playground
 npm run dev
 ```
 
-Then open the demo in your browser at <a href="http://localhost:3000" target="_blank">localhost:3000</a>.
+Then open the playground in your browser at <a href="http://localhost:3000" target="_blank">localhost:3000</a>.
 
-To run the demo online, visit:
+To run the playground online, visit:
 
-- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=demo%2Fapp.vue
+- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=playground%2Fapp.vue
 
-To browse the demo folder:
+To browse the playground folder:
 
-- https://github.com/davestewart/nuxt-content-assets/tree/main/demo
+- https://github.com/davestewart/nuxt-content-assets/tree/main/playground
 
 ## Setup
 
@@ -143,7 +145,7 @@ These values can then be passed to components:
 :image-gallery{:data="images"}
 ```
 
-See the Demo for [markup](demo/content/advanced/gallery.md) and [component](demo/components/content/ContentGallery.vue) examples.
+See the playground for [markup](playground/content/advanced/gallery.md) and [component](playground/components/content/ContentGallery.vue) examples.
 
 ### Live reload
 
@@ -171,7 +173,7 @@ Keeping this on prevents content jumps as your page loads.
 
 #### Prose components
 
-If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can [hook into](demo/components/temp/ProseImg.vue) image size hints via the `$attrs` property:
+If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can [hook into](playground/components/temp/ProseImg.vue) image size hints via the `$attrs` property:
 
 ```vue
 <template>
@@ -189,7 +191,7 @@ export default {
 
 #### Frontmatter
 
-If you pass [frontmatter](demo/content/advanced/gallery.md) to [custom components](demo/components/content/ContentImage.vue) set `imageSize` to `'src'` to encode values in `src`:
+If you pass [frontmatter](playground/content/advanced/gallery.md) to [custom components](playground/components/content/ContentImage.vue) set `imageSize` to `'src'` to encode values in `src`:
 
 ```
 :image-content{:src="image"}
@@ -201,24 +203,32 @@ The component will receive the size information as a query string which you can 
 <img class="image-content" src="/image.jpg?width=640&height=480">
 ```
 
-See demo component [here](demo/components/content/ContentImage.vue).
+See playground component [here](playground/components/content/ContentImage.vue).
 
-### Nuxt Image compatibility
+### Nuxt Image
 
-Nuxt Content Assets works with [Nuxt Image](https://image.nuxtjs.org/) with just a little configuration.
-
-First, configure Nuxt Image to use Nuxt Content Asset's public folder:
+Nuxt Content Assets works with [Nuxt Image](https://image.nuxtjs.org/) with just a little configuration:
 
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
-  image: {
-    dir: '.nuxt/content-assets/public'
-  }
+  modules: [
+    // Nuxt Image should be placed before Nuxt Content Assets
+    '@nuxt/image',
+    'nuxt-content-assets',
+    '@nuxt/content',
+  ],
+
+  extends: [
+    // add Nuxt Content Assets build folder as a Nuxt Layer (since v1.4.0)
+    '.nuxt/content-assets',
+  ],
 }
 ```
 
-Then, create a `ProseImg` component like so:
+> Note that the new Layers setup enables Nuxt Image to load images from both the project's `public` folder and from `content`.
+
+To serve all images as Nuxt Image images, create a `ProseImg` component like so:
 
 ```vue
 <!-- components/content/ProseImg.vue -->
@@ -227,9 +237,7 @@ Then, create a `ProseImg` component like so:
 </template>
 ```
 
-Any images rendered by Nuxt Content will now use Nuxt Image.
-
-> For a per-image solution, check the [override](demo/components/content/NuxtImg.ts) in the demo folder.
+See the playground folder for both the [global](playground/components/temp/ProseImg.vue) and a [per image](playground/components/content/NuxtImg.ts) solution.
 
 
 ## Configuration
@@ -264,12 +272,12 @@ You can add one or more image size hints to the generated images:
 
 Pick from the following switches:
 
-| Switch    | What it does                                                 |
-| --------- | ------------------------------------------------------------ |
-| `'style'` | Adds `style="aspect-ratio:..."` to any `<img>` tag           |
-| `'attrs'` | Adds `width` and `height` attributes to any `<img>` tag      |
+| Switch    | What it does                                                       |
+|-----------|--------------------------------------------------------------------|
+| `'style'` | Adds `style="aspect-ratio:..."` to any `<img>` tag                 |
+| `'attrs'` | Adds `width` and `height` attributes to any `<img>` tag            |
 | `'src'`   | Adds `?width=...&height=...` to `src` attribute (frontmatter only) |
-| `false`   | Disable image size hints                                     |
+| `false`   | Disable image size hints                                           |
 
 Note: if you add *only* `attrs`, include the following CSS in your app:
 
@@ -318,16 +326,16 @@ In development, file watching propagates asset changes to the public folder, upd
 
 Should you wish to develop the project, the scripts are:
 
-Develop the module (running a demo which uses the live module code):
+Develop the module (running the playground which uses the live module code):
 
 ```bash
 # install dependencies
 npm install
 
-# generate demo type stubs (for the first time)
+# generate playground type stubs (for the first time)
 npm run dev:prepare
 
-# develop (runs the demo app)
+# develop (runs the playground app)
 npm run dev
 
 # run eslint
@@ -338,17 +346,17 @@ npm run test
 npm run test:watch
 ```
 
-Build and check the demo (simulating users' final build choices):
+Build and check the playground (simulating users' final build choices):
 
 ```bash
-# generate the demo
+# generate the playground
 npm run dev:generate
 
-# build the demo
+# build the playground
 npm run dev:build
 
-# serve the built demo
-npm run dev:serve
+# serve the generated / built playground
+npm run dev:preview
 ```
 
 Make a new release (so users can install the module):
@@ -375,7 +383,7 @@ This created the module code from the starter template found here:
 
 - https://github.com/nuxt/starter/tree/module
 
-Both [Nuxi](https://github.com/nuxt/cli) and the module's dependencies and scripts are updated fairly regularly, so from time to time this module will / does need to be updated to keep in sync. So far, this has meant just updating the dependencies and scripts, which are found in the starter template code mentioned above.
+Both [Nuxi](https://github.com/nuxt/cli) and the module's dependencies and scripts are updated fairly regularly, so from time to time this module may need to be updated to keep in sync. So far, this has meant just updating the dependencies and scripts, which are found in the starter template code mentioned above.
 
 <!-- Badges -->
 [npm-version-src]: https://img.shields.io/npm/v/nuxt-content-assets/latest.svg?style=flat&colorA=18181B&colorB=28CF8D

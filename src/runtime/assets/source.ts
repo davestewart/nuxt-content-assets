@@ -47,6 +47,7 @@ export interface SourceManager {
   storage: Storage,
   init: () => Promise<string[]>
   keys: () => Promise<string[]>
+  dispose: () => Promise<void>
 }
 
 /**
@@ -168,12 +169,19 @@ export function makeSourceManager (key: string, source: MountOptions, publicPath
 
   // storage
   const storage = makeSourceStorage(source, key)
-  storage.watch(onWatch)
+  void storage.watch(onWatch)
+
+  // cleanup
+  async function dispose () {
+    await storage.unwatch()
+    await storage.dispose()
+  }
 
   // return
   return {
     storage,
     init,
     keys: getKeys,
+    dispose,
   }
 }

@@ -1,7 +1,17 @@
-import * as Fs from 'fs'
-import * as Path from 'crosspath'
-import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
-import { isImage, list, log, makeIgnores, matchTokens, removeFolder, toPath } from './runtime/utils'
+import Fs from 'fs'
+import Path from 'crosspath'
+import { addPlugin, createResolver, defineNuxtModule, useNuxt } from '@nuxt/kit'
+import {
+  createFolder,
+  isImage,
+  list,
+  log,
+  makeIgnores,
+  matchTokens,
+  removeFolder,
+  toPath,
+  writeFile,
+} from './runtime/utils'
 import { setupSocketServer } from './build/sockets/setup'
 import { makeSourceManager } from './runtime/assets/source'
 import { makeAssetsManager } from './runtime/assets/public'
@@ -29,7 +39,7 @@ export default defineNuxtModule<ModuleOptions>({
     debug: false,
   },
 
-  async setup (options, nuxt: Nuxt) {
+  async setup (options: ModuleOptions, nuxt: Nuxt) {
     // ---------------------------------------------------------------------------------------------------------------------
     // setup
     // ---------------------------------------------------------------------------------------------------------------------
@@ -42,8 +52,12 @@ export default defineNuxtModule<ModuleOptions>({
     // cached content
     const contentPath = Path.join(buildPath, 'content-cache/parsed')
 
+    // options
+    const isDev = !!nuxt.options.dev
+    const isDebug = !!options.debug
+
     // clear caches
-    if (options.debug) {
+    if (isDebug) {
       log('Removing cache folders...')
     }
     // clear cached markdown so image paths get updated
@@ -51,6 +65,10 @@ export default defineNuxtModule<ModuleOptions>({
 
     // clear images from previous run
     removeFolder(assetsPath)
+
+    // setup layers
+    createFolder(`${assetsPath}/public`)
+    writeFile(`${assetsPath}/nuxt.config.ts`, 'export default {}')
 
     // ---------------------------------------------------------------------------------------------------------------------
     // options
@@ -101,9 +119,7 @@ export default defineNuxtModule<ModuleOptions>({
     /**
      * Assets manager
      */
-    const assets = makeAssetsManager(publicPath, nuxt.options.dev)
-
-    nuxt.hooks.hook('close', () => assets.dispose())
+    const assets = makeAssetsManager(publicPath, isDev)
 
     /**
      * Callback for when assets change
@@ -167,7 +183,7 @@ export default defineNuxtModule<ModuleOptions>({
      * Socket to communicate changes to client
      */
     addPlugin(resolve('./runtime/sockets/plugin'))
-    const socket = nuxt.options.dev
+    const socket = isDev
       ? await setupSocketServer('content-assets')
       : null
 
@@ -179,7 +195,7 @@ export default defineNuxtModule<ModuleOptions>({
     const managers: Record<string, ReturnType<typeof makeSourceManager>> = {}
     for (const [key, source] of Object.entries(sources)) {
       // debug
-      if (options.debug) {
+      if (isDebug) {
         log(`Creating source "${key}"`)
       }
 
@@ -187,15 +203,8 @@ export default defineNuxtModule<ModuleOptions>({
       managers[key] = makeSourceManager(key, source, publicPath, onAssetChange)
     }
 
-    nuxt.hook('close', async () => {
-      for (const key in managers) {
-        await managers[key].storage.unwatch()
-        await managers[key].storage.dispose()
-      }
-    })
-
     // ---------------------------------------------------------------------------------------------------------------------
-    // build hook
+    // nuxt hooks
     // ---------------------------------------------------------------------------------------------------------------------
 
     // copy assets to public folder
@@ -208,9 +217,17 @@ export default defineNuxtModule<ModuleOptions>({
         paths.forEach(path => assets.setAsset(path))
 
         // debug
-        if (options.debug) {
+        if (isDebug) {
           list(`Copied "${key}" assets`, paths.map(path => Path.relative(publicPath, path)))
         }
+      }
+    })
+
+    // cleanup when nuxt closes
+    nuxt.hook('close', async () => {
+      await assets.dispose()
+      for (const key in managers) {
+        await managers[key].dispose()
       }
     })
 
@@ -226,7 +243,7 @@ export default defineNuxtModule<ModuleOptions>({
     const virtualConfig = [
       makeVar('publicPath', publicPath),
       makeVar('imageSizes', imageSizes),
-      makeVar('debug', options.debug),
+      makeVar('debug', isDebug),
     ].join('\n')
 
     // setup server plugin

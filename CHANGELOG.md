@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.0
+
+- Update Nuxt Image support to support multiple folders
+
 ## v1.3.7
 
 - Update module builder [#69](../../issues/69)

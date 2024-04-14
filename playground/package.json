@@ -1,0 +1,8 @@
+{
+  "name": "nuxt-content-assets-playground",
+  "description": "Nuxt Content Assets Playground",
+  "devDependencies": {
+    "@nuxt/devtools": "^1.1.5",
+    "@nuxt/image": "^1.5.0"
+  }
+}
