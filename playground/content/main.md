@@ -2,7 +2,7 @@
 title: Nuxt Content Assets - Playground
 ---
 
-<img src="splash.png" style="margin: -20px 0">
+:nuxt-img{ src="/splash.png" width="600" }
 
 # Playground
 
@@ -21,7 +21,7 @@ Assets:
 Advanced:
 
 - [Image `src` from `frontmatter` variable](advanced/frontmatter)
-- [Custom gallery component using `frontmatter` data](advanced/gallery) 
+- [Custom gallery component using `frontmatter` data](advanced/gallery)
 - [Custom image component](advanced/component)
 
 Sources:

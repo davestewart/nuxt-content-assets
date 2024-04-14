@@ -3,7 +3,6 @@
   "description": "Nuxt Content Assets Playground",
   "devDependencies": {
     "@nuxt/devtools": "^1.1.5",
-    "@nuxt/image": "^1.0.0",
-    "sharp": "^0.33.3"
+    "@nuxt/image": "^1.5.0"
   }
 }

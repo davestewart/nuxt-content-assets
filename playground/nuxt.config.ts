@@ -56,8 +56,9 @@ export default defineNuxtConfig({
     debug: true,
   },
 
-  // https://image.nuxt.com/get-started/configuration#dir
-  image: {
-    // dir: './.nuxt/content-assets/public'
-  }
+  // https://github.com/davestewart/nuxt-content-assets/#nuxt-image
+  extends: [
+    // enable nuxt image to process images
+    '.nuxt/content-assets',
+  ],
 })
