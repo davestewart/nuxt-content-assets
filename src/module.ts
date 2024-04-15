@@ -183,7 +183,7 @@ export default defineNuxtModule<ModuleOptions>({
      * Socket to communicate changes to client
      */
     addPlugin(resolve('./runtime/sockets/plugin'))
-    const socket = isDev
+    const socket = isDev && nuxt.options.content?.watch !== false
       ? await setupSocketServer('content-assets')
       : null
 
