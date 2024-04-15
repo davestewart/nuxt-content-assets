@@ -1,6 +1,6 @@
 {
   "name": "nuxt-content-assets",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Enable locally-located assets in Nuxt Content",
   "repository": "davestewart/nuxt-content-assets",
   "license": "MIT",
@@ -23,8 +23,8 @@
     "dev:generate": "nuxi generate playground",
     "dev:build": "nuxi build playground",
     "dev:preview": "nuxi preview playground",
+    "release": "npm run lint && npm run test && nuxt-module-build build && npm publish",
     "release:dry": "npm run lint && npm run test && nuxt-module-build build && npm publish --dry-run",
-    "release": "npm run lint && npm run test && nuxt-module-build build && changelogen --release && npm publish && git push --follow-tags",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest watch"

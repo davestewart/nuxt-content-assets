@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.1
+
+- Skip sockets setup if content watch is disabled [#72](../../issues/72)
+
 ## v1.4.0
 
 - Update Nuxt Image support to support multiple folders
