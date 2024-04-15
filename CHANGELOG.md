@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.2
+
+- Fix splash image
+
 ## v1.4.1
 
 - Skip sockets setup if content watch is disabled [#72](../../issues/72)
