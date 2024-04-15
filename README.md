@@ -8,7 +8,7 @@
 > Enable locally-located assets in Nuxt Content
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/davestewart/nuxt-content-assets/main/playground/content/splash.png" alt="Nuxt Content Assets logo">
+  <img src="https://raw.githubusercontent.com/davestewart/nuxt-content-assets/main/playground/public/splash.png" alt="Nuxt Content Assets logo">
 </p>
 
 ## Overview
