@@ -23,10 +23,6 @@ Advanced:
 - [Custom gallery component using `frontmatter` data](advanced/gallery) 
 - [Custom image component](advanced/component)
 
-Sources:
-
-- [Content from GitHub](external) (disabled in StackBlitz)
-
 Internal:
 
 - [Path replacement skips invalid elements](internal/traversal)
