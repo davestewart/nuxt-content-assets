@@ -2,9 +2,7 @@
   <div class="gallery">
     <div class="columns is-multiline">
       <div v-for="item in data" :key="item.src" class="column is-half">
-        <NuxtLink :to="item.route">
-          <ContentImage :image="item.image" :title="item.title" />
-        </NuxtLink>
+        <nuxt-img :src="item.image" :title="item.title" />
         <p>{{ item.title }}</p>
       </div>
     </div>

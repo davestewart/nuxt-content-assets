@@ -2,19 +2,15 @@
 recipes:
   -
     title: Italian Bean Stew, Rainbow Chard & Quinoa
-    route: /paths/italian-bean-stew
     image: ../paths/same/italian-bean-stew.jpg?a=1
   -
     title: Pesto Salmon & Mediterranean-style lentils
-    route: /paths/pesto-salmon-lentils
     image: ../paths/sub/images/pesto-salmon-lentils.jpg
   -
     title: Sicilian Fish Stew with Lemony Courgette Salad
-    route: /paths/sicilian-fish-stew
     image: ../assets/images/sicilian-fish-stew.jpg
   -
     title: Creamy Turkey & Tomato Pesto Casserole
-    route: /advanced/frontmatter
     image: frontmatter/turkey-casserole.jpg
 ---
 
