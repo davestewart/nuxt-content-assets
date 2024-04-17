@@ -1,17 +1,7 @@
-import Fs from 'fs'
+import * as Fs from 'fs'
 import Path from 'crosspath'
-import { addPlugin, createResolver, defineNuxtModule, useNuxt } from '@nuxt/kit'
-import {
-  createFolder,
-  isImage,
-  list,
-  log,
-  makeIgnores,
-  matchTokens,
-  removeFolder,
-  toPath,
-  writeFile,
-} from './runtime/utils'
+import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { isImage, list, log, warn, makeIgnores, matchTokens, removeEntry, toPath } from './runtime/utils'
 import { setupSocketServer } from './build/sockets/setup'
 import { makeSourceManager } from './runtime/assets/source'
 import { makeAssetsManager } from './runtime/assets/public'
@@ -26,31 +16,50 @@ const meta: ModuleMeta = {
   name: 'nuxt-content-assets',
   configKey: 'contentAssets',
   compatibility: {
-    nuxt: '^3.0.0'
-  }
+    nuxt: '^3.0.0',
+  },
 }
 
 export default defineNuxtModule<ModuleOptions>({
   meta,
 
   defaults: {
-    imageSize: 'style',
+    imageSize: '',
     contentExtensions: 'md csv ya?ml json',
     debug: false,
   },
 
   async setup (options: ModuleOptions, nuxt: Nuxt) {
     // ---------------------------------------------------------------------------------------------------------------------
-    // setup
+    // paths
     // ---------------------------------------------------------------------------------------------------------------------
 
-    // build folders
+    // nuxt build folder (.nuxt)
     const buildPath = nuxt.options.buildDir
-    const assetsPath = Path.join(buildPath, 'content-assets')
+
+    // node modules folder (note: from v1.4.1 the assets cache moves from .nuxt/... to node_modules/... @see #76)
+    const modulesPath = nuxt.options.modulesDir.find((path: string) => Fs.existsSync(`${path}/nuxt-content-assets/cache`)) || ''
+    if (!modulesPath) {
+      warn('Unable to find cache folder!')
+      if (nuxt.options.srcDir.endsWith('/playground')) {
+        warn('Make sure to execute "npm run dev:prepare" to generate a new cache folder')
+      }
+    }
+
+    // assets folder (node_modules/nuxt-content-assets/cache)
+    const assetsPath = modulesPath
+      ? Path.resolve(modulesPath, 'nuxt-content-assets/cache')
+      : Path.resolve(buildPath, 'content-assets')
+
+    // public folder (node_modules/nuxt-content-assets/cache/public)
     const publicPath = Path.join(assetsPath, 'public')
 
-    // cached content
-    const contentPath = Path.join(buildPath, 'content-cache/parsed')
+    // content cache (.nuxt/content-cache)
+    const contentPath = Path.join(buildPath, 'content-cache')
+
+    // ---------------------------------------------------------------------------------------------------------------------
+    // setup
+    // ---------------------------------------------------------------------------------------------------------------------
 
     // options
     const isDev = !!nuxt.options.dev
@@ -61,14 +70,7 @@ export default defineNuxtModule<ModuleOptions>({
       log('Removing cache folders...')
     }
     // clear cached markdown so image paths get updated
-    removeFolder(Path.join(buildPath, 'content-cache'))
-
-    // clear images from previous run
-    removeFolder(assetsPath)
-
-    // setup layers
-    createFolder(`${assetsPath}/public`)
-    writeFile(`${assetsPath}/nuxt.config.ts`, 'export default {}')
+    removeEntry(contentPath)
 
     // ---------------------------------------------------------------------------------------------------------------------
     // options
@@ -91,12 +93,12 @@ export default defineNuxtModule<ModuleOptions>({
 
     // collate sources
     type Sources = Record<string, MountOptions>
-    const sources: Sources = Array.from(nuxt.options._layers)
-      // @ts-ignore
+    const sources: Sources = <Sources>Array
+      .from(nuxt.options._layers)
       .map(layer => layer.config?.content?.sources)
       .reduce((output: Sources, sources) => {
-        if (sources) {
-          Object.assign(output, sources)
+        if (sources && !Array.isArray(sources)) {
+          Object.assign(output, <Sources>sources)
         }
         return output
       }, {})
@@ -107,7 +109,7 @@ export default defineNuxtModule<ModuleOptions>({
       if (Fs.existsSync(content)) {
         sources.content = {
           driver: 'fs',
-          base: content
+          base: content,
         }
       }
     }
@@ -120,6 +122,9 @@ export default defineNuxtModule<ModuleOptions>({
      * Assets manager
      */
     const assets = makeAssetsManager(publicPath, isDev)
+
+    // clear files from previous run
+    assets.init()
 
     /**
      * Callback for when assets change
@@ -155,7 +160,7 @@ export default defineNuxtModule<ModuleOptions>({
           // we rewrite cached content directly so image size changes are permanent
           if (oldAsset.width !== newAsset.width || oldAsset.height !== newAsset.height) {
             newAsset.content.forEach(async (id: string) => {
-              const path = Path.join(contentPath, toPath(id))
+              const path = Path.join(contentPath, 'parsed', toPath(id))
               rewriteContent(path, newAsset)
             })
           }
@@ -262,7 +267,7 @@ export default defineNuxtModule<ModuleOptions>({
       config.publicAssets ||= []
       config.publicAssets.push({
         dir: publicPath,
-        maxAge: (60 * 60 * 24) * 7 // 7 days
+        maxAge: (60 * 60 * 24) * 7, // 7 days
       })
     })
   },
