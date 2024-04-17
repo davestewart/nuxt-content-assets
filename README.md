@@ -155,11 +155,14 @@ If you delete an asset, it will be greyed out in the browser until you replace t
 
 If you edit an image, video, embed or iframe source, the content will update immediately, which is useful if you're looking to get that design just right!
 
+> [!NOTE]
+> Live reload does not currently work with Nuxt Image (see Issue #77) so you might consider disabling Nuxt Image in development.
+
 ### Image sizing
 
 #### HTML
 
-The module is [preconfigured](#image-size) to pass image size hints (by default `style`) to generated `<img>` tags:
+The module can pass image size hints to generated `<img>` tags:
 
 ```html
 <!-- imageSize: 'style' -->
@@ -169,7 +172,10 @@ The module is [preconfigured](#image-size) to pass image size hints (by default 
 <img src="/image.jpg" width="640" height="480">
 ```
 
-Keeping this on prevents content jumps as your page loads.
+Turning this on prevents content jumps as your page loads.
+
+> [!CAUTION]
+> Don't use `imageSize: 'src'` in conjunction with Nuxt Image, as it can break the IPX provider and by extension, static site generation 
 
 #### Prose components
 
@@ -207,26 +213,16 @@ See playground component [here](playground/components/content/ContentImage.vue).
 
 ### Nuxt Image
 
-Nuxt Content Assets works with [Nuxt Image](https://image.nuxtjs.org/) with just a little configuration:
+[Nuxt Image](https://image.nuxtjs.org/) is supported by adding Nuxt Content Asset's cache folder as a Nuxt Layer:
 
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
-  modules: [
-    // Nuxt Image should be placed before Nuxt Content Assets
-    '@nuxt/image',
-    'nuxt-content-assets',
-    '@nuxt/content',
-  ],
-
   extends: [
-    // add Nuxt Content Assets build folder as a Nuxt Layer (since v1.4.0)
-    '.nuxt/content-assets',
+    'node_modules/nuxt-content-assets/cache',
   ],
 }
 ```
-
-> Note that the new Layers setup enables Nuxt Image to load images from both the project's `public` folder and from `content`.
 
 To serve all images as Nuxt Image images, create a `ProseImg` component like so:
 
@@ -239,7 +235,6 @@ To serve all images as Nuxt Image images, create a `ProseImg` component like so:
 
 See the playground folder for both the [global](playground/components/temp/ProseImg.vue) and a [per image](playground/components/content/NuxtImg.ts) solution.
 
-
 ## Configuration
 
 The module has the following options:
@@ -248,7 +243,7 @@ The module has the following options:
 // nuxt.config.ts
 export default defineNuxtConfig({
   contentAssets: {    
-    // inject image sizes into the rendered html
+    // inject image size hints into the rendered html
     imageSize: 'style',
     
     // treat these extensions as content
@@ -262,7 +257,7 @@ export default defineNuxtConfig({
 
 ### Image size
 
-You can add one or more image size hints to the generated images:
+You can add one _or more_ image size hints to the generated images:
 
 ```ts
 {
@@ -277,7 +272,6 @@ Pick from the following switches:
 | `'style'` | Adds `style="aspect-ratio:..."` to any `<img>` tag                 |
 | `'attrs'` | Adds `width` and `height` attributes to any `<img>` tag            |
 | `'src'`   | Adds `?width=...&height=...` to `src` attribute (frontmatter only) |
-| `false`   | Disable image size hints                                           |
 
 Note: if you add *only* `attrs`, include the following CSS in your app:
 
@@ -288,8 +282,14 @@ img {
 }
 ```
 
+> [!Note]
+> 
+> Since `v1.4.1` image size hints are now opt-in. This was done to maximise compatibiility with Nuxt Image.  
+
 ### Content extensions
 
+> [!TIP]
+>
 > Generally, you shouldn't need to touch this setting
 
 This setting tells Nuxt Content to ignore anything that is **not** one of these file extensions:
@@ -332,7 +332,7 @@ Develop the module (running the playground which uses the live module code):
 # install dependencies
 npm install
 
-# generate playground type stubs (for the first time)
+# generate playground cache folder and types (for the first time)
 npm run dev:prepare
 
 # develop (runs the playground app)
