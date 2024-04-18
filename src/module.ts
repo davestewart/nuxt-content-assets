@@ -42,7 +42,7 @@ export default defineNuxtModule<ModuleOptions>({
     if (!modulesPath) {
       warn('Unable to find cache folder!')
       if (nuxt.options.srcDir.endsWith('/playground')) {
-        warn('Make sure to execute "npm run dev:prepare" to generate a new cache folder')
+        warn('Run "npm run dev:setup" to generate a new cache folder')
       }
     }
 
@@ -67,7 +67,7 @@ export default defineNuxtModule<ModuleOptions>({
 
     // clear caches
     if (isDebug) {
-      log('Removing cache folders...')
+      log('Cleaning content-cache')
     }
     // clear cached markdown so image paths get updated
     removeEntry(contentPath)

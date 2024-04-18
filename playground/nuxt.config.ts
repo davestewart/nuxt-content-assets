@@ -32,9 +32,9 @@ export default defineNuxtConfig({
 
   // @ts-ignore
   modules: [
-    '@nuxt/image',
     '../src/module',
     '@nuxt/content',
+    '@nuxt/image',
     '@nuxt/devtools',
   ],
 

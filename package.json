@@ -19,14 +19,19 @@
     "dist"
   ],
   "scripts": {
+    "dev:setup": "cpy cache playground/node_modules/nuxt-content-assets && cpy \"cache/**\" playground/.nuxt/content-assets",
+    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare",
+
     "dev": "nuxi dev playground",
-    "dev:prepare": "npm run setup --prefix playground && nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
-    "dev:prepare-playground": "npm run setup --prefix playground && nuxi prepare playground",
     "dev:generate": "nuxi generate playground",
     "dev:build": "nuxi build playground",
     "dev:preview": "nuxi preview playground",
-    "release": "npm run lint && npm run test && nuxt-module-build build && npm publish",
-    "release:dry": "npm run lint && npm run test && nuxt-module-build build && npm publish --dry-run",
+
+    "build": "nuxt-module-build build",
+    "release:setup": "npm run lint && npm run test && npm run build",
+    "release:dry": "npm run release:setup && npm publish --dry-run",
+    "release": "npm run release:setup && npm publish",
+
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest watch"
@@ -55,6 +60,7 @@
     "@types/node": "^20.12.4",
     "@types/ws": "^8.5.10",
     "changelogen": "^0.5.5",
+    "cpy-cli": "^5.0.0",
     "eslint": "^8.57.0",
     "nuxt": "^3.11.2",
     "vitest": "^1.4.0"

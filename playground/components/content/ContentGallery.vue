@@ -2,7 +2,7 @@
   <div class="gallery">
     <div class="columns is-multiline">
       <div v-for="item in data" :key="item.src" class="column is-half">
-        <nuxt-img :src="item.image" :title="item.title" />
+        <ContentImage :src="item.image" :title="item.title" />
         <p>{{ item.title }}</p>
       </div>
     </div>

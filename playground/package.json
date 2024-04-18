@@ -1,15 +1,11 @@
 {
   "name": "nuxt-content-assets-playground",
   "description": "Nuxt Content Assets Playground",
-  "scripts": {
-    "setup": "cpy ../cache ./node_modules/nuxt-content-assets && cpy \"../cache/**\" ./.nuxt/content-assets"
+  "dependencies": {
+    "nuxt-content-assets": "^1.4.2"
   },
   "devDependencies": {
     "@nuxt/devtools": "^1.1.5",
-    "@nuxt/image": "^1.5.0",
-    "cpy-cli": "^5.0.0"
-  },
-  "dependencies": {
-    "nuxt-content-assets": "file:.."
+    "@nuxt/image": "^1.5.0"
   }
 }
