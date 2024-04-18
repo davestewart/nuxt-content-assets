@@ -344,7 +344,7 @@ npm install
 # copy the cache folder to the playground's node_modules (workaround required in development)
 npm run dev:setup
 
-# generate types for the module and playground
+# generate types for the module and playground (re-run if you install new packages)
 npm run dev:prepare
 ```
 

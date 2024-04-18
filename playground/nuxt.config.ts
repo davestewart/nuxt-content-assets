@@ -32,6 +32,7 @@ export default defineNuxtConfig({
 
   // @ts-ignore
   modules: [
+    // 'nuxt-content-assets',
     '../src/module',
     '@nuxt/content',
     '@nuxt/image',

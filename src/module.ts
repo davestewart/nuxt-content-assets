@@ -6,7 +6,7 @@ import { setupSocketServer } from './build/sockets/setup'
 import { makeSourceManager } from './runtime/assets/source'
 import { makeAssetsManager } from './runtime/assets/public'
 import { rewriteContent } from './runtime/content/parsed'
-import type { ModuleMeta, Nuxt } from '@nuxt/schema'
+import type { ModuleMeta, Nuxt, NuxtConfigLayer } from '@nuxt/schema'
 import type { MountOptions } from '@nuxt/content'
 import type { ImageSize, ModuleOptions } from './types'
 
@@ -37,7 +37,7 @@ export default defineNuxtModule<ModuleOptions>({
     // nuxt build folder (.nuxt)
     const buildPath = nuxt.options.buildDir
 
-    // node modules folder (note: from v1.4.1 the assets cache moves from .nuxt/... to node_modules/... @see #76)
+    // node modules folder (note: from v1.4.1 the assets cache moved from .nuxt/... to node_modules/... @see #76)
     const modulesPath = nuxt.options.modulesDir.find((path: string) => Fs.existsSync(`${path}/nuxt-content-assets/cache`)) || ''
     if (!modulesPath) {
       warn('Unable to find cache folder!')
@@ -46,13 +46,13 @@ export default defineNuxtModule<ModuleOptions>({
       }
     }
 
-    // assets folder (node_modules/nuxt-content-assets/cache)
-    const assetsPath = modulesPath
+    // assets cache (node_modules/nuxt-content-assets/cache)
+    const cachePath = modulesPath
       ? Path.resolve(modulesPath, 'nuxt-content-assets/cache')
-      : Path.resolve(buildPath, 'content-assets')
+      : Path.resolve(buildPath, 'content-assets') // TODO check if fallback even works?
 
     // public folder (node_modules/nuxt-content-assets/cache/public)
-    const publicPath = Path.join(assetsPath, 'public')
+    const publicPath = Path.join(cachePath, 'public')
 
     // content cache (.nuxt/content-cache)
     const contentPath = Path.join(buildPath, 'content-cache')
@@ -68,7 +68,9 @@ export default defineNuxtModule<ModuleOptions>({
     // clear caches
     if (isDebug) {
       log('Cleaning content-cache')
+      log(`Cache path: "${Path.relative(".", cachePath)}"`)
     }
+
     // clear cached markdown so image paths get updated
     removeEntry(contentPath)
 
@@ -93,9 +95,9 @@ export default defineNuxtModule<ModuleOptions>({
 
     // collate sources
     type Sources = Record<string, MountOptions>
-    const sources: Sources = <Sources>Array
+    const sources: Sources = Array
       .from(nuxt.options._layers)
-      .map(layer => layer.config?.content?.sources)
+      .map((layer: NuxtConfigLayer) => layer.config?.content?.sources)
       .reduce((output: Sources, sources) => {
         if (sources && !Array.isArray(sources)) {
           Object.assign(output, <Sources>sources)
