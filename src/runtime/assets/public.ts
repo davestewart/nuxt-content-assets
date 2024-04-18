@@ -18,9 +18,10 @@ export function makeAssetsManager (publicPath: string, shouldWatch = true) {
 
   // variables
   const assetsKey: string = 'assets.json'
+  const assetsPath = Path.join(publicPath, '..')
 
   // storage
-  const storage = makeSourceStorage(Path.join(publicPath, '..'))
+  const storage = makeSourceStorage(assetsPath)
   if (shouldWatch) {
     void storage.watch(async (event: string, key: string) => {
       if (event === 'update' && key === assetsKey) {
