@@ -321,11 +321,9 @@ If they do, then the attribute or property in Nuxt Content's cache is rewritten 
 
 Finally, Nitro serves the site, and any requests made to the transformed asset paths should be picked up and the *copied* asset served by the browser.
 
-In development, file watching propagates asset changes the cache layer's `public` folder, updates related cached content, and notifies the browser via web sockets to refresh any loaded images. 
+In development, a watch process propagates asset changes to the cache, updates the asset index, and notifies the browser via web sockets to refresh any loaded images. 
 
-If Nuxt Image is used, the images are served by the `_ipx/` endpoint directly from the same folder.
-
-At build time, Nitro interleaves the final pages and the copied assets into the final site structure.
+If Nuxt Image is used, the `_ipx/` endpoint serves images directly from the cache's public folder.
 
 ## Development
 
@@ -334,6 +332,8 @@ Should you wish to develop the project, you'll work with the following entities:
 - [src](./src)<br>The module code itself
 - [playground](./playground)<br>A standalone Nuxt app that reads the live module code
 - [scripts](package.json)<br>A set of scripts to develop and publish the module
+
+### Setup
 
 To set up the project, run each of these scripts once:
 
@@ -347,6 +347,8 @@ npm run dev:setup
 # generate types for the module and playground (re-run if you install new packages)
 npm run dev:prepare
 ```
+
+### Development
 
 To develop the module, utilise the supplied playground app:
 
@@ -364,26 +366,6 @@ npm run dev:build
 npm run dev:preview
 ```
 
-To build and publish, run following scripts as required:
-
-```bash
-# build the module
-npm run build
-
-# lint, test and build the module
-npm run release:setup
-
-# lint, test, build, and dry-run publish
-npm run release:dry
-
-# lint, test, build and publish
-npm run release
-```
-
-> [!IMPORTANT]
-> Before publishing, be sure to update the [version](package.json) and [changelog](CHANGELOG.md)!
-
-
 Check your code quality using these tools:
 
 ```bash
@@ -393,6 +375,21 @@ npm run lint
 # runs tests with vitest
 npm run test
 npm run test:watch
+```
+
+### Publishing
+
+> [!IMPORTANT]
+> Before publishing, be sure to update the [version](package.json) and [changelog](CHANGELOG.md)!
+
+To build and publish, run following scripts as required:
+
+```bash
+# lint, test, build, and dry-run publish
+npm run release:dry
+
+# lint, test, build and publish
+npm run release
 ```
 
 ## Maintenance
