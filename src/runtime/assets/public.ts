@@ -1,10 +1,11 @@
+import * as Fs from 'fs'
 import Path from 'crosspath'
 import getImageSize from 'image-size'
 import debounce from 'debounce'
 import { hash } from 'ohash'
 import type { ParsedContent, AssetConfig } from '../../types'
 import { makeSourceStorage } from './source'
-import { isImage, warn, log } from '../utils'
+import { isImage, warn, log, removeEntry } from '../utils'
 
 /**
  * Manages the public assets
@@ -12,17 +13,18 @@ import { isImage, warn, log } from '../utils'
 export function makeAssetsManager (publicPath: string, shouldWatch = true) {
 
   // ---------------------------------------------------------------------------------------------------------------------
-  // storage - updates asset index, watches for changes from other processes
+  // storage - updates asset index file, watches for changes from other processes
   // ---------------------------------------------------------------------------------------------------------------------
 
   // variables
-  const indexKey = 'assets.json'
+  const assetsKey: string = 'assets.json'
+  const assetsPath = Path.join(publicPath, '..')
 
   // storage
-  const storage = makeSourceStorage(Path.join(publicPath, '..'))
+  const storage = makeSourceStorage(assetsPath)
   if (shouldWatch) {
     void storage.watch(async (event: string, key: string) => {
-      if (event === 'update' && key === indexKey) {
+      if (event === 'update' && key === assetsKey) {
         await load()
       }
     })
@@ -31,14 +33,14 @@ export function makeAssetsManager (publicPath: string, shouldWatch = true) {
   // assets
   const assets: Record<string, AssetConfig> = {}
   async function load () {
-    const data = await storage.getItem(indexKey)
+    const data = await storage.getItem(assetsKey)
     // console.log('load:', data)
     Object.assign(assets, data || {})
   }
 
   const save = debounce(function () {
     // console.log('save:', assets)
-    void storage.setItem(indexKey, assets)
+    void storage.setItem(assetsKey, assets)
   }, 50)
 
   // ---------------------------------------------------------------------------------------------------------------------
@@ -52,7 +54,7 @@ export function makeAssetsManager (publicPath: string, shouldWatch = true) {
    * @param relAsset
    * @param registerContent
    */
-  function resolveAsset (content: ParsedContent, relAsset: string, registerContent = false) {
+  function resolveAsset (content: ParsedContent, relAsset: string, registerContent = false): Partial<AssetConfig> {
     const srcDir = Path.dirname(content._file)
     const srcAsset = Path.join(srcDir, relAsset)
     const asset = assets[srcAsset]
@@ -123,11 +125,26 @@ export function makeAssetsManager (publicPath: string, shouldWatch = true) {
     return asset
   }
 
+  /**
+   * Remove public asset files
+   */
+  const init = () => {
+    if (Fs.existsSync(publicPath)) {
+      const names = Fs.readdirSync(publicPath)
+      for (const name of names) {
+        if (!/^\.git(ignore|keep)$/.test(name)) {
+          removeEntry(Path.join(publicPath, name))
+        }
+      }
+    }
+  }
+
   // start
   void load()
 
   // return
   return {
+    init,
     setAsset,
     getAsset,
     removeAsset,

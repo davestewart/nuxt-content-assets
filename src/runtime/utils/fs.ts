@@ -41,3 +41,18 @@ export function removeFolder (path: string) {
     Fs.rmSync(path, { recursive: true, force: true })
   }
 }
+
+export function removeEntry (path: string) {
+  if (Fs.existsSync(path)) {
+    if (isFile(path)) {
+      removeFile(path)
+    }
+    else {
+      removeFolder(path)
+    }
+  }
+}
+
+export function isFile (path: string) {
+  return Fs.lstatSync(path).isFile()
+}

@@ -155,11 +155,16 @@ If you delete an asset, it will be greyed out in the browser until you replace t
 
 If you edit an image, video, embed or iframe source, the content will update immediately, which is useful if you're looking to get that design just right!
 
+> [!NOTE]
+> Live reload does not currently work with Nuxt Image (see Issue [#77](https://github.com/davestewart/nuxt-content-assets/issues/77)).
+> 
+> If you need to iterate on image design, consider disabling Nuxt Image in development.
+
 ### Image sizing
 
 #### HTML
 
-The module is [preconfigured](#image-size) to pass image size hints (by default `style`) to generated `<img>` tags:
+The module can pass image size hints to generated `<img>` tags:
 
 ```html
 <!-- imageSize: 'style' -->
@@ -169,7 +174,10 @@ The module is [preconfigured](#image-size) to pass image size hints (by default 
 <img src="/image.jpg" width="640" height="480">
 ```
 
-Keeping this on prevents content jumps as your page loads.
+Turning this on prevents content jumps as your page loads.
+
+> [!CAUTION]
+> Don't use `imageSize: 'src'` in conjunction with Nuxt Image as it prevents the IPX module from correctly serving images, which causes static site generation to fail 
 
 #### Prose components
 
@@ -207,26 +215,16 @@ See playground component [here](playground/components/content/ContentImage.vue).
 
 ### Nuxt Image
 
-Nuxt Content Assets works with [Nuxt Image](https://image.nuxtjs.org/) with just a little configuration:
+[Nuxt Image](https://image.nuxtjs.org/) is supported by adding Nuxt Content Asset's cache folder as a Nuxt Layer:
 
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
-  modules: [
-    // Nuxt Image should be placed before Nuxt Content Assets
-    '@nuxt/image',
-    'nuxt-content-assets',
-    '@nuxt/content',
-  ],
-
   extends: [
-    // add Nuxt Content Assets build folder as a Nuxt Layer (since v1.4.0)
-    '.nuxt/content-assets',
+    'node_modules/nuxt-content-assets/cache',
   ],
 }
 ```
-
-> Note that the new Layers setup enables Nuxt Image to load images from both the project's `public` folder and from `content`.
 
 To serve all images as Nuxt Image images, create a `ProseImg` component like so:
 
@@ -239,7 +237,6 @@ To serve all images as Nuxt Image images, create a `ProseImg` component like so:
 
 See the playground folder for both the [global](playground/components/temp/ProseImg.vue) and a [per image](playground/components/content/NuxtImg.ts) solution.
 
-
 ## Configuration
 
 The module has the following options:
@@ -248,7 +245,7 @@ The module has the following options:
 // nuxt.config.ts
 export default defineNuxtConfig({
   contentAssets: {    
-    // inject image sizes into the rendered html
+    // inject image size hints into the rendered html
     imageSize: 'style',
     
     // treat these extensions as content
@@ -262,7 +259,7 @@ export default defineNuxtConfig({
 
 ### Image size
 
-You can add one or more image size hints to the generated images:
+You can add one _or more_ image size hints to the generated images:
 
 ```ts
 {
@@ -277,7 +274,6 @@ Pick from the following switches:
 | `'style'` | Adds `style="aspect-ratio:..."` to any `<img>` tag                 |
 | `'attrs'` | Adds `width` and `height` attributes to any `<img>` tag            |
 | `'src'`   | Adds `?width=...&height=...` to `src` attribute (frontmatter only) |
-| `false`   | Disable image size hints                                           |
 
 Note: if you add *only* `attrs`, include the following CSS in your app:
 
@@ -288,8 +284,13 @@ img {
 }
 ```
 
+> [!Note]
+> 
+> Since `v1.4.1` image size hints are now opt-in. This was done to maximise compatibiility with Nuxt Image.  
+
 ### Content extensions
 
+> [!NOTE]
 > Generally, you shouldn't need to touch this setting
 
 This setting tells Nuxt Content to ignore anything that is **not** one of these file extensions:
@@ -312,64 +313,84 @@ If you want to see what the module does as it runs, set `debug` to true:
 
 ## How it works
 
-When Nuxt builds, the module scans all content sources for assets, copies them to an accessible public assets folder, and indexes path and image metadata.
+When Nuxt builds, the module scans all content sources for assets, copies them to a temporary layer folder (`nuxt_modules/nuxt-content-assets/cache`), and indexes path and image metadata.
 
-After Nuxt Content has run, the parsed content is traversed, and both element attributes and frontmatter properties are checked to see if they resolve to the indexed asset paths.
+After Nuxt Content has run, the parsed content (`.nuxt/content-cache`) is traversed, and both element attributes and frontmatter properties are checked to see if they resolve to the previously-indexed asset paths.
 
-If they do, then the attribute or property is rewritten with the absolute path. If the asset is an image, then the element or metadata is optionally updated with size attributes or a query string.
+If they do, then the attribute or property in Nuxt Content's cache is rewritten with the absolute path. If the asset is an image, then the element or metadata is optionally updated with size attributes or a query string.
 
 Finally, Nitro serves the site, and any requests made to the transformed asset paths should be picked up and the *copied* asset served by the browser.
 
-In development, file watching propagates asset changes to the public folder, updates related cached content, and notifies the browser via web sockets to refresh any loaded images. 
+In development, a watch process propagates asset changes to the cache, updates the asset index, and notifies the browser via web sockets to refresh any loaded images. 
+
+If Nuxt Image is used, the `_ipx/` endpoint serves images directly from the cache's public folder.
 
 ## Development
 
-Should you wish to develop the project, the scripts are:
+Should you wish to develop the project, you'll work with the following entities:
 
-Develop the module (running the playground which uses the live module code):
+- [src](./src)<br>The module code itself
+- [playground](./playground)<br>A standalone Nuxt app that reads the live module code
+- [scripts](package.json)<br>A set of scripts to develop and publish the module
+
+### Setup
+
+To set up the project, run each of these scripts once:
 
 ```bash
 # install dependencies
 npm install
 
-# generate playground type stubs (for the first time)
+# copy the cache folder to the playground's node_modules (workaround required in development)
+npm run dev:setup
+
+# generate types for the module and playground (re-run if you install new packages)
 npm run dev:prepare
-
-# develop (runs the playground app)
-npm run dev
-
-# run eslint
-npm run lint
-
-# run vitest
-npm run test
-npm run test:watch
 ```
 
-Build and check the playground (simulating users' final build choices):
+### Development
+
+To develop the module, utilise the supplied playground app:
 
 ```bash
+# compile the module, run and serve the playground
+npm run dev
+
 # generate the playground
 npm run dev:generate
 
 # build the playground
 npm run dev:build
 
-# serve the generated / built playground
+# serve the generated/built playground
 npm run dev:preview
 ```
 
-Make a new release (so users can install the module):
+Check your code quality using these tools:
 
 ```bash
-# dry run the release
-npm run release:dry
+# lint your code with eslint
+npm run lint
 
-# release new version
-npm run release
+# runs tests with vitest
+npm run test
+npm run test:watch
 ```
 
-Make sure to edit changelog and update `package.json` version before releasing!
+### Publishing
+
+> [!IMPORTANT]
+> Before publishing, be sure to update the [version](package.json) and [changelog](CHANGELOG.md)!
+
+To build and publish, run following scripts as required:
+
+```bash
+# lint, test, build, and dry-run publish
+npm run release:dry
+
+# lint, test, build and publish
+npm run release
+```
 
 ## Maintenance
 
@@ -384,6 +405,8 @@ This created the module code from the starter template found here:
 - https://github.com/nuxt/starter/tree/module
 
 Both [Nuxi](https://github.com/nuxt/cli) and the module's dependencies and scripts are updated fairly regularly, so from time to time this module may need to be updated to keep in sync. So far, this has meant just updating the dependencies and scripts, which are found in the starter template code mentioned above.
+
+Note that the build/release scripts are slightly modified from the originals; build is now separated, and release now doesn't use [changelogen](https://github.com/unjs/changelogen), or automatically add tags and push to GitHub.
 
 <!-- Badges -->
 [npm-version-src]: https://img.shields.io/npm/v/nuxt-content-assets/latest.svg?style=flat&colorA=18181B&colorB=28CF8D

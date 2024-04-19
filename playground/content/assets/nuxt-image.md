@@ -2,7 +2,7 @@
 
 This is single example of using Nuxt Image:
 
-:nuxt-img{src="assets/images/sicilian-fish-stew.jpg" :placeholder="20"}
+:nuxt-img{src="images/sicilian-fish-stew.jpg" :placeholder="20"}
 
 It requires:
 
@@ -16,7 +16,7 @@ To make all content images Nuxt Image:
 
 See the [docs](https://github.com/davestewart/nuxt-content-assets#nuxt-image) for more info.
 
-> Note: the image on the [Home](/) page is also rendered using Nuxt Image – but directly from the `/public` folder.
+> **Note:** the image on the [Home](/) page is also rendered using Nuxt Image – but directly from the `/public` folder.
 > 
-> Multiple Nuxt Image folders were not supported before `1.4.0`.
+> Nuxt Content Assets changed how it supports Nuxt Image (from [config](https://github.com/davestewart/nuxt-content-assets/tree/172cc241ed43e06eeffabded226eb94da1bd0558#nuxt-image-compatibility) to [layers](https://github.com/davestewart/nuxt-content-assets#nuxt-image)) in `v1.4.0`.
 

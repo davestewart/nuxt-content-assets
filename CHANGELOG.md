@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.3
+
+- Refactor cache storage to support Nuxt Image [#76](../../issues/76)
+
 ## v1.4.2
 
 - Fix splash image

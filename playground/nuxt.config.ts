@@ -32,9 +32,9 @@ export default defineNuxtConfig({
 
   // @ts-ignore
   modules: [
-    '@nuxt/image',
     '../src/module',
     '@nuxt/content',
+    '@nuxt/image',
     '@nuxt/devtools',
   ],
 
@@ -52,8 +52,8 @@ export default defineNuxtConfig({
 
   // https://github.com/davestewart/nuxt-content-assets/#configuration
   contentAssets: {
-    // add all image size hints
-    imageSize: 'style attrs src',
+    // add image size hints (except for src, as to not interfere with Nuxt Image)
+    imageSize: 'style attrs',
 
     // show debug messages
     debug: true,
@@ -62,6 +62,6 @@ export default defineNuxtConfig({
   // use layers to support nuxt image
   extends: [
     // https://github.com/davestewart/nuxt-content-assets/#nuxt-image
-    '.nuxt/content-assets',
+    'node_modules/nuxt-content-assets/cache',
   ],
 })
