@@ -11,7 +11,7 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
    * Walk the parsed frontmatter and check properties as paths
    */
   function processMeta (content: ParsedContent, imageSizes: ImageSize = [], updated: string[] = []) {
-    walkMeta(content, (value, parent, key) => {
+    walkMeta(content, (value: string | number, parent: Record<string, any>, key: string) => {
       if (isValidAsset(value)) {
         const { srcAttr, width, height } = resolveAsset(content, removeQuery(value), true)
         if (srcAttr) {
