@@ -20,6 +20,14 @@ export function removeQuery (path: string): string {
 }
 
 /**
+ * Gets the extension of a path
+ * @param path
+ */
+export function getExt (path: string) {
+  return Path.extname(removeQuery(path)).substring(1)
+}
+
+/**
  * Test path to be relative
  */
 export function isRelative (path: string): boolean {
@@ -38,15 +46,14 @@ export function isExcluded (path: string) {
  * Test path for image extension
  */
 export function isImage (path: string): boolean {
-  const ext = Path.extname(path).substring(1)
-  return extensions.image.includes(ext)
+  return extensions.image.includes(getExt(path))
 }
 
 /**
- * Test path is markdown
+ * Test path is markdown or data
  */
 export function isArticle (path: string): boolean {
-  return removeQuery(path).endsWith('.md')
+  return extensions.content.includes(getExt(path))
 }
 
 /**

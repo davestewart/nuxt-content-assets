@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.4
+
+- Prevent supported assets (`mdx json yml csv`) being copied to `public` [#63](../../issues/63)
+
 ## v1.4.3
 
 - Refactor cache storage to support Nuxt Image [#76](../../issues/76)
