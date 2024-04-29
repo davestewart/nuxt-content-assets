@@ -33,6 +33,10 @@ Internal:
 - [Path replacement skips invalid elements](internal/traversal)
 - [Should include ordered files](internal/ordered)
 
+Data:
+
+- [Data files should not be made public](data/)
+
 GitHub:
 
 - [Repo and docs](https://github.com/davestewart/nuxt-content-assets)

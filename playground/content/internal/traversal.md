@@ -1,4 +1,4 @@
-# Code
+# AST traversal
 
 > Path replacement skips invalid elements
 
