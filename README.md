@@ -249,7 +249,7 @@ export default defineNuxtConfig({
     imageSize: 'style',
     
     // treat these extensions as content
-    contentExtensions: 'md csv ya?ml json',
+    contentExtensions: 'mdx? csv ya?ml json',
     
     // output debug messages
     debug: false,
@@ -258,6 +258,10 @@ export default defineNuxtConfig({
 ```
 
 ### Image size
+
+> [!Note]
+>
+> Since `v1.4.1` image size hints are now opt-in. This was done to maximise compatibiility with Nuxt Image.
 
 You can add one _or more_ image size hints to the generated images:
 
@@ -284,22 +288,22 @@ img {
 }
 ```
 
-> [!Note]
-> 
-> Since `v1.4.1` image size hints are now opt-in. This was done to maximise compatibiility with Nuxt Image.  
-
 ### Content extensions
 
 > [!NOTE]
 > Generally, you shouldn't need to touch this setting
 
-This setting tells Nuxt Content to ignore anything that is **not** one of these file extensions:
+This setting tells Nuxt Content to ignore anything that is **not** one of the supported content types:
 
 ```
-md csv ya?ml json
+mdx? csv ya?ml json
 ```
 
-This way, you can use any **other** file type as an asset, without needing to explicitly configure extensions.
+This way, you can use any **other** file type as an asset, without needing to explicitly configure Nuxt Content's [ignores](https://content.nuxt.com/get-started/configuration#ignores) list.
+
+Without this, Nuxt Content would warn about unsupported file types: 
+
+> [WARN] .jpg files are not supported, "content:path:to:some-asset.jpg" falling back to raw content
 
 ### Debug
 
