@@ -25,7 +25,7 @@ export default defineNuxtModule<ModuleOptions>({
 
   defaults: {
     imageSize: '',
-    contentExtensions: 'md csv ya?ml json',
+    contentExtensions: 'mdx? csv ya?ml json',
     debug: false,
   },
 
