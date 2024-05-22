@@ -93,8 +93,12 @@ export function makeSourceManager (key: string, source: MountOptions, publicPath
   // absolute target file path from key
   function getAbsTrg (key: string) {
     const parts = getRelTrg(key).split('/')
-    // do not refine asset name
-    const refinedPath = parts.map((part, ind) => ind === parts.length - 1 ? part : refineUrlPart(part)).join('/')
+    const refinedPath = parts
+      // do not refine asset name
+      .map((part, ind) => ind === parts.length - 1 ? part : refineUrlPart(part))
+      // remove empty paths in case of directory names with index draft etc.
+      .filter(Boolean)
+      .join('/')
     return Path.join(publicPath, refinedPath)
   }
 
