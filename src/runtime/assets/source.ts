@@ -3,7 +3,7 @@ import { type MountOptions } from '@nuxt/content'
 import githubDriver, { type GithubOptions } from 'unstorage/drivers/github'
 import fsDriver, { type FSStorageOptions } from 'unstorage/drivers/fs'
 import { createStorage, type WatchEvent, type Storage } from 'unstorage'
-import { warn, isAsset, toPath, removeFile, copyFile, writeBlob, writeFile, deKey, isExcluded } from '../utils'
+import { warn, isAsset, toPath, removeFile, copyFile, writeBlob, writeFile, deKey, isExcluded, refineUrlPart } from '../utils'
 
 /**
  * Helper function to determine valid ids
@@ -92,7 +92,14 @@ export function makeSourceManager (key: string, source: MountOptions, publicPath
 
   // absolute target file path from key
   function getAbsTrg (key: string) {
-    return Path.join(publicPath, getRelTrg(key))
+    const parts = getRelTrg(key).split('/')
+    const refinedPath = parts
+      // do not refine asset name
+      .map((part, ind) => ind === parts.length - 1 ? part : refineUrlPart(part))
+      // remove empty paths in case of directory names with index draft etc.
+      .filter(Boolean)
+      .join('/')
+    return Path.join(publicPath, refinedPath)
   }
 
   /**
