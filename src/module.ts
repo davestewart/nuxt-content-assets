@@ -16,7 +16,7 @@ const meta: ModuleMeta = {
   name: 'nuxt-content-assets',
   configKey: 'contentAssets',
   compatibility: {
-    nuxt: '^3.0.0',
+    nuxt: '>=3.0.0',
   },
 }
 
