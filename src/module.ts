@@ -107,7 +107,7 @@ export default defineNuxtModule<ModuleOptions>({
 
     // add default content folder
     if (Object.keys(sources).length === 0 || !sources.content) {
-      const content = nuxt.options.srcDir + '/content'
+      const content = nuxt.options.rootDir + '/content'
       if (Fs.existsSync(content)) {
         sources.content = {
           driver: 'fs',
