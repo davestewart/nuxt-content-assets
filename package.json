@@ -48,7 +48,7 @@
     "ws": "^8.13.0"
   },
   "peerDependencies": {
-    "@nuxt/content": ">=2.13.0"
+    "@nuxt/content": "^2.13.0"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
