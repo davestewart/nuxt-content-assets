@@ -19,6 +19,10 @@ if (!isStackblitz) {
 }
 
 export default defineNuxtConfig({
+  future: {
+    compatibilityVersion: 4,
+  },
+
   app: {
     head: {
       link: [
@@ -64,4 +68,6 @@ export default defineNuxtConfig({
     // https://github.com/davestewart/nuxt-content-assets/#nuxt-image
     'node_modules/nuxt-content-assets/cache',
   ],
+
+  compatibilityDate: '2024-08-11'
 })

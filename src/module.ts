@@ -41,7 +41,7 @@ export default defineNuxtModule<ModuleOptions>({
     const modulesPath = nuxt.options.modulesDir.find((path: string) => Fs.existsSync(`${path}/nuxt-content-assets/cache`)) || ''
     if (!modulesPath) {
       warn('Unable to find cache folder!')
-      if (nuxt.options.srcDir.endsWith('/playground')) {
+      if (nuxt.options.rootDir.endsWith('/playground')) {
         warn('Run "npm run dev:setup" to generate a new cache folder')
       }
     }
@@ -107,7 +107,7 @@ export default defineNuxtModule<ModuleOptions>({
 
     // add default content folder
     if (Object.keys(sources).length === 0 || !sources.content) {
-      const content = nuxt.options.srcDir + '/content'
+      const content = nuxt.options.rootDir + '/content'
       if (Fs.existsSync(content)) {
         sources.content = {
           driver: 'fs',

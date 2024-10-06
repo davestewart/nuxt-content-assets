@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.0
+
+- Migrate to top-level `/content` directory [#85](../../issues/85)
+
 ## v1.4.4
 
 - Prevent supported assets (`mdx json yml csv`) being copied to `public` [#63](../../issues/63)
