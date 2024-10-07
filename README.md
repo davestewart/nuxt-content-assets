@@ -91,7 +91,7 @@ To browse the playground folder:
 Install the dependency:
 
 ```bash
-npm install nuxt-content-assets
+npx nuxi@latest module add content-assets
 ```
 
 Configure `nuxt.config.ts`:
