@@ -234,7 +234,7 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.hook('close', async () => {
       await assets.dispose()
       for (const key in managers) {
-        await managers[key].dispose()
+        await managers[key]?.dispose()
       }
     })
 

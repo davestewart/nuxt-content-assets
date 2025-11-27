@@ -1,7 +1,7 @@
 import { Server } from 'http'
 import { listen } from 'listhen'
 import { useNuxt } from '@nuxt/kit'
-import { Callback, SocketInstance } from '../../types'
+import type { Callback, SocketInstance } from '../../types'
 import { createWebSocket } from './factory'
 import { isObject, log } from '../../runtime/utils'
 
