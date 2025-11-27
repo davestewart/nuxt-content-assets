@@ -47,10 +47,10 @@ export async function setupSocketServer (channel: string, handler?: Callback): P
   nuxt.hook('nitro:init', async (nitro) => {
     if (!nuxt._socketServer) {
       // server
-      const defaults = nuxt.options.runtimeConfig.content.watch.ws
-      const port = defaults.port.port
+      const defaults = nuxt.options.runtimeConfig.content?.watch?.ws
+      const port = defaults?.port?.port || 3000
       const { server, url } = await listen(() => 'Nuxt Content Assets', {
-        hostname: defaults.hostname,
+        hostname: defaults?.hostname,
         port: {
           port:  port + 1,
           portRange: [
