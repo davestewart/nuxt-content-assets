@@ -89,7 +89,7 @@ To browse the demo folder:
 Install the dependency:
 
 ```bash
-npx nuxi@latest module add content-assets
+npx nuxt module add content-assets
 ```
 
 Configure `nuxt.config.ts`:
