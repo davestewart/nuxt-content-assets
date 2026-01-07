@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.6.0
+
+- Support `avif`, `bmp` and `cur` image formats
+
 ### v1.5.2
 
 - Nuxt 4 compatibility

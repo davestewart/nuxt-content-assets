@@ -4,11 +4,11 @@ import { matchTokens } from './string'
  * Common extensions
  */
 export const extensions = {
-  // used to get image size
-  image: matchTokens('png jpg jpeg gif svg webp ico'),
-
   // used to recognise content
   content: matchTokens('md mdx json yml yaml csv'),
+
+  // used to get image size
+  image: matchTokens('png jpg jpeg gif svg webp ico avif bmp cur'),
 
   // unused for now
   media: matchTokens('mp3 m4a wav mp4 mov webm ogg avi flv avchd'),
