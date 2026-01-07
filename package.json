@@ -1,19 +1,20 @@
 {
   "name": "nuxt-content-assets",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Enable locally-located assets in Nuxt Content",
-  "repository": "davestewart/nuxt-content-assets",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davestewart/nuxt-content-assets.git"
+  },
   "license": "MIT",
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types.d.ts",
-      "import": "./dist/module.mjs",
-      "require": "./dist/module.cjs"
+      "types": "./dist/types.d.mts",
+      "import": "./dist/module.mjs"
     }
   },
-  "main": "./dist/module.cjs",
-  "types": "./dist/types.d.ts",
+  "main": "./dist/module.mjs",
   "files": [
     "cache",
     "dist"
@@ -37,33 +38,32 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
-    "@nuxt/kit": "^3.11.2",
+    "@nuxt/kit": "^3.20.2",
     "crosspath": "^2.0.0",
-    "debounce": "^1.2.1",
-    "image-size": "^1.0.2",
-    "listhen": "^1.7.2",
-    "ohash": "^1.0.0",
-    "unist-util-visit": "^4.1.2",
-    "unstorage": "^1.4.1",
-    "ws": "^8.13.0"
+    "debounce": "^3.0.0",
+    "image-size": "^1.1.1",
+    "listhen": "^1.9.0",
+    "ohash": "^2.0.11",
+    "unist-util-visit": "^5.0.0",
+    "unstorage": "^1.17.3",
+    "ws": "^8.19.0"
   },
   "peerDependencies": {
     "@nuxt/content": "^2.13.0"
   },
   "devDependencies": {
-    "@nuxt/devtools": "latest",
-    "@nuxt/eslint-config": "^0.2.0",
-    "@nuxt/module-builder": "^0.5.5",
-    "@nuxt/schema": "^3.11.2",
-    "@nuxt/test-utils": "^3.12.0",
-    "@types/debounce": "^1.2.1",
-    "@types/node": "^20.12.4",
-    "@types/ws": "^8.5.10",
-    "changelogen": "^0.5.5",
-    "cpy-cli": "^5.0.0",
-    "eslint": "^8.57.0",
-    "nuxt": "^3.11.2",
-    "vitest": "^1.4.0"
+    "@nuxt/devtools": "^1.7.0",
+    "@nuxt/eslint-config": "^0.7.6",
+    "@nuxt/module-builder": "^1.0.2",
+    "@nuxt/schema": "^3.20.2",
+    "@nuxt/test-utils": "^3.23.0",
+    "@types/debounce": "^1.2.4",
+    "@types/node": "^25.0.3",
+    "@types/ws": "^8.18.1",
+    "cpy-cli": "^6.0.0",
+    "eslint": "^8.39.2",
+    "nuxt": "^3.20.2",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=16.0.0"

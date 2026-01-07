@@ -107,7 +107,7 @@ export function makeAssetsManager (publicPath: string, shouldWatch = true) {
    */
   function getAsset (path: string): AssetConfig | undefined {
     const { srcRel } = getAssetPaths(publicPath, path)
-    return srcRel
+    return srcRel && assets[srcRel]
       ? { ...assets[srcRel] }
       : undefined
   }
@@ -225,7 +225,7 @@ export function getAssetSize (srcAbs: string): { width?: number, height?: number
     try {
       return getImageSize(srcAbs)
     }
-    catch (err) {
+    catch {
       warn(`could not read image "${srcAbs}`)
     }
   }

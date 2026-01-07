@@ -1,6 +1,6 @@
 import type { IncomingMessage } from 'http'
 import { WebSocket, WebSocketServer } from 'ws'
-import { Callback } from '../../types'
+import type { Callback } from '../../types'
 
 /**
  * WebSocket Server
@@ -32,7 +32,7 @@ export function createWebSocket () {
       try {
         data = JSON.parse(event.data as string || '{}')
       }
-      catch (err) {
+      catch {
         // empty
       }
       if (data) {

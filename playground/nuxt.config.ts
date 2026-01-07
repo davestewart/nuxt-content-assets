@@ -20,6 +20,7 @@ if (!isStackblitz) {
 
 export default defineNuxtConfig({
   future: {
+    // this enables the app/ folder
     compatibilityVersion: 4,
   },
 
