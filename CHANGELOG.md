@@ -1,8 +1,12 @@
 # Changelog
 
+### v1.7.0
+
+- Add support for image path query strings [#41](../../issues/41)
+
 ### v1.6.0
 
-- Support `avif`, `bmp` and `cur` image formats
+- Support `avif`, `bmp` and `cur` image formats [#83](../../issues/83)
 
 ### v1.5.2
 

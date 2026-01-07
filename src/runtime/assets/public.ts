@@ -5,7 +5,7 @@ import debounce from 'debounce'
 import { hash } from 'ohash'
 import type { ParsedContent, AssetConfig } from '../../types'
 import { makeSourceStorage } from './source'
-import { isImage, warn, log, removeEntry } from '../utils'
+import { isImage, warn, log, removeEntry, removeQuery } from '../utils'
 
 /**
  * Manages the public assets
@@ -54,10 +54,14 @@ export function makeAssetsManager (publicPath: string, shouldWatch = true) {
    * @param relAsset
    * @param registerContent
    */
-  function resolveAsset (content: ParsedContent, relAsset: string, registerContent = false): Partial<AssetConfig> {
+  function resolveAsset (content: ParsedContent, relAsset: string, registerContent = false): AssetConfig {
+    // test relative asset against stored absolute assets
     const srcDir = Path.dirname(content._file)
-    const srcAsset = Path.join(srcDir, relAsset)
+    const relAssetNoQuery = removeQuery(relAsset)
+    const srcAsset = Path.join(srcDir, relAssetNoQuery)
     const asset = assets[srcAsset]
+
+    // special case for register content
     if (asset && registerContent) {
       const { _id } = content
       if (!asset.content.includes(_id)) {
@@ -65,7 +69,20 @@ export function makeAssetsManager (publicPath: string, shouldWatch = true) {
         save()
       }
     }
-    return asset || {}
+
+    // if we have an asset, return it
+    if (asset) {
+      if (relAsset.includes('?')) {
+        return {
+          ...asset,
+          srcAttr: asset.srcAttr + '?' + relAsset.split('?').pop() || ''
+        }
+      }
+      return asset
+    }
+
+    // return empty object if not found
+    return { srcAttr: '', content: [] }
   }
 
   // ---------------------------------------------------------------------------------------------------------------------
