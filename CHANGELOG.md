@@ -1,38 +1,46 @@
 # Changelog
 
-## v1.5.0
+### v1.5.2
+
+- Nuxt 4 compatibility
+
+### v1.5.1
+
+- Update dependencies
+
+### v1.5.0
 
 - Migrate to top-level `/content` directory [#85](../../issues/85)
 
-## v1.4.4
+### v1.4.4
 
 - Prevent supported assets (`mdx json yml csv`) being copied to `public` [#63](../../issues/63)
 
-## v1.4.3
+### v1.4.3
 
 - Refactor cache storage to support Nuxt Image [#76](../../issues/76)
 
-## v1.4.2
+### v1.4.2
 
 - Fix splash image
 
-## v1.4.1
+### v1.4.1
 
 - Skip sockets setup if content watch is disabled [#72](../../issues/72)
 
-## v1.4.0
+### v1.4.0
 
 - Update Nuxt Image support to support multiple folders
 
-## v1.3.7
+### v1.3.7
 
 - Update module builder [#69](../../issues/69)
 
-## v1.3.5
+### v1.3.5
 
 - Close storage drivers when nuxt is closing [#49](../../issues/49)
 
-## v1.3.4
+### v1.3.4
 
 - Opt in to `import.meta.*` properties (#66)
 - Update Nuxt compatibility

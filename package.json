@@ -1,6 +1,6 @@
 {
   "name": "nuxt-content-assets",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Enable locally-located assets in Nuxt Content",
   "repository": {
     "type": "git",
@@ -49,10 +49,11 @@
     "ws": "^8.19.0"
   },
   "peerDependencies": {
-    "@nuxt/content": "^2.13.0"
+    "@nuxt/content": "^2.13.0",
+    "nuxt": ">=3.0.0"
   },
   "devDependencies": {
-    "@nuxt/devtools": "^1.7.0",
+    "@nuxt/devtools": "latest",
     "@nuxt/eslint-config": "^0.7.6",
     "@nuxt/module-builder": "^1.0.2",
     "@nuxt/schema": "^3.20.2",
@@ -62,7 +63,7 @@
     "@types/ws": "^8.18.1",
     "cpy-cli": "^6.0.0",
     "eslint": "^8.39.2",
-    "nuxt": "^3.20.2",
+    "nuxt": ">=3.0.0",
     "vitest": "^3.2.4"
   },
   "engines": {
