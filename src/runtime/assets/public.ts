@@ -3,9 +3,9 @@ import Path from 'crosspath'
 import getImageSize from 'image-size'
 import debounce from 'debounce'
 import { hash } from 'ohash'
-import type { ParsedContent, AssetConfig } from '../../types'
 import { makeSourceStorage } from './source'
 import { isImage, warn, log, removeEntry, removeQuery } from '../utils'
+import type { ParsedContent, AssetConfig } from '../../types'
 
 /**
  * Manages the public assets

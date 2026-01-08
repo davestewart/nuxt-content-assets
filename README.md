@@ -317,7 +317,7 @@ If you want to see what the module does as it runs, set `debug` to true:
 
 ## How it works
 
-When Nuxt builds, the module scans all content sources for assets, copies them to a temporary layer folder (`nuxt_modules/nuxt-content-assets/cache`), and indexes path and image metadata.
+When Nuxt builds, the module scans all content sources for assets, copies them to a temporary layer folder (`node_modules/nuxt-content-assets/cache`), and indexes path and image metadata.
 
 After Nuxt Content has run, the parsed content (`.nuxt/content-cache`) is traversed, and both element attributes and frontmatter properties are checked to see if they resolve to the previously-indexed asset paths.
 
