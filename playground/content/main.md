@@ -23,7 +23,7 @@ Advanced:
 - [Image `src` from `frontmatter` variable](advanced/frontmatter)
 - [Custom gallery component using `frontmatter` data](advanced/gallery)
 - [Custom image component](advanced/component)
-- [Query string support](advanced/query)
+- [Query string support](advanced/query) (not supported by Nuxt Image)
 
 Sources:
 
@@ -32,7 +32,8 @@ Sources:
 Internal:
 
 - [Path replacement skips invalid elements](internal/traversal)
-- [Should include ordered files](internal/ordered)
+- [Ordered-folder numbering stripped from asset paths](internal/ordered-folder)
+- [Ordered-files included](internal/ordered-page)
 
 Data:
 

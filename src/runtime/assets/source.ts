@@ -2,8 +2,19 @@ import Path from 'crosspath'
 import { type MountOptions } from '@nuxt/content'
 import githubDriver, { type GithubOptions } from 'unstorage/drivers/github'
 import fsDriver, { type FSStorageOptions } from 'unstorage/drivers/fs'
-import { createStorage, type WatchEvent, type Storage } from 'unstorage'
-import { warn, isAsset, toPath, removeFile, copyFile, writeBlob, writeFile, deKey, isExcluded } from '../utils'
+import { createStorage, type Storage, type WatchEvent } from 'unstorage'
+import {
+  copyFile,
+  deKey,
+  isAsset,
+  isExcluded,
+  removeFile,
+  removeOrdering,
+  toPath,
+  warn,
+  writeBlob,
+  writeFile,
+} from '../utils'
 
 /**
  * Helper function to determine valid ids
@@ -87,7 +98,7 @@ export function makeSourceManager (key: string, source: MountOptions, publicPath
 
   // relative target file path from key
   function getRelTrg (key: string) {
-    return Path.join(source.prefix || '', toPath(deKey(key)))
+    return Path.join(source.prefix || '', removeOrdering(toPath(deKey(key))))
   }
 
   // absolute target file path from key
