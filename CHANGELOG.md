@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.8.0
+
+- Strip ordering from asset paths [#57](../../issues/57)
+
 ### v1.7.0
 
 - Add support for image path query strings [#41](../../issues/41)
