@@ -20,6 +20,16 @@ export function removeQuery (path: string): string {
 }
 
 /**
+ * Remove ordering from a path
+ */
+export function removeOrdering (path: string): string {
+  return path
+    .split('/')
+    .map(segment => segment.replace(/^\d+\./, ''))
+    .join('/')
+}
+
+/**
  * Gets the extension of a path
  * @param path
  */
@@ -69,4 +79,3 @@ export function isAsset (path: string): boolean {
 export function isValidAsset (value?: string): boolean {
   return typeof value === 'string' && isAsset(value) && isRelative(value)
 }
-

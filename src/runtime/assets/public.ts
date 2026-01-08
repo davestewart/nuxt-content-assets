@@ -4,8 +4,8 @@ import getImageSize from 'image-size'
 import debounce from 'debounce'
 import { hash } from 'ohash'
 import { makeSourceStorage } from './source'
-import { isImage, warn, log, removeEntry, removeQuery } from '../utils'
-import type { ParsedContent, AssetConfig } from '../../types'
+import { isImage, log, removeEntry, removeOrdering, removeQuery, warn } from '../utils'
+import type { AssetConfig, ParsedContent } from '../../types'
 
 /**
  * Manages the public assets
@@ -32,6 +32,7 @@ export function makeAssetsManager (publicPath: string, shouldWatch = true) {
 
   // assets
   const assets: Record<string, AssetConfig> = {}
+
   async function load () {
     const data = await storage.getItem(assetsKey)
     // console.log('load:', data)
@@ -58,7 +59,7 @@ export function makeAssetsManager (publicPath: string, shouldWatch = true) {
     // test relative asset against stored absolute assets
     const srcDir = Path.dirname(content._file)
     const relAssetNoQuery = removeQuery(relAsset)
-    const srcAsset = Path.join(srcDir, relAssetNoQuery)
+    const srcAsset = removeOrdering(Path.join(srcDir, relAssetNoQuery))
     const asset = assets[srcAsset]
 
     // special case for register content
@@ -75,7 +76,7 @@ export function makeAssetsManager (publicPath: string, shouldWatch = true) {
       if (relAsset.includes('?')) {
         return {
           ...asset,
-          srcAttr: asset.srcAttr + '?' + relAsset.split('?').pop() || ''
+          srcAttr: asset.srcAttr + '?' + relAsset.split('?').pop() || '',
         }
       }
       return asset
@@ -169,7 +170,7 @@ export function makeAssetsManager (publicPath: string, shouldWatch = true) {
     dispose: async () => {
       await storage.unwatch()
       await storage.dispose()
-    }
+    },
   }
 }
 

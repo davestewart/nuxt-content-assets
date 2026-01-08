@@ -1,8 +1,8 @@
 # Ordered folder
 
-> Should include ordered folders
+> Folder-numbering stripped from asset paths 
 
-This page (`internal/1.ordered-folder/index.md`) should serve the image from `internal/ordered-folder/`
+Ordered content (`/01.foo/index.md`) should copy and serve images from `public/foo/`
 
 ![image](./sicilian-fish-stew.jpg)
 
