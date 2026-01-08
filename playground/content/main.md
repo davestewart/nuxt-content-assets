@@ -23,6 +23,7 @@ Advanced:
 - [Image `src` from `frontmatter` variable](advanced/frontmatter)
 - [Custom gallery component using `frontmatter` data](advanced/gallery)
 - [Custom image component](advanced/component)
+- [Query string support](advanced/query)
 
 Sources:
 

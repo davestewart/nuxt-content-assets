@@ -47,7 +47,7 @@ export function createWebSocket (url: string, logger: Logger = { log, warn: log 
     try {
       data = JSON.parse(message.data)
     }
-    catch (err) {
+    catch {
       logger.warn('Error parsing message:', message.data)
       return
     }
@@ -78,7 +78,7 @@ export function createWebSocket (url: string, logger: Logger = { log, warn: log 
       try {
         ws.close()
       }
-      catch (err) {
+      catch {
         // empty
       }
       ws = undefined
