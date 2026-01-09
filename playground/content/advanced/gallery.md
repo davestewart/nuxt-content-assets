@@ -20,4 +20,4 @@ recipes:
  
 Here are four delicious recipes:
 
-:content-gallery{:data="recipes"}
+:content-gallery{:items="recipes"}
