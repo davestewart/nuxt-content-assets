@@ -17,30 +17,27 @@
   </nav>
 </template>
 
-<script lang="ts">
-import { defineNuxtComponent } from '#imports'
+<script setup lang="ts">
+import { computed, useRoute } from '#imports'
 
-function link (href: string, text: string) {
-  return { href, text }
+type Link = {
+  href: string
+  text: string
 }
 
-export default defineNuxtComponent({
-  computed: {
-    links () {
-      const links = [
-        link('/', 'Home'),
-      ]
-      const path = this.$route.path
-      const segments = path.replace(/\/$/, '').split('/')
-      if (path !== '/') {
-        links.push({
-          href: path,
-          text: segments[segments.length - 1].replace(/\W/g, ' ')
-        })
-      }
-      return links
-    }
+const links = computed<Link[]>(() => {
+  const links = [
+    { href: '/', text: 'Home' },
+  ]
+  const path = useRoute().path
+  const segments = path.replace(/\/$/, '').split('/')
+  if (path !== '/') {
+    links.push({
+      href: path,
+      text: segments[segments.length - 1].replace(/\W/g, ' ')
+    })
   }
+  return links
 })
 </script>
 

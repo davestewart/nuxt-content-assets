@@ -1,0 +1,24 @@
+---
+title: Custom Example
+fire: true
+---
+
+# Hello World
+
+This is a transformer example for files which have a non-standard content extension, e.g. `.fire`.
+
+To support custom file extensions, update `contentExtensions` field in your `nuxt.config.ts`:
+
+```ts
+export default defineNuxtConfig({
+  content: {
+    contentExtensions: 'mdx? csv ya?ml json fire', // add 'fire' extension
+  }
+})
+```
+
+![image](../../assets/images/sicilian-fish-stew.jpg)
+
+```
+![image](../../assets/images/sicilian-fish-stew.jpg)
+```

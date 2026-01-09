@@ -39,6 +39,11 @@ Data:
 
 - [Data files should not be made public](data/)
 
+Transformers:
+
+- [Custom transformer](transformers/article)
+- [List transformer](transformers/names)
+
 GitHub:
 
 - [Repo and docs](https://github.com/davestewart/nuxt-content-assets)

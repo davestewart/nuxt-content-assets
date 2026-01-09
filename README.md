@@ -215,7 +215,7 @@ See playground component [here](playground/components/content/ContentImage.vue).
 
 ### Nuxt Image
 
-[Nuxt Image](https://image.nuxtjs.org/) is supported by adding Nuxt Content Asset's cache folder as a Nuxt Layer:
+To support [Nuxt Image](https://image.nuxtjs.org/), add Nuxt Content Asset's cache folder as a Nuxt Layer:
 
 ```ts
 // nuxt.config.ts
@@ -291,7 +291,7 @@ img {
 ### Content extensions
 
 > [!NOTE]
-> Generally, you shouldn't need to touch this setting
+> Generally, you shouldn't need to touch this setting, however, if you're looking to support custom content types [by way of transformers](https://v2.content.nuxt.com/recipes/transformers) then you'll need to add those extensions here.
 
 This setting tells Nuxt Content to ignore anything that is **not** one of the supported content types:
 

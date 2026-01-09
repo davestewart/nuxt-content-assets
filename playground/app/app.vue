@@ -3,13 +3,9 @@
     <NuxtLoadingIndicator :height="10" />
     <SiteNav />
     <div class="content">
-      <ContentDoc
-        :key="$route.path"
-        :path="$route.path === '/' ? '/main' : $route.path"
-      />
+      <NuxtPage />
     </div>
   </div>
-  <NuxtPage />
 </template>
 
 <style>

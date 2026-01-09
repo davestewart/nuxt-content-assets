@@ -4,42 +4,35 @@
     :src="info.src"
     :width="info.width"
     :height="info.height"
-    :alt="title"
+    :alt="title ?? ''"
   >
 </template>
 
-<script>
-export default {
-  global: true,
+<script lang="ts" setup>
+import { computed } from '#imports'
 
-  props: {
-    image: {
-      type: String,
-      required: true,
-    },
-    title: {
-      type: String,
-      default: '',
-    },
-  },
+const props = defineProps<{
+  image: string
+  title?: string
+}>()
 
-  computed: {
-    info () {
-      return parseImageInfo(this.image)
-    },
-  }
-}
-
-/**
- * Parse src, width and height from URL
- */
-function parseImageInfo (url = '') {
-  const [src, query] = url.split('?')
+const info = computed(() => {
+  const [src, query] = props.image.split('?')
   const params = new URLSearchParams(query)
   return {
     src,
     width: Number(params.get('width')) || undefined,
     height: Number(params.get('height')) || undefined,
   }
-}
+})
 </script>
+
+<style>
+.content-image {
+  display: block;
+  margin: 1rem auto;
+  max-width: 100%;
+  border-radius: 2%;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.3);
+}
+</style>

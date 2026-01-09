@@ -1,5 +1,7 @@
 import { defineNuxtConfig } from 'nuxt/config'
 import type { MountOptions } from '@nuxt/content'
+import FireModule from './modules/fire/module'
+import ListModule from './modules/list/module'
 
 // @ts-ignore
 const isStackblitz = process.env.GIT_PROXY?.includes('stackblitz')
@@ -9,7 +11,7 @@ const external = {
   driver: 'github',
   repo: 'davestewart/nuxt-content-assets',
   dir: '/playground/external',
-  prefix: '/external'
+  prefix: '/external',
 }
 
 // no external playground in stackblitz (due to CORS)
@@ -31,12 +33,14 @@ export default defineNuxtConfig({
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Dosis:wght@600;700&display=swap' },
-      ]
+      ],
     },
   },
 
   // @ts-ignore
   modules: [
+    ListModule,
+    FireModule,
     '../src/module',
     '@nuxt/content',
     '@nuxt/image',
@@ -48,7 +52,7 @@ export default defineNuxtConfig({
     sources,
     highlight: {
       theme: 'github-light',
-      preload: ['js']
+      preload: ['js'],
     },
     markdown: {
       anchorLinks: false,
@@ -60,6 +64,9 @@ export default defineNuxtConfig({
     // add image size hints (except for src, as to not interfere with Nuxt Image)
     imageSize: 'style attrs',
 
+    // allow custom transformers
+    contentExtensions: 'mdx? csv ya?ml json fire list',
+
     // show debug messages
     debug: true,
   },
@@ -70,5 +77,5 @@ export default defineNuxtConfig({
     'node_modules/nuxt-content-assets/cache',
   ],
 
-  compatibilityDate: '2024-08-11'
+  compatibilityDate: '2024-08-11',
 })
