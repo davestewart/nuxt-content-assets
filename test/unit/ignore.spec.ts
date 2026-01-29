@@ -2,16 +2,30 @@ import { describe, expect, it } from 'vitest'
 import { makeIgnores } from '../../src/runtime/utils'
 
 /**
- * Mirrors the Nuxt Content test
- * @see https://github.com/nuxt/content/blob/main/src/module.ts#L651
+ * Copy of Nuxt makeIgnored() function
+ *
+ * @see https://github.com/nuxt/content/blob/v2/src/runtime/utils/config.ts
  */
-function test (file: string) {
-  const rx = new RegExp(`^${p}|:${p}`)
-  return rx.test(file)
+function makeIgnored (ignores: string[]): (key: string) => boolean {
+  const rxAll = ['/\\.', '/-', ...ignores.filter(p => p)].map(p => new RegExp(p))
+  return function isIgnored (key: string): boolean {
+    const path = '/' + key.replace(/:/g, '/')
+    return rxAll.some(rx => rx.test(path))
+  }
 }
 
-const p = makeIgnores('md json yaml csv')
+/**
+ * Mirrors the Nuxt Content test
+ *
+ * @see https://github.com/nuxt/content/blob/v2/src/module.ts#L633C5-L633C58
+ */
+const isIgnored = makeIgnored([
+  makeIgnores('md json yaml csv')
+])
 
+/**
+ * Tests for the ignore function
+ */
 describe('ignore', () => {
   function makeTest (result: boolean, data: string[]) {
     return { result, data }
@@ -29,6 +43,7 @@ describe('ignore', () => {
     assets: makeTest(true, [
       ':image.jpg',
       'content:paths:some-image.jpg',
+      'content:json-tutorial:some-image.png',
     ])
   }
 
@@ -37,7 +52,7 @@ describe('ignore', () => {
     describe(name, () => {
       data.forEach(file => {
         it(`should ${state} "${file}"`, () => {
-          expect(test(file)).toBe(result)
+          expect(isIgnored(file)).toBe(result)
         })
       })
     })
