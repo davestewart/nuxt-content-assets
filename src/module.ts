@@ -87,7 +87,9 @@ export default defineNuxtModule<ModuleOptions>({
         nuxt.options.content.ignores ||= []
       }
       const ignores = makeIgnores(contentExtensions)
-      nuxt.options.content?.ignores.push(ignores)
+      if (ignores.length) {
+        nuxt.options.content?.ignores.push(ignores)
+      }
     }
 
     // convert image size hints to array
