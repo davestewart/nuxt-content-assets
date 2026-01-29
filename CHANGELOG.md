@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.8.1
+
+- Fix ignore assets regexp generation [#57](../../issues/98)
+
 ### v1.8.0
 
 - Strip ordering from asset paths [#57](../../issues/57)
