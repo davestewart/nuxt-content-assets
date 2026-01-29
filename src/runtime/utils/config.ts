@@ -17,10 +17,15 @@ export const extensions = {
 /**
  * Create a Nuxt Content ignore string
  *
- * @see https://stackoverflow.com/questions/10052032/regex-pattern-that-does-not-match-certain-extensions
- * @see https://regex101.com/r/gC3HXz/1
+ * @see https://regex101.com/r/gC3HXz/2
  */
 export function makeIgnores (extensions: string | string[]): string {
-  const included = matchTokens(extensions).join('|')
-  return `^(?:(?!(${included})).)+$`
+  const tokens = matchTokens(extensions)
+
+  if (tokens.length === 0) {
+    return ''
+  }
+
+  const disallowTail = tokens.join("$|") + "$"
+  return `\\.(?!${disallowTail})[^.]+$`
 }
