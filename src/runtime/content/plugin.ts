@@ -36,6 +36,7 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
       const { tag, props } = node
       for (const [prop, value] of Object.entries(props)) {
         // only process strings
+        // TODO: potentially use safe-list rather than type check here
         if (typeof value !== 'string') {
           continue
         }
