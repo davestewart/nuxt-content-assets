@@ -1,8 +1,12 @@
 # Changelog
 
+### v1.8.2
+
+- Fix AST props check leading to skipping of asset processing [#102](../../issues/102)
+
 ### v1.8.1
 
-- Fix ignore assets regexp generation [#57](../../issues/98)
+- Fix ignore assets regexp generation [#98](../../issues/98)
 
 ### v1.8.0
 
