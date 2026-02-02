@@ -37,7 +37,7 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
       for (const [prop, value] of Object.entries(props)) {
         // only process strings
         if (typeof value !== 'string') {
-          return
+          continue
         }
 
         // parse value
