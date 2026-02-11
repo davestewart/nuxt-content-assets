@@ -13,7 +13,9 @@ const { data, error } = await useAsyncData(route.path, () => queryContent(route.
       <template v-if="data._extension === 'list'">
         <p>This is a custom "list" transformer:</p>
         <ul>
-          <li v-for="item in data.body" :key="item">{{ item }}</li>
+          <li v-for="item in data.body" :key="item">
+            {{ item }}
+          </li>
         </ul>
       </template>
 

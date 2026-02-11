@@ -10,6 +10,15 @@ import type { ModuleMeta, Nuxt, NuxtConfigLayer } from '@nuxt/schema'
 import type { MountOptions } from '@nuxt/content'
 import type { ImageSize, ModuleOptions } from './types'
 
+// Re-export types for consumers
+export type {
+  ModuleOptions,
+  ImageSize,
+  AssetConfig,
+  AssetMessage,
+  SocketInstance
+} from './types'
+
 const resolve = createResolver(import.meta.url).resolve
 
 const meta: ModuleMeta = {

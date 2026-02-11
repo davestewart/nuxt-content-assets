@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.8.3
+
+- Update build to export types [#103](../../issues/103)
+
 ### v1.8.2
 
 - Fix AST props check leading to skipping of asset processing [#102](../../issues/102)
