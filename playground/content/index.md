@@ -16,7 +16,7 @@ Paths:
 Assets:
 
 - [Media and file assets](assets)
-- [Nuxt Image component](assets/nuxt-image.md)
+- [Nuxt Image component](assets/nuxt-image)
 - [High resolution images with `srcset`](assets/srcset)
 
 Advanced:
@@ -38,12 +38,7 @@ Internal:
 
 Data:
 
-- [Data files should not be made public](data/)
-
-Transformers:
-
-- [Custom transformer](transformers/article)
-- [List transformer](transformers/names)
+- [Data files should not be made public](data)
 
 GitHub:
 

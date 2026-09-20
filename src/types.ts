@@ -14,7 +14,7 @@ export interface ModuleOptions {
   imageSize?: string | string[] | false
 
   /**
-   * File extensions to treat as content; anything else is treated as an asset
+   * File extensions to treat as content; anything else found in a collection's source folder is treated as an asset
    *
    * Tokens may use simple regex fragments
    *
@@ -68,20 +68,56 @@ export interface SrcsetOptions {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
+// sources
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**
+ * A folder of content whose non-content files should be treated as assets
+ */
+export interface AssetSource {
+  /**
+   * The absolute path to the folder
+   */
+  dir: string
+
+  /**
+   * The web path prefix assets in this folder are served under
+   * @example '/blog'
+   */
+  prefix: string
+
+  /**
+   * Glob patterns (relative to `dir`) to exclude
+   */
+  exclude: string[]
+
+  /**
+   * Whether the folder is populated by Nuxt Content from a git repository
+   */
+  remote: boolean
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 // assets
 // ---------------------------------------------------------------------------------------------------------------------
 
 export type ImageSize = Array<'style' | 'attrs' | 'src'>
 
 /**
- * A single asset, keyed in the index by its path relative to the public folder
+ * A single copied asset
  */
 export interface AssetConfig {
   /**
    * The absolute web path to the asset
-   * @example '/content/posts/image.jpg'
+   * @example '/blog/posts/image.jpg'
    */
   srcAttr: string
+
+  /**
+   * The absolute path to the copied file
+   */
+  target: string
+
   width?: number
   height?: number
 }
@@ -95,25 +131,8 @@ export interface ResolvedAsset extends AssetConfig {
 }
 
 /**
- * Index of assets, written by the build process
+ * Message sent to the browser when an asset changes
  */
-export type AssetIndex = Record<string, AssetConfig>
-
-/**
- * Index of which documents reference which assets, written by the server process
- */
-export interface ContentIndex {
-  /**
-   * Asset paths which resolved, and the ids of the documents that referenced them
-   */
-  hits: Record<string, string[]>
-
-  /**
-   * Asset paths which did not resolve, and the ids of the documents that referenced them
-   */
-  misses: Record<string, string[]>
-}
-
 export interface AssetMessage {
   event: 'update' | 'remove'
   src: string
@@ -121,75 +140,4 @@ export interface AssetMessage {
   height?: number
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-// content
-// ---------------------------------------------------------------------------------------------------------------------
-
-export interface ParsedContent {
-  /**
-   * The storage id of the file
-   * @example 'content:foo:bar:index.md'
-   */
-  _id: string
-
-  /**
-   * The source group identifier
-   * @example 'content'
-   */
-  _source: string
-
-  /**
-   * The directory of the file under _source
-   * @example 'foo'
-   */
-  _dir: string
-
-  /**
-   * The route to the file (excluding _source)
-   * @example '/foo/bar'
-   */
-  _path: string
-
-  /**
-   * The file path of the file (excluding _source)
-   * @example 'foo/bar/index.md'
-   */
-  _file: string
-
-  /**
-   * The type of the file
-   * @example 'markdown'
-   */
-  _type: string
-
-  /**
-   * The file extension (excluding the dot)
-   * @example 'md'
-   */
-  _extension: string
-
-  /**
-   * The AST structure
-   */
-  body: {
-    type: string
-    children: Array<any>
-  }
-
-  /**
-   * Any other metadata key
-   * @see https://content.nuxtjs.org/guide/writing/markdown/#native-parameters
-   */
-  [key: string]: any
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-// sockets
-// ---------------------------------------------------------------------------------------------------------------------
-
-export type Callback = (data: any) => void
-
-export interface SocketInstance {
-  send: (data: any) => SocketInstance
-  addHandler: (handler: Callback) => SocketInstance
-}
+export const HMR_EVENT = 'nuxt-content-assets:update'

@@ -12,6 +12,8 @@ export default createConfigForNuxt({
       'cache',
       'playground/.nuxt',
       'playground/.output',
+      'playground/.data',
+      'test/fixtures/**/.data',
       'test/fixtures/**/.nuxt',
       'test/fixtures/**/.output',
     ],

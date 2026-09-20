@@ -1,18 +1,11 @@
-# Italian Bean Stew, Rainbow Chard & Quinoa
+# Absolute path
 
-> Image using absolute path
+> Image on an absolute path
 
-![Italian Bean Stew](/paths/same/italian-bean-stew.jpg)
+Absolute paths are left untouched, and are expected to resolve against the app's `public` folder:
 
-The image `src` above points to an image in a sibling folder:
+![Splash](/splash.png)
 
+```md
+![Splash](/splash.png)
 ```
-page url  -> /paths/absolute
-image src -> /paths/same/italian-bean-stew.jpg
-```
-
-Remember:
-
-- in `dev` images are intercepted and served by Nitro
-- in `build` images are copied and served from the filesystem
-

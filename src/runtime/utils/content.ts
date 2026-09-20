@@ -1,35 +1,93 @@
-import { CONTINUE, SKIP, visit } from 'unist-util-visit'
-import type { ParsedContent } from '../../types'
 import { type WalkCallback, walk } from './object'
 import { matchTokens } from './string'
 
 /**
- * Walk parsed content meta, only processing relevant properties
+ * A uniform view of an element in either a hast or minimark tree
  */
-export function walkMeta (content: ParsedContent, callback: WalkCallback) {
-  walk(content, callback, (value, key) => !(String(key).startsWith('_') || key === 'body' || key === 'excerpt'))
+export interface ElementView {
+  tag: string
+  props: Record<string, any>
 }
 
 /**
- * Walk parsed content body, only visiting elements that could reference assets
+ * Keys which hold ASTs, raw content or identity, rather than user data
  */
-export function walkBody (content: ParsedContent, callback: (node: any) => void) {
-  visit(content.body, (node: any) => node.type === 'element', (node: any) => {
-    const { tag, props } = node
+const nonMetaKeys = ['body', 'excerpt', 'rawbody', '__metadata', 'id', 'path', 'stem', 'extension']
 
-    // skip containers we think won't contain assets
-    if (tags.exclude.includes(tag)) {
-      return SKIP
+/**
+ * Walk parsed content fields (frontmatter and schema fields), skipping ASTs and identity fields
+ */
+export function walkMeta (content: Record<string, any>, callback: WalkCallback) {
+  walk(content, callback, (value, key) => !(typeof key === 'string' && nonMetaKeys.includes(key)))
+}
+
+/**
+ * Walk a parsed body or excerpt (hast or minimark), visiting elements that could reference assets
+ */
+export function walkBody (body: any, callback: (node: ElementView) => void) {
+  if (!body || typeof body !== 'object') {
+    return
+  }
+  if (body.type === 'minimark' && Array.isArray(body.value)) {
+    walkMinimark(body.value, callback)
+  }
+  else if (Array.isArray(body.children)) {
+    walkHast(body.children, callback)
+  }
+}
+
+/**
+ * Whether to process, traverse or skip an element
+ */
+function classify (tag: string, props: any): 'skip' | 'traverse' | 'process' {
+  if (tags.exclude.includes(tag)) {
+    return 'skip'
+  }
+  if (tags.include.includes(tag) || !props) {
+    return 'traverse'
+  }
+  return 'process'
+}
+
+/**
+ * Walk hast nodes: { type: 'element', tag, props, children }
+ */
+function walkHast (nodes: any[], callback: (node: ElementView) => void) {
+  for (const node of nodes) {
+    if (!node || node.type !== 'element') {
+      continue
     }
-
-    // traverse containers we think could contain assets
-    if (tags.include.includes(tag) || !props) {
-      return CONTINUE
+    const action = classify(node.tag, node.props)
+    if (action === 'skip') {
+      continue
     }
+    if (action === 'process') {
+      callback(node)
+    }
+    if (Array.isArray(node.children)) {
+      walkHast(node.children, callback)
+    }
+  }
+}
 
-    // process node
-    callback(node)
-  })
+/**
+ * Walk minimark nodes: [tag, props, ...children] | string
+ */
+function walkMinimark (nodes: any[], callback: (node: ElementView) => void) {
+  for (const node of nodes) {
+    if (!Array.isArray(node)) {
+      continue
+    }
+    const [tag, props, ...children] = node
+    const action = classify(tag, props)
+    if (action === 'skip') {
+      continue
+    }
+    if (action === 'process') {
+      callback({ tag, props })
+    }
+    walkMinimark(children, callback)
+  }
 }
 
 const tags = {

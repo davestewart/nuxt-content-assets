@@ -1,23 +1,27 @@
 ---
-recipes:
+items:
   -
-    title: Italian Bean Stew, Rainbow Chard & Quinoa
+    title: Same folder
     image: ../paths/same/italian-bean-stew.jpg?a=1
   -
-    title: Pesto Salmon & Mediterranean-style lentils
+    title: Sub folder
     image: ../paths/sub/images/pesto-salmon-lentils.jpg
   -
-    title: Sicilian Fish Stew with Lemony Courgette Salad
+    title: Assets folder
     image: ../assets/images/sicilian-fish-stew.jpg
   -
-    title: Creamy Turkey & Tomato Pesto Casserole
+    title: Sibling folder
     image: frontmatter/turkey-casserole.jpg
 ---
 
-# Recipes
+# Gallery
 
 > Custom gallery component using `frontmatter` data
- 
-Here are four delicious recipes:
 
-:content-gallery{:items="recipes"}
+Relative image paths in frontmatter arrays and objects are rewritten too, so they can be passed straight to components:
+
+:content-gallery{:items="items"}
+
+```md
+:content-gallery{:items="items"}
+```

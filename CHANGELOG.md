@@ -1,5 +1,19 @@
 # Changelog
 
+### v3.0.0
+
+Nuxt Content 3 support. The module now targets `@nuxt/content` v3 only; for Nuxt Content 2 keep using `nuxt-content-assets@1`.
+
+- Rewrite asset paths via Nuxt Content's `content:file:afterParse` hook (works for `minimark` and `hast` bodies) [#93](../../issues/93)
+- Read collections and sources from `content.config.ts`, including `cwd` and remote git sources
+- Copy assets and index them entirely in the build process; no Nitro plugin, sockets or storage layer
+- Live reload over Vite's HMR channel instead of a separate websocket server
+- Re-parse documents when assets change by contributing a fingerprint to Nuxt Content's parse cache key
+- Drop the `unstorage`, `ws`, `listhen`, `debounce` and `unist-util-visit` dependencies
+- Rewrite the playground for Nuxt 4 and Nuxt Content 3 with technical rather than recipe content [#53](../../issues/53)
+- Playground dependencies are now installed from the repository root
+- Requires Node 20.19+
+
 ### v1.9.0
 
 - Generate `srcset` and `sizes` for images with `@2x` / `@3x` variants [#106](../../issues/106)

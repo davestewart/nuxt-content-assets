@@ -38,19 +38,3 @@ export function makeExtensionRegExp (extensions: string | string[]): RegExp {
     ? new RegExp(`^(?:${tokens.join('|')})$`, 'i')
     : /^$/
 }
-
-/**
- * Create a Nuxt Content ignore string
- *
- * @see https://regex101.com/r/gC3HXz/2
- */
-export function makeIgnores (extensions: string | string[]): string {
-  const tokens = matchTokens(extensions)
-
-  if (tokens.length === 0) {
-    return ''
-  }
-
-  const disallowTail = tokens.join('$|') + '$'
-  return `\\.(?!${disallowTail})[^.]+$`
-}

@@ -1,30 +1,6 @@
 import { defineNuxtConfig } from 'nuxt/config'
-import type { MountOptions } from '@nuxt/content'
-import FireModule from './modules/fire/module'
-import ListModule from './modules/list/module'
-
-const isStackblitz = process.env.GIT_PROXY?.includes('stackblitz')
-
-// external source
-const external = {
-  driver: 'github',
-  repo: 'davestewart/nuxt-content-assets',
-  dir: '/playground/external',
-  prefix: '/external',
-}
-
-// no external playground in stackblitz (due to CORS)
-const sources: Record<string, MountOptions> = {}
-if (!isStackblitz) {
-  sources.ds = external
-}
 
 export default defineNuxtConfig({
-  future: {
-    // this enables the app/ folder
-    compatibilityVersion: 4,
-  },
-
   app: {
     head: {
       link: [
@@ -37,23 +13,25 @@ export default defineNuxtConfig({
   },
 
   modules: [
-    ListModule,
-    FireModule,
+    // make sure to add before content!
     '../src/module',
     '@nuxt/content',
     '@nuxt/image',
-    '@nuxt/devtools',
   ],
 
-  // https://content.nuxtjs.org/api/configuration
+  // https://content.nuxt.com/docs/getting-started/configuration
   content: {
-    sources,
-    highlight: {
-      theme: 'github-light',
-      preload: ['js'],
+    experimental: {
+      // use node's built-in sqlite (node 22+) so the playground doesn't need better-sqlite3
+      sqliteConnector: 'native',
     },
-    markdown: {
-      anchorLinks: false,
+    build: {
+      markdown: {
+        highlight: {
+          theme: 'github-light',
+          langs: ['js', 'ts', 'md', 'html'],
+        },
+      },
     },
   },
 
@@ -62,11 +40,18 @@ export default defineNuxtConfig({
     // add image size hints (except for src, as to not interfere with Nuxt Image)
     imageSize: 'style attrs',
 
-    // allow custom transformers
-    contentExtensions: 'mdx? csv ya?ml json fire list',
-
     // show debug messages
     debug: true,
+  },
+
+  // make <NuxtImg> available to markdown as :nuxt-img{...}
+  hooks: {
+    'components:extend' (components) {
+      const component = components.find(c => c.pascalName === 'NuxtImg')
+      if (component) {
+        component.global = true
+      }
+    },
   },
 
   // the playground deliberately includes invalid and query-string image paths, which IPX can't prerender
@@ -76,5 +61,5 @@ export default defineNuxtConfig({
     },
   },
 
-  compatibilityDate: '2024-08-11',
+  compatibilityDate: '2025-01-01',
 })

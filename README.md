@@ -7,13 +7,16 @@
 
 > Enable locally-located assets in Nuxt Content
 
+> [!IMPORTANT]
+> Version 3 of this module supports **Nuxt Content 3**. If you are still on Nuxt Content 2, install `nuxt-content-assets@1` and see the [1.x README](https://github.com/davestewart/nuxt-content-assets/tree/1.x#readme).
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/davestewart/nuxt-content-assets/main/playground/public/splash.png" alt="Nuxt Content Assets logo">
 </p>
 
 ## Overview
 
-Nuxt Content Assets enables locally-located assets in [Nuxt Content](https://content.nuxtjs.org/):
+Nuxt Content Assets enables locally-located assets in [Nuxt Content](https://content.nuxt.com/):
 
 ```
 +- content
@@ -47,7 +50,7 @@ At build time the module [collates and serves](#how-it-works) assets and content
 
 ### Features
 
-Built on top of [Nuxt Content](https://github.com/nuxt/content/) and compatible with any Nuxt Content project or theme, including [Docus](https://github.com/nuxt-themes/docus).
+Built on top of [Nuxt Content](https://github.com/nuxt/content/) v3 and compatible with any Nuxt Content project or theme, including [Docus](https://docus.dev/).
 
 User experience:
 
@@ -59,7 +62,7 @@ Developer experience:
 
 - works with tags and custom components
 - works in markdown and frontmatter
-- works with local and remote (GitHub) content sources
+- works with local, `cwd` and remote (git) collection sources
 - file watching and asset live-reload
 - image size and `srcset` injection
 - Nuxt Image support
@@ -74,7 +77,7 @@ To clone and run locally:
 ```bash
 git clone https://github.com/davestewart/nuxt-content-assets.git
 cd nuxt-content-assets
-npm install && npm install --prefix ./playground
+npm install
 npm run dev
 ```
 
@@ -82,7 +85,7 @@ Then open the playground in your browser at <a href="http://localhost:3000" targ
 
 To run the playground online, visit:
 
-- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=playground%2Fapp.vue
+- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=playground%2Fapp%2Fapp.vue
 
 To browse the playground folder:
 
@@ -108,6 +111,9 @@ export default defineNuxtConfig({
 ```
 
 Run the dev server or build and local assets should now be served alongside markdown content.
+
+> [!NOTE]
+> The module must be listed **before** `@nuxt/content`. It contributes a fingerprint of your assets to Nuxt Content's parse cache so that documents are re-parsed when assets change; if Content sets up first, cached documents may keep stale paths until you edit them.
 
 ## Usage
 
@@ -147,7 +153,35 @@ These values can then be passed to components:
 :image-gallery{:data="images"}
 ```
 
-See the playground for [markup](playground/content/advanced/gallery.md) and [component](playground/components/content/ContentGallery.vue) examples.
+Both schema fields and free-form `meta` fields are rewritten.
+
+See the playground for [markup](playground/content/advanced/gallery.md) and [component](playground/app/components/content/ContentGallery.vue) examples.
+
+### Collections and sources
+
+Assets are discovered from the same places Nuxt Content reads documents. For each collection source in `content.config.ts`, the module scans the source folder (the fixed part of the `include` glob, under `cwd` or `content/`) for any file that isn't a content file, and serves it under the source's `prefix`:
+
+```ts
+// content.config.ts
+export default defineContentConfig({
+  collections: {
+    blog: defineCollection({
+      type: 'page',
+      source: 'blog/**',                    // assets served from /blog/...
+    }),
+    docs: defineCollection({
+      type: 'page',
+      source: {
+        include: '**',
+        cwd: '~~/packages/docs/content',    // assets served from /...
+        prefix: '/docs',                    // ...or /docs/... when a prefix is set
+      },
+    }),
+  },
+})
+```
+
+Remote sources (`repository`) are cloned by Nuxt Content on first build; the module picks their assets up as soon as the first document from that source is parsed.
 
 ### Live reload
 
@@ -178,7 +212,7 @@ Turning this on prevents content jumps as your page loads.
 
 #### Prose components
 
-If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can [hook into](playground/components/temp/ProseImg.vue) image size hints via the `$attrs` property:
+If you use [ProseImg](https://content.nuxt.com/docs/components/prose) components, you can [hook into](playground/app/components/temp/ProseImg.vue) image size hints via the `$attrs` property:
 
 ```vue
 <template>
@@ -196,7 +230,7 @@ export default {
 
 #### Frontmatter
 
-If you pass [frontmatter](playground/content/advanced/gallery.md) to [custom components](playground/components/content/ContentImage.vue) set `imageSize` to `'src'` to encode values in `src`:
+If you pass [frontmatter](playground/content/advanced/gallery.md) to [custom components](playground/app/components/content/ContentImage.vue) set `imageSize` to `'src'` to encode values in `src`:
 
 ```
 :image-content{:src="image"}
@@ -208,7 +242,7 @@ The component will receive the size information as a query string which you can 
 <img class="image-content" src="/image.jpg?width=640&height=480">
 ```
 
-See playground component [here](playground/components/content/ContentImage.vue).
+See playground component [here](playground/app/components/content/ContentImage.vue).
 
 ### High resolution images
 
@@ -243,6 +277,8 @@ See the [configuration](#srcset) section to customise or disable this.
 
 > [!NOTE]
 > Prior to `v1.9.0` you needed to add `node_modules/nuxt-content-assets/cache` to `extends` in your Nuxt config. This is no longer required, but is harmless if left in place.
+>
+> If your `ProseImg` forwards `$attrs` to `<NuxtImg>`, either exclude `srcset` and `sizes` or set `srcset: false`, as Nuxt Image generates its own.
 
 To serve all images as Nuxt Image images, create a `ProseImg` component like so:
 
@@ -253,7 +289,7 @@ To serve all images as Nuxt Image images, create a `ProseImg` component like so:
 </template>
 ```
 
-See the playground folder for both the [global](playground/components/temp/ProseImg.vue) and a [per image](playground/components/content/NuxtImg.ts) solution.
+See the playground folder for both the [global](playground/app/components/temp/ProseImg.vue) and a [per image](playground/app/components/content/NuxtImg.ts) solution.
 
 ## Configuration
 
@@ -312,19 +348,15 @@ img {
 ### Content extensions
 
 > [!NOTE]
-> Generally, you shouldn't need to touch this setting, however, if you're looking to support custom content types [by way of transformers](https://v2.content.nuxt.com/recipes/transformers) then you'll need to add those extensions here.
+> Generally, you shouldn't need to touch this setting, however, if you're looking to support custom content types [by way of transformers](https://content.nuxt.com/docs/advanced/transformers) then you'll need to add those extensions here.
 
-This setting tells Nuxt Content to ignore anything that is **not** one of the supported content types:
+This setting tells the module which files in a collection's source folder are content rather than assets:
 
 ```
 mdx? csv ya?ml json
 ```
 
-This way, you can use any **other** file type as an asset, without needing to explicitly configure Nuxt Content's [ignores](https://content.nuxt.com/get-started/configuration#ignores) list.
-
-Without this, Nuxt Content would warn about unsupported file types: 
-
-> [WARN] .jpg files are not supported, "content:path:to:some-asset.jpg" falling back to raw content
+Anything **else** found in the folder is copied to the public folder and treated as an asset. Dot-prefixed files and folders, and anything matching a source's `exclude` globs, are skipped.
 
 ### Srcset
 
@@ -361,26 +393,27 @@ If you want to see what the module does as it runs, set `debug` to true:
 
 ## How it works
 
-When Nuxt builds, the module scans all content sources for assets, copies them to a cache folder within the package (`node_modules/nuxt-content-assets/cache`), and indexes path and image metadata.
+When Nuxt starts, the module reads your `content.config.ts` (the same way Nuxt Content does), scans each collection source folder for non-content files, copies them to a cache folder within the package (`node_modules/nuxt-content-assets/cache/public`), and indexes path and image metadata.
 
-As Nuxt Content parses each document, both element attributes and frontmatter properties are checked to see if they resolve to the previously-indexed asset paths.
+As Nuxt Content parses each document (via its `content:file:afterParse` hook) both element attributes and frontmatter properties are checked to see if they resolve to indexed assets. If they do, the attribute or property is rewritten with the absolute public path before the document is stored in Nuxt Content's database. If the asset is an image, the element is optionally updated with size attributes, `srcset` or a query string.
 
-If they do, then the attribute or property is rewritten with the absolute path before Nuxt Content caches the document. If the asset is an image, then the element or metadata is optionally updated with size attributes, `srcset` or a query string.
+Nuxt Content caches parsed documents between runs. The module contributes a fingerprint of the asset index to that cache key, so adding, removing or resizing assets re-parses documents on the next start.
 
-Between runs, the module remembers which documents referenced which assets, and only invalidates Nuxt Content's cache (`.nuxt/content-cache`) for documents affected by added, removed or resized assets.
+Nitro serves the copied assets as public assets, and the cache folder is registered as a Nuxt layer so that Nuxt Image's `_ipx/` endpoint can find them in development.
 
-Finally, Nitro serves the site, and any requests made to the transformed asset paths should be picked up and the *copied* asset served by the browser.
+In development, the module watches source folders for asset changes, updates the copy and index, and notifies the browser over Vite's HMR channel to refresh affected images, videos and embeds.
 
-In development, a watch process propagates asset changes to the cache, updates the asset index, and notifies the browser via web sockets to refresh any loaded images. 
+### Limitations
 
-The cache folder is registered as a Nuxt layer, so if Nuxt Image is used, the `_ipx/` endpoint serves images directly from the cache's public folder.
+- In development, if you add or resize an image **after** the document referencing it has been parsed, the browser refreshes the image but the stored document keeps the old path or size until you save the document or restart the dev server. Nuxt Content does not currently expose a way for modules to re-parse individual documents.
+- Remote (git) sources are only scanned once Nuxt Content has cloned them, so on a completely fresh build their assets are indexed when the first document from that source is parsed.
 
 ## Development
 
 Should you wish to develop the project, you'll work with the following entities:
 
 - [src](./src)<br>The module code itself
-- [playground](./playground)<br>A standalone Nuxt app that reads the live module code
+- [playground](./playground)<br>A standalone Nuxt 4 / Nuxt Content 3 app that reads the live module code
 - [scripts](package.json)<br>A set of scripts to develop and publish the module
 
 ### Setup
@@ -389,11 +422,13 @@ To set up the project, run each of these scripts once:
 
 ```bash
 # install dependencies
-npm install && npm install --prefix ./playground
+npm install
 
 # generate types for the module and playground (re-run if you install new packages)
 npm run dev:prepare
 ```
+
+The playground uses Node's built-in SQLite driver (`sqliteConnector: 'native'`), so it needs Node 22.5 or later.
 
 ### Development
 

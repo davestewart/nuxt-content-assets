@@ -4,17 +4,12 @@
 
 This index file should render but none of the files in this folder should be copied to the `public` folder during build, so the following links should 404:
 
-- [index.mdx](/data/index.mdx)
 - [CSV.csv](/data/CSV.csv)
 - [JSON.json](/data/JSON.json)
 - [YAML.yml](/data/YAML.yml)
 
-You can still query them in code though, for example:
-
-```js
-await queryContent('/data/YAML').findOne()
-```
+Files matching `contentExtensions` (`mdx? csv ya?ml json` by default) are treated as content, everything else as assets.
 
 See:
 
-- https://content.nuxt.com/usage/files
+- https://content.nuxt.com/docs/files

@@ -20,3 +20,7 @@ Tables should be processed:
 | Label                        | Image                                                                        |
 |------------------------------|------------------------------------------------------------------------------|
 | This is a load of dummy text | :img{src="../advanced/frontmatter/turkey-casserole.jpg" style="width: 50%;"} |
+
+Headings should be processed:
+
+## Heading with image ![icon](../internal/json-tutorial/dummy.png)
