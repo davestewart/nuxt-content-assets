@@ -1,5 +1,5 @@
 import Path from 'crosspath'
-import { type MountOptions } from '@nuxt/content'
+import type { MountOptions } from '@nuxt/content'
 import githubDriver, { type GithubOptions } from 'unstorage/drivers/github'
 import fsDriver, { type FSStorageOptions } from 'unstorage/drivers/fs'
 import { createStorage, type Storage, type WatchEvent } from 'unstorage'
@@ -70,8 +70,9 @@ export interface SourceManager {
  * @param source
  * @param publicPath
  * @param callback
+ * @param watch       Whether to watch the source for changes (dev only)
  */
-export function makeSourceManager (key: string, source: MountOptions, publicPath: string, callback?: (event: WatchEvent, path: string) => void): SourceManager {
+export function makeSourceManager (key: string, source: MountOptions, publicPath: string, callback?: (event: WatchEvent, path: string) => void, watch = false): SourceManager {
   // only fs will trigger watch events
   async function onWatch (event: WatchEvent, key: string) {
     if (isAssetId(key)) {
@@ -86,9 +87,7 @@ export function makeSourceManager (key: string, source: MountOptions, publicPath
 
   // relative source file path from key
   function getRelSrc (key: string) {
-    return toPath(key)
-      .replace(/\w+/, '')
-      .replace(source.prefix || '', '')
+    return toPath(deKey(key))
   }
 
   // absolute source file path from key
@@ -135,9 +134,12 @@ export function makeSourceManager (key: string, source: MountOptions, publicPath
       try {
         const data = await storage.getItem(key)
         if (data) {
-          data?.constructor.name === 'Blob'
-            ? await writeBlob(absTrg, data as object)
-            : writeFile(absTrg, data)
+          if (data instanceof Blob) {
+            await writeBlob(absTrg, data)
+          }
+          else {
+            writeFile(absTrg, data as string | object)
+          }
         }
         else {
           warn(`No data for key "${key}"`)
@@ -180,7 +182,9 @@ export function makeSourceManager (key: string, source: MountOptions, publicPath
 
   // storage
   const storage = makeSourceStorage(source, key)
-  void storage.watch(onWatch)
+  if (watch) {
+    void storage.watch(onWatch)
+  }
 
   // cleanup
   async function dispose () {

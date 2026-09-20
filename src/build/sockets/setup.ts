@@ -1,4 +1,4 @@
-import { Server } from 'http'
+import type { Server } from 'node:http'
 import { listen } from 'listhen'
 import { useNuxt } from '@nuxt/kit'
 import { createWebSocket } from './factory'
@@ -47,7 +47,7 @@ export async function setupSocketServer (channel: string, handler?: Callback): P
   nuxt.hook('nitro:init', async (nitro) => {
     if (!nuxt._socketServer) {
       // server
-      const defaults = nuxt.options.runtimeConfig.content.watch.ws
+      const defaults = (nuxt.options.runtimeConfig.content as any).watch.ws
       const port = defaults.port.port
       const { server, url } = await listen(() => 'Nuxt Content Assets', {
         hostname: defaults.hostname,

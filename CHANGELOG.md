@@ -1,5 +1,21 @@
 # Changelog
 
+### v1.9.0
+
+- Generate `srcset` and `sizes` for images with `@2x` / `@3x` variants [#106](../../issues/106)
+- Register the assets cache as a Nuxt layer automatically, so Nuxt Image works without `extends` [#84](../../issues/84)
+- Copy assets on `modules:done` so builds restored from `experimental.buildCache` still get assets [#88](../../issues/88)
+- Only invalidate Nuxt Content's cache for documents affected by asset changes, rather than clearing it on every run [#18](../../issues/18)
+- Live reload Nuxt Image images and `srcset` candidates [#77](../../issues/77)
+- Respect `contentExtensions` when deciding which files are assets (custom transformer content is no longer copied to public)
+- Process assets referenced inside headings
+- Preserve query strings on frontmatter asset paths (previously only kept when `imageSize` included `src`)
+- Fix relative path detection for `data:`, `mailto:` and anchor links
+- Fix source keys containing non-word characters (e.g. `my-source`)
+- Fix crash when rewriting cached documents with non-string frontmatter values
+- Resolve the cache folder relative to the package rather than searching `node_modules`
+- Add CI, typechecking, ESLint 9 and more unit tests; upgrade `image-size` to v2; require Node 18.20+
+
 ### v1.8.3
 
 - Update build to export types [#103](../../issues/103)

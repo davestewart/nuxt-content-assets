@@ -7,8 +7,7 @@ export interface Logger {
 
 let ws: WebSocket | undefined
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function log (...args: any[]) {}
+function log (..._args: any[]) {}
 
 export function createWebSocket (url: string, logger: Logger = { log, warn: log }) {
   if (!window.WebSocket) {
@@ -16,17 +15,13 @@ export function createWebSocket (url: string, logger: Logger = { log, warn: log 
     return null
   }
 
-  const onOpen = () => logger.log('WS connected!')
+  const onOpen = () => {
+    retries = 0
+    logger.log('WS connected!')
+  }
 
   const onError = (e: any) => {
-    switch (e.code) {
-      case 'ECONNREFUSED':
-        connect(true)
-        break
-      default:
-        logger.warn('Socket error:', e)
-        break
-    }
+    logger.warn('Socket error:', e)
   }
 
   const onClose = (e: any) => {

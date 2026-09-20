@@ -17,6 +17,7 @@ Assets:
 
 - [Media and file assets](assets)
 - [Nuxt Image component](assets/nuxt-image.md)
+- [High resolution images with `srcset`](assets/srcset)
 
 Advanced:
 

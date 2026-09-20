@@ -1,29 +1,32 @@
 import type { NitroApp, NitroAppPlugin } from 'nitropack'
-import type { ImageSize, ParsedContent } from '../../types'
-import { buildQuery, buildStyle, isValidAsset, list, parseQuery, removeQuery, walkBody, walkMeta } from '../utils'
-import { makeAssetsManager } from '../assets/public'
-// @ts-ignore – options injected via module.ts
-import { debug, imageSizes, publicPath } from '#nuxt-content-assets'
+import type { ImageSize, ParsedContent, ResolvedAsset } from '../../types'
+import { buildQuery, buildStyle, list, setContentExtensions, walkBody, walkMeta } from '../utils'
+import { makeAssetResolver } from '../assets/resolver'
+import { contentExtensions, debug, imageSizes, publicPath, srcset } from '#nuxt-content-assets'
 
-const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
+const plugin: NitroAppPlugin = (nitro: NitroApp) => {
+  // configure which extensions count as content (mirrors the build process)
+  setContentExtensions(contentExtensions)
+
+  // resolver
+  const resolver = makeAssetResolver(publicPath, {
+    watch: import.meta.dev,
+    srcset,
+  })
 
   /**
    * Walk the parsed frontmatter and check properties as paths
    */
-  function processMeta (content: ParsedContent, imageSizes: ImageSize = [], updated: string[] = []) {
-    walkMeta(content, (value: string | number, parent: Record<string, any>, key: string) => {
-      if (isValidAsset(value)) {
-        const { srcAttr, width, height } = resolveAsset(content, removeQuery(value), true)
-        if (srcAttr) {
-          const query = width && height && (imageSizes.includes('src') || imageSizes.includes('url'))
-            ? `width=${width}&height=${height}`
-            : ''
-          const srcUrl = query
-            ? buildQuery(srcAttr, parseQuery(value), query)
-            : srcAttr
-          parent[key] = srcUrl
-          updated.push(`meta: ${key} to "${srcUrl}"`)
-        }
+  function processMeta (content: ParsedContent, imageSizes: ImageSize, updated: string[]) {
+    walkMeta(content, (value, parent, key) => {
+      const asset = resolver.resolve(content, value)
+      if (asset) {
+        const { srcAttr, width, height } = asset
+        const srcUrl = width && height && imageSizes.includes('src')
+          ? buildQuery(srcAttr, `width=${width}&height=${height}`)
+          : srcAttr
+        parent[key] = srcUrl
+        updated.push(`meta: ${key} to "${srcUrl}"`)
       }
     })
   }
@@ -31,72 +34,70 @@ const plugin: NitroAppPlugin = async (nitro: NitroApp) => {
   /**
    * Walk the parsed content and check potential attributes as paths
    */
-  function processBody (content: ParsedContent, imageSizes: ImageSize = [], updated: string[] = []) {
-    walkBody(content, function (node: any) {
+  function processBody (content: ParsedContent, imageSizes: ImageSize, updated: string[]) {
+    walkBody(content, (node: any) => {
       const { tag, props } = node
       for (const [prop, value] of Object.entries(props)) {
-        // only process strings
-        // TODO: potentially use safe-list rather than type check here
-        if (typeof value !== 'string') {
-          continue
-        }
-
-        // parse value
-        const { srcAttr, width, height } = resolveAsset(content, value, true)
-
-        // if we resolved an asset
-        if (srcAttr) {
-          // assign src
-          node.props[prop] = srcAttr
-
-          // assign size
-          if (node.tag === 'img' || node.tag === 'nuxt-img') {
-            if (width && height) {
-              if (imageSizes.includes('attrs')) {
-                node.props.width = width
-                node.props.height = height
-              }
-              if (imageSizes.includes('style')) {
-                const ratio = `${width}/${height}`
-                if (typeof node.props.style === 'string') {
-                  node.props.style = buildStyle(node.props.style, `aspect-ratio: ${ratio}`)
-                }
-                else {
-                  node.props.style ||= {}
-                  node.props.style.aspectRatio = ratio
-                }
-              }
-            }
+        const asset = resolver.resolve(content, value)
+        if (asset) {
+          props[prop] = asset.srcAttr
+          if (tag === 'img' || tag === 'nuxt-img') {
+            applyImageHints(node, asset, imageSizes)
           }
-
-          // open links in new window
-          else if (node.tag === 'a') {
-            node.props.target ||= '_blank'
+          else if (tag === 'a') {
+            props.target ||= '_blank'
           }
-
-          // debug
-          updated.push(`page: ${tag}[${prop}] to "${srcAttr}"`)
+          updated.push(`page: ${tag}[${prop}] to "${asset.srcAttr}"`)
         }
       }
     })
   }
 
-  const { resolveAsset, dispose } = makeAssetsManager(publicPath, import.meta.dev)
+  /**
+   * Add size and srcset hints to image nodes
+   */
+  function applyImageHints (node: any, asset: ResolvedAsset, imageSizes: ImageSize) {
+    const { props } = node
+    const { width, height } = asset
+    if (width && height) {
+      if (imageSizes.includes('attrs')) {
+        props.width = width
+        props.height = height
+      }
+      if (imageSizes.includes('style')) {
+        const ratio = `${width}/${height}`
+        if (typeof props.style === 'string') {
+          props.style = buildStyle(props.style, `aspect-ratio: ${ratio}`)
+        }
+        else {
+          props.style ||= {}
+          props.style.aspectRatio = ratio
+        }
+      }
+    }
+    // only plain images; nuxt-img generates its own srcset
+    if (node.tag === 'img' && asset.srcset && !props.srcset) {
+      props.srcset = asset.srcset
+      if (asset.sizes && !props.sizes) {
+        props.sizes = asset.sizes
+      }
+    }
+  }
 
-  // @ts-ignore hook name
-  nitro.hooks.hook('content:file:afterParse', function (content: ParsedContent) {
+  // @ts-expect-error hook is added by Nuxt Content
+  nitro.hooks.hook('content:file:afterParse', async (content: ParsedContent) => {
     if (content._extension === 'md') {
+      await resolver.ready
       const updated: string[] = []
       processMeta(content, imageSizes, updated)
       processBody(content, imageSizes, updated)
       if (debug && updated.length) {
         list(`Processed "/${content._file}"`, updated)
-        console.log()
       }
     }
   })
 
-  nitro.hooks.hook('close', dispose)
+  nitro.hooks.hook('close', resolver.dispose)
 }
 
 export default plugin

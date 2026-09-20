@@ -57,3 +57,6 @@ Temporary Items
 
 # local
 /debug
+
+# module runtime indexes
+/cache/*.json

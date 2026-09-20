@@ -1,6 +1,6 @@
 export type Walkable = { [key: string | number]: any }
 
-export type WalkFilter = (value: any, key?: string | number) => boolean | void
+export type WalkFilter = (value: any, key?: string | number) => boolean | undefined
 
 export type WalkCallback = (value: any, parent: Walkable, key: string | number) => void
 

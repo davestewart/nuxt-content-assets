@@ -6,13 +6,11 @@ let client: ReturnType<typeof createWebSocket>
 const plugin = '[Content Assets]'
 
 const logger: Logger = {
-  // eslint-disable-next-line no-console
   log: (...args: any[]) => console.log(plugin, ...args),
-  // eslint-disable-next-line no-console
   warn: (...args: any[]) => console.warn(plugin, ...args)
 }
 
-export function setupSocketClient (url: string, channel: string, callback?: Callback): SocketInstance | null{
+export function setupSocketClient (url: string, channel: string, callback?: Callback): SocketInstance | null {
   if (!client) {
     client = createWebSocket(url, logger)
     if (client === null) {

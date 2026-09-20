@@ -1,6 +1,6 @@
 {
   "name": "nuxt-content-assets",
-  "version": "1.8.3",
+  "version": "1.9.0",
   "description": "Enable locally-located assets in Nuxt Content",
   "repository": {
     "type": "git",
@@ -20,20 +20,18 @@
     "dist"
   ],
   "scripts": {
-    "dev:setup": "cpy cache playground/node_modules/nuxt-content-assets && cpy \"cache/**\" playground/.nuxt/content-assets",
-    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare",
-
+    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
     "dev": "nuxi dev playground",
     "dev:generate": "nuxi generate playground",
     "dev:build": "nuxi build playground",
     "dev:preview": "nuxi preview playground",
-
     "build": "nuxt-module-build build",
-    "release:setup": "npm run lint && npm run test && npm run build",
+    "release:setup": "npm run lint && npm run typecheck && npm test && npm run build",
     "release:dry": "npm run release:setup && npm publish --dry-run",
     "release": "npm run release:setup && npm publish",
-
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest watch"
   },
@@ -41,7 +39,7 @@
     "@nuxt/kit": "^3.20.2",
     "crosspath": "^2.0.0",
     "debounce": "^3.0.0",
-    "image-size": "^1.1.1",
+    "image-size": "^2.0.4",
     "listhen": "^1.9.0",
     "ohash": "^2.0.11",
     "unist-util-visit": "^5.0.0",
@@ -54,19 +52,19 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
-    "@nuxt/eslint-config": "^0.7.6",
+    "@nuxt/eslint-config": "^1.17.0",
     "@nuxt/module-builder": "^1.0.2",
     "@nuxt/schema": "^3.20.2",
     "@nuxt/test-utils": "^3.23.0",
     "@types/debounce": "^1.2.4",
     "@types/node": "^25.0.3",
     "@types/ws": "^8.18.1",
-    "cpy-cli": "^6.0.0",
-    "eslint": "^8.39.2",
+    "eslint": "^9.39.5",
     "nuxt": ">=3.0.0",
+    "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.20.0"
   }
 }

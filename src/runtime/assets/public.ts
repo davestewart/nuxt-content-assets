@@ -1,250 +1,149 @@
-import * as Fs from 'fs'
+import * as Fs from 'node:fs'
 import Path from 'crosspath'
-import getImageSize from 'image-size'
-import debounce from 'debounce'
-import { hash } from 'ohash'
-import { makeSourceStorage } from './source'
-import { isImage, log, removeEntry, removeOrdering, removeQuery, warn } from '../utils'
-import type { AssetConfig, ParsedContent } from '../../types'
+import { imageSize } from 'image-size'
+import { makeJsonStore } from './store'
+import { isImage, removeEntry, warn } from '../utils'
+import type { AssetConfig, AssetIndex, ContentIndex } from '../../types'
+
+export const ASSETS_FILE = 'assets.json'
+export const CONTENT_FILE = 'content.json'
+
+export const emptyContentIndex = (): ContentIndex => ({ hits: {}, misses: {} })
 
 /**
- * Manages the public assets
+ * Manages the public assets folder and index (build process)
+ *
+ * - writes `assets.json` (asset paths and sizes)
+ * - reads `content.json` (which documents reference which assets, written by the server process)
+ *
+ * @param publicPath  The absolute path to the public folder
+ * @param watch       Whether to watch `content.json` for changes (dev only)
  */
-export function makeAssetsManager (publicPath: string, shouldWatch = true) {
-
-  // ---------------------------------------------------------------------------------------------------------------------
-  // storage - updates asset index file, watches for changes from other processes
-  // ---------------------------------------------------------------------------------------------------------------------
-
-  // variables
-  const assetsKey: string = 'assets.json'
-  const assetsPath = Path.join(publicPath, '..')
-
-  // storage
-  const storage = makeSourceStorage(assetsPath)
-  if (shouldWatch) {
-    void storage.watch(async (event: string, key: string) => {
-      if (event === 'update' && key === assetsKey) {
-        await load()
-      }
-    })
-  }
-
-  // assets
-  const assets: Record<string, AssetConfig> = {}
-
-  async function load () {
-    const data = await storage.getItem(assetsKey)
-    // console.log('load:', data)
-    Object.assign(assets, data || {})
-  }
-
-  const save = debounce(function () {
-    // console.log('save:', assets)
-    void storage.setItem(assetsKey, assets)
-  }, 50)
-
-  // ---------------------------------------------------------------------------------------------------------------------
-  // content - get
-  // ---------------------------------------------------------------------------------------------------------------------
+export function makeAssetsManager (publicPath: string, watch = false) {
+  const cachePath = Path.dirname(publicPath)
+  const assets = makeJsonStore<AssetIndex>(cachePath, ASSETS_FILE, {})
+  const content = makeJsonStore<ContentIndex>(cachePath, CONTENT_FILE, emptyContentIndex(), watch)
 
   /**
-   * Resolve relative asset from content
-   *
-   * @param content
-   * @param relAsset
-   * @param registerContent
+   * Load both indexes from disk; returns a snapshot of the previous run's assets
    */
-  function resolveAsset (content: ParsedContent, relAsset: string, registerContent = false): AssetConfig {
-    // test relative asset against stored absolute assets
-    const srcDir = Path.dirname(content._file)
-    const relAssetNoQuery = removeQuery(relAsset)
-    const srcAsset = removeOrdering(Path.join(srcDir, relAssetNoQuery))
-    const asset = assets[srcAsset]
+  async function load (): Promise<AssetIndex> {
+    await content.load()
+    const previous = await assets.load()
+    return { ...previous }
+  }
 
-    // special case for register content
-    if (asset && registerContent) {
-      const { _id } = content
-      if (!asset.content.includes(_id)) {
-        asset.content.push(_id)
-        save()
-      }
-    }
-
-    // if we have an asset, return it
-    if (asset) {
-      if (relAsset.includes('?')) {
-        return {
-          ...asset,
-          srcAttr: asset.srcAttr + '?' + relAsset.split('?').pop() || '',
+  /**
+   * Remove all files from the public folder
+   */
+  function clear () {
+    if (Fs.existsSync(publicPath)) {
+      for (const name of Fs.readdirSync(publicPath)) {
+        if (!/^\.git(?:ignore|keep)$/.test(name)) {
+          removeEntry(Path.join(publicPath, name))
         }
       }
-      return asset
     }
-
-    // return empty object if not found
-    return { srcAttr: '', content: [] }
+    for (const key of Object.keys(assets.data)) {
+      delete assets.data[key]
+    }
   }
 
-  // ---------------------------------------------------------------------------------------------------------------------
-  // asset - get and set asset data from absolute paths (used in watching)
-  // ---------------------------------------------------------------------------------------------------------------------
-
   /**
-   * Update a cached asset by its absolute public path
-   *
-   * When called by build, used to register images for the first time
-   * When called by watch, used to update image size, etc
-   *
-   * @param path Absolute path to the asset
+   * Add or update an asset by its absolute public path
    */
   function setAsset (path: string): AssetConfig {
-    // variables
     const { srcRel, srcAttr } = getAssetPaths(publicPath, path)
-    const { width, height } = getAssetSize(path)
-
-    // add assets to config
-    const oldAsset = assets[srcRel]
-    const newAsset = {
-      srcAttr,
-      content: oldAsset?.content || [],
-      width,
-      height,
-    }
-
-    // update
-    assets[srcRel] = newAsset
-    save()
-
-    // return
-    return newAsset
+    const asset: AssetConfig = { srcAttr, ...getAssetSize(path) }
+    assets.data[srcRel] = asset
+    assets.save()
+    return asset
   }
 
   /**
-   * Get a cached asset by its absolute public path
+   * Get an asset by its absolute public path
    */
   function getAsset (path: string): AssetConfig | undefined {
     const { srcRel } = getAssetPaths(publicPath, path)
-    return srcRel && assets[srcRel]
-      ? { ...assets[srcRel] }
+    return assets.data[srcRel]
+      ? { ...assets.data[srcRel] }
       : undefined
   }
 
   /**
-   * Remove a cached asset by its absolute public path
+   * Remove an asset by its absolute public path
    */
   function removeAsset (path: string): AssetConfig | undefined {
     const { srcRel } = getAssetPaths(publicPath, path)
-    const asset = assets[srcRel]
+    const asset = assets.data[srcRel]
     if (asset) {
-      delete assets[srcRel]
-      save()
+      delete assets.data[srcRel]
+      assets.save()
     }
     return asset
   }
 
   /**
-   * Remove public asset files
+   * Get the ids of documents that referenced an asset (by public path)
    */
-  const init = () => {
-    if (Fs.existsSync(publicPath)) {
-      const names = Fs.readdirSync(publicPath)
-      for (const name of names) {
-        if (!/^\.git(ignore|keep)$/.test(name)) {
-          removeEntry(Path.join(publicPath, name))
-        }
-      }
-    }
+  function getContentIds (path: string): string[] {
+    const { srcRel } = getAssetPaths(publicPath, path)
+    return content.data.hits[srcRel] || []
   }
 
-  // start
-  void load()
-
-  // return
   return {
-    init,
+    load,
+    clear,
     setAsset,
     getAsset,
     removeAsset,
-    resolveAsset,
+    getContentIds,
+    get assets () {
+      return assets.data
+    },
+    get content () {
+      return content.data
+    },
     dispose: async () => {
-      await storage.unwatch()
-      await storage.dispose()
+      await assets.dispose()
+      await content.dispose()
     },
   }
 }
+
+export type AssetsManager = ReturnType<typeof makeAssetsManager>
 
 // ---------------------------------------------------------------------------------------------------------------------
 // utils
 // ---------------------------------------------------------------------------------------------------------------------
 
 /**
- * Hash of replacer functions
- */
-export const replacers: Record<string, (src: string) => string> = {
-  key: (src: string) => Path.dirname(src).split('/').filter(e => e).shift() || '',
-  path: (src: string) => Path.dirname(src),
-  folder: (src: string) => Path.dirname(src).replace(/[^/]+\//, ''),
-  file: (src: string) => Path.basename(src),
-  name: (src: string) => Path.basename(src, Path.extname(src)),
-  extname: (src: string) => Path.extname(src),
-  ext: (src: string) => Path.extname(src).substring(1),
-  hash: (src: string) => hash({ src }),
-}
-
-/**
- * Interpolate assets path pattern
- *
- * @param pattern   A path pattern with tokens
- * @param src       The relative path to a src asset
- * @param warn      An optional flag to warn for unknown tokens
- */
-export function interpolatePattern (pattern: string, src: string, warn = false): string {
-  return Path.join(pattern.replace(/\[\w+]/g, (match: string) => {
-    const name = match.substring(1, match.length - 1)
-    const fn = replacers[name]
-    if (fn) {
-      return fn(src)
-    }
-    if (warn) {
-      log(`Unknown output token ${match}`, true)
-    }
-    return match
-  }))
-}
-
-/**
  * Parse asset paths from absolute path
  *
- * @param srcDir    The absolute path to the asset's source folder
- * @param srcAbs    The absolute path to the asset itself
+ * @param publicPath  The absolute path to the public folder
+ * @param srcAbs      The absolute path to the asset itself
  */
-export function getAssetPaths (srcDir: string, srcAbs: string) {
-  // relative asset path
-  const srcRel = Path.relative(srcDir, srcAbs)
-
-  // interpolated public path
-  const srcAttr = '/' + srcRel
-
-  // return
+export function getAssetPaths (publicPath: string, srcAbs: string) {
+  const srcRel = Path.relative(publicPath, srcAbs)
   return {
     srcRel,
-    srcAttr,
+    srcAttr: '/' + srcRel,
   }
 }
 
 /**
- * Get asset image sizes
+ * Get image dimensions for image assets
  *
  * @param srcAbs    The absolute path to the asset itself
  */
 export function getAssetSize (srcAbs: string): { width?: number, height?: number } {
   if (isImage(srcAbs)) {
     try {
-      return getImageSize(srcAbs)
+      const { width, height } = imageSize(Fs.readFileSync(srcAbs))
+      return { width, height }
     }
     catch {
-      warn(`could not read image "${srcAbs}`)
+      warn(`Could not read image "${srcAbs}"`)
     }
   }
   return {}
