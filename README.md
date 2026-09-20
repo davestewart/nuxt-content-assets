@@ -59,8 +59,10 @@ Developer experience:
 
 - works with tags and custom components
 - works in markdown and frontmatter
+- works with local and remote (GitHub) content sources
 - file watching and asset live-reload
-- image size injection
+- image size and `srcset` injection
+- Nuxt Image support
 - zero config
 
 ## Playground
