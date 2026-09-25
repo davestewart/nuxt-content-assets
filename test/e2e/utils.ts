@@ -4,7 +4,7 @@ import { createServer } from 'node:net'
 import { fileURLToPath } from 'node:url'
 import { imageSize } from 'image-size'
 import { expect } from 'vitest'
-import { $fetch, setup } from '@nuxt/test-utils/e2e'
+import { setup } from '@nuxt/test-utils/e2e'
 
 type SetupOptions = Parameters<typeof setup>[0]
 
@@ -31,6 +31,22 @@ export async function setupFixture (name: string, options: SetupOptions = {}) {
     buildDir,
     outputDir: `${buildDir}/output`,
   }
+}
+
+/**
+ * Generate a fixture, equivalent to `nuxi generate`, prerendering the given routes
+ */
+export function generateFixture (name: string, routes: string[]) {
+  return setupFixture(name, {
+    server: false,
+    nuxtConfig: {
+      _generate: true,
+      nitro: {
+        static: true,
+        prerender: { routes, crawlLinks: false },
+      },
+    } as NonNullable<SetupOptions>['nuxtConfig'],
+  })
 }
 
 /**
@@ -139,13 +155,6 @@ export async function waitFor<T> (fn: () => T | Promise<T>, timeout = 10_000, in
     await new Promise(resolve => setTimeout(resolve, interval))
   }
   throw lastError || new Error(`Timed out after ${timeout}ms`)
-}
-
-/**
- * Fetch a parsed document from the fixture's `/api/doc/**` route
- */
-export function getDoc (path: string): Promise<Record<string, any>> {
-  return $fetch(`/api/doc${path}`)
 }
 
 /**

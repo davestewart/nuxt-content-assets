@@ -1,18 +1,51 @@
-import { existsSync, readFileSync } from 'node:fs'
-import { describe, expect, it } from 'vitest'
-import { $fetch, fetch } from '@nuxt/test-utils/e2e'
-import { findImage, findProps, getDoc, setupFixture } from './utils'
+import { copyFileSync, mkdirSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import WebSocket from 'ws'
+import { findImage, findProps, getFixturePath, startDevServer, waitFor } from './utils'
 
-const routes = ['/', '/paths', '/paths/parent', '/media', '/srcset', '/frontmatter', '/ordered', '/query', '/tags']
+// feature tests run against the dev server, as it starts faster than a production build;
+// see prod.spec.ts and content-generate.spec.ts for production and static output
+describe('content', () => {
+  const rootDir = getFixturePath('content')
+  const liveDir = `${rootDir}/content/live`
+  const messages: any[] = []
 
-describe('content', async () => {
-  // prerender the pages as well, so one build covers both the server and `nuxi generate` output
-  const { rootDir, outputDir } = await setupFixture('content', {
-    nuxtConfig: {
-      nitro: {
-        prerender: { routes, crawlLinks: false },
-      },
-    },
+  let server: Awaited<ReturnType<typeof startDevServer>>
+  let socket: WebSocket
+
+  const get = (path: string) => server.get(path)
+
+  const getHtml = async (path: string) => (await get(path)).text()
+
+  const getDoc = async (path: string): Promise<Record<string, any>> => (await get(`/api/doc${path}`)).json()
+
+  beforeAll(async () => {
+    rmSync(liveDir, { recursive: true, force: true })
+    mkdirSync(liveDir)
+
+    // a page and image which exist before the server starts, so the page is parsed with the image's size
+    copyFileSync(`${rootDir}/content/tags/image.png`, `${liveDir}/resized.png`)
+    writeFileSync(`${liveDir}/index.md`, '![resized](resized.png)\n')
+
+    server = await startDevServer('content')
+
+    // connect to the module's socket server (not Nuxt Content's, which is also in the config)
+    const wsUrl = server.html.match(/sockets:\{wsUrl:"([^"]+)"/)?.[1]
+    expect(wsUrl).toBeDefined()
+    socket = new WebSocket(wsUrl!)
+    socket.on('message', (data) => {
+      const message = JSON.parse(String(data))
+      if (message.channel === 'content-assets') {
+        messages.push(message.data)
+      }
+    })
+    await new Promise(resolve => socket.once('open', resolve))
+  })
+
+  afterAll(async () => {
+    socket?.close()
+    await server?.close()
+    rmSync(liveDir, { recursive: true, force: true })
   })
 
   describe('paths', () => {
@@ -49,7 +82,7 @@ describe('content', async () => {
     })
 
     it('renders rewritten paths in the page', async () => {
-      const html = await $fetch<string>('/paths')
+      const html = await getHtml('/paths')
       expect(html).toContain('src="/paths/same.png"')
       expect(html).toContain('src="/paths/sub/images/sub.png"')
     })
@@ -63,7 +96,7 @@ describe('content', async () => {
       ['/media/document.pdf', 'application/pdf', 'media/document.pdf'],
       ['/media/video.mp4', 'video/mp4', 'media/video.mp4'],
     ])('serves %s', async (url, type, file) => {
-      const res = await fetch(url)
+      const res = await get(url)
       expect(res.status).toBe(200)
       expect(res.headers.get('content-type')).toContain(type)
       const source = readFileSync(`${rootDir}/content/${file}`)
@@ -74,7 +107,7 @@ describe('content', async () => {
       ['partials', '/_partials/hidden.png'],
       ['content files', '/data/names.list'],
     ])('does not serve %s', async (_, url) => {
-      const res = await fetch(url)
+      const res = await get(url)
       expect(res.status).toBe(404)
     })
   })
@@ -105,7 +138,7 @@ describe('content', async () => {
     })
 
     it('rewrites component props', async () => {
-      const html = await $fetch<string>('/tags')
+      const html = await getHtml('/tags')
       expect(html).toMatch(/<img src="\/tags\/image\.png" class="custom-image">/)
     })
 
@@ -113,7 +146,7 @@ describe('content', async () => {
       const { body } = await getDoc('/tags')
       const code = JSON.stringify(findProps(body, 'pre'))
       expect(code).not.toContain('/tags/image.png')
-      const html = await $fetch<string>('/tags')
+      const html = await getHtml('/tags')
       expect(html).toMatch(/<code[^>]*><!--\[-->image\.png<!--\]--><\/code>/)
     })
   })
@@ -168,7 +201,7 @@ describe('content', async () => {
     })
 
     it('keeps an authored srcset', async () => {
-      const html = await $fetch<string>('/srcset')
+      const html = await getHtml('/srcset')
       expect(html).toMatch(/<img [^>]*alt="explicit"[^>]*srcset="custom\.png 1x"/)
       expect(html).not.toMatch(/<img [^>]*alt="explicit"[^>]*photo@2x/)
     })
@@ -176,52 +209,53 @@ describe('content', async () => {
 
   describe('content extensions', () => {
     it('does not treat content files as assets', async () => {
-      expect((await fetch('/data/items.json')).status).toBe(404)
-      expect((await fetch('/data/names.list')).status).toBe(404)
+      expect((await get('/data/items.json')).status).toBe(404)
+      expect((await get('/data/names.list')).status).toBe(404)
     })
 
     it('treats other files as assets', async () => {
-      expect((await fetch('/media/notes.txt')).status).toBe(200)
+      expect((await get('/media/notes.txt')).status).toBe(200)
     })
   })
 
-  describe('prerender', () => {
-    const publicDir = `${outputDir}/public`
+  describe('live reload', () => {
+    const copy = (from: string, to: string) => copyFileSync(`${rootDir}/content/${from}`, `${liveDir}/${to}`)
 
-    const read = (path: string) => readFileSync(`${publicDir}/${path}`, 'utf8')
-
-    it.each([
-      ['paths/same.png', 'paths/same.png'],
-      ['paths/sub/images/sub.png', 'paths/sub/images/sub.png'],
-      ['ordered/ordered.png', '1.ordered/ordered.png'],
-      ['srcset/photo@2x.png', 'srcset/photo@2x.png'],
-      ['media/document.pdf', 'media/document.pdf'],
-      ['media/video.mp4', 'media/video.mp4'],
-    ])('copies %s', (path, source) => {
-      const output = readFileSync(`${publicDir}/${path}`)
-      expect(output.equals(readFileSync(`${rootDir}/content/${source}`))).toBe(true)
+    const waitForMessage = (match: Record<string, any>) => waitFor(() => {
+      return messages.find(message => Object.entries(match).every(([key, value]) => message[key] === value))
     })
 
-    it.each([
-      '_partials/hidden.png',
-      'data/names.list',
-      'data/items.json',
-    ])('does not copy %s', (path) => {
-      expect(existsSync(`${publicDir}/${path}`)).toBe(false)
+    it('copies and serves added assets', async () => {
+      copy('tags/image.png', 'added.png')
+      await waitForMessage({ event: 'update', src: '/live/added.png' })
+      expect((await get('/live/added.png')).status).toBe(200)
     })
 
-    it('renders rewritten paths and image hints', () => {
-      expect(read('paths/index.html')).toContain('<img src="/paths/same.png" alt="same folder" width="40" height="30" style="aspect-ratio:40/30;">')
-      expect(read('paths/parent/index.html')).toContain('src="/paths/parent.png"')
+    it('updates image sizes in the client and in parsed content', async () => {
+      const getImage = async () => findImage((await getDoc('/live')).body, 'resized')
+
+      expect(await getImage()).toMatchObject({ width: 16, height: 16 })
+
+      // resize image
+      copy('paths/same.png', 'resized.png')
+      expect(await waitForMessage({ event: 'update', src: '/live/resized.png' })).toMatchObject({ width: 40, height: 30 })
+      await waitFor(async () => (await getImage())?.width === 40)
+      expect(await getImage()).toMatchObject({ width: 40, height: 30, style: { aspectRatio: '40/30' } })
     })
 
-    it('renders srcset', () => {
-      expect(read('srcset/index.html')).toContain('srcset="/srcset/photo.png 40w, /srcset/photo@2x.png 80w, /srcset/photo@3x.png 120w"')
+    it('removes deleted assets', async () => {
+      copy('tags/image.png', 'removed.png')
+      await waitForMessage({ event: 'update', src: '/live/removed.png' })
+      unlinkSync(`${liveDir}/removed.png`)
+      await waitForMessage({ event: 'remove', src: '/live/removed.png' })
+      expect((await get('/live/removed.png')).status).toBe(404)
     })
 
-    it('rewrites the payload used for client-side navigation', () => {
-      expect(read('frontmatter/_payload.json')).toContain('/frontmatter/cover.png')
+    it('does not copy content files', async () => {
+      copy('index.md', 'page.md')
+      // give the watcher time to (not) act
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      expect(messages.find(message => message.src === '/live/page.md')).toBeUndefined()
     })
   })
-
 })

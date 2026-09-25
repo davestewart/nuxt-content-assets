@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { findImage, getSize, startDevServer } from './utils'
 
 // runs in development, as that's where the module's cache layer is needed for ipx to find images
-describe('nuxt image', () => {
+describe('image dev', () => {
   let server: Awaited<ReturnType<typeof startDevServer>>
 
   const getDoc = async (path: string) => (await server.get(`/api/doc${path}`)).json()

@@ -426,7 +426,7 @@ npm run typecheck
 npm run test
 npm run test:watch
 
-# run end-to-end tests (builds, prerenders and runs dev servers for the fixtures in test/fixtures)
+# run end-to-end tests (runs the fixtures in test/fixtures in dev, generate and production)
 npm run test:e2e
 
 # run all tests
