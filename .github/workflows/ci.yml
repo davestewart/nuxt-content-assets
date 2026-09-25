@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install playground dependencies
+        run: npm ci --prefix playground
+
       - name: Prepare module stubs and types
         run: npm run dev:prepare
 
