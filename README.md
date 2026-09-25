@@ -208,7 +208,7 @@ The component will receive the size information as a query string which you can 
 <img class="image-content" src="/image.jpg?width=640&height=480">
 ```
 
-See playground component [here](playground/app/components/content/ContentImage.vue).
+See the playground [ContentImage.vue](playground/app/components/content/ContentImage.vue) component for an example.
 
 ### High resolution images
 

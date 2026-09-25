@@ -1,7 +1,7 @@
 import Path from 'crosspath'
 import { makeJsonStore } from './store'
 import { ASSETS_FILE, CONTENT_FILE, emptyContentIndex } from './public'
-import { getSrcset, isImage, isValidAsset, parseQuery, removeOrdering, removeQuery } from '../utils'
+import { getSrcset, getVariantKey, isImage, isValidAsset, parseQuery, removeOrdering, removeQuery } from '../utils'
 import type { AssetIndex, ContentIndex, ParsedContent, ResolvedAsset, SrcsetOptions } from '../../types'
 
 export interface ResolverOptions {
@@ -66,6 +66,12 @@ export function makeAssetResolver (publicPath: string, options: ResolverOptions 
 
     const resolved: ResolvedAsset = { ...asset }
     if (options.srcset && isImage(key)) {
+      // register variants too, so adding, removing or resizing one invalidates the document
+      const { scales, pattern } = options.srcset
+      for (const scale of scales) {
+        const variantKey = getVariantKey(key, scale, pattern)
+        register(assets.data[variantKey] ? content.data.hits : content.data.misses, variantKey, doc._id)
+      }
       Object.assign(resolved, getSrcset(key, asset, assets.data, options.srcset))
     }
     const query = parseQuery(value)

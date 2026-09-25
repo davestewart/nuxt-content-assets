@@ -43,13 +43,14 @@ export function makeJsonStore<T extends object> (dir: string, file: string, init
     }),
   })
 
-  const data: T = { ...initial }
+  // clone, so writes to nested data (i.e. `hits` and `misses`) never leak into `initial`
+  const data: T = structuredClone(initial)
 
   function replace (next: Partial<T> | null | undefined) {
     for (const key of Object.keys(data)) {
       delete (data as any)[key]
     }
-    Object.assign(data, initial, next || {})
+    Object.assign(data, structuredClone(initial), next || {})
   }
 
   async function load () {
