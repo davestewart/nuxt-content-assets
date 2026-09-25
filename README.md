@@ -82,7 +82,7 @@ Then open the playground in your browser at <a href="http://localhost:3000" targ
 
 To run the playground online, visit:
 
-- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=playground%2Fapp.vue
+- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=playground%2Fapp%2Fapp.vue
 
 To browse the playground folder:
 
@@ -147,7 +147,7 @@ These values can then be passed to components:
 :image-gallery{:data="images"}
 ```
 
-See the playground for [markup](playground/content/advanced/gallery.md) and [component](playground/components/content/ContentGallery.vue) examples.
+See the playground for [markup](playground/content/advanced/gallery.md) and [component](playground/app/components/content/ContentGallery.vue) examples.
 
 ### Live reload
 
@@ -178,7 +178,7 @@ Turning this on prevents content jumps as your page loads.
 
 #### Prose components
 
-If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can [hook into](playground/components/temp/ProseImg.vue) image size hints via the `$attrs` property:
+If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can [hook into](playground/app/components/temp/ProseImg.vue) image size hints via the `$attrs` property:
 
 ```vue
 <template>
@@ -196,7 +196,7 @@ export default {
 
 #### Frontmatter
 
-If you pass [frontmatter](playground/content/advanced/gallery.md) to [custom components](playground/components/content/ContentImage.vue) set `imageSize` to `'src'` to encode values in `src`:
+If you pass [frontmatter](playground/content/advanced/gallery.md) to [custom components](playground/app/components/content/ContentImage.vue) set `imageSize` to `'src'` to encode values in `src`:
 
 ```
 :image-content{:src="image"}
@@ -208,7 +208,7 @@ The component will receive the size information as a query string which you can 
 <img class="image-content" src="/image.jpg?width=640&height=480">
 ```
 
-See playground component [here](playground/components/content/ContentImage.vue).
+See playground component [here](playground/app/components/content/ContentImage.vue).
 
 ### High resolution images
 
@@ -253,7 +253,7 @@ To serve all images as Nuxt Image images, create a `ProseImg` component like so:
 </template>
 ```
 
-See the playground folder for both the [global](playground/components/temp/ProseImg.vue) and a [per image](playground/components/content/NuxtImg.ts) solution.
+See the playground folder for both the [global](playground/app/components/temp/ProseImg.vue) and a [per image](playground/app/components/content/NuxtImg.ts) solution.
 
 ## Configuration
 
@@ -426,7 +426,7 @@ npm run typecheck
 npm run test
 npm run test:watch
 
-# run end-to-end tests (builds and serves the fixtures in test/fixtures)
+# run end-to-end tests (builds, prerenders and runs dev servers for the fixtures in test/fixtures)
 npm run test:e2e
 
 # run all tests

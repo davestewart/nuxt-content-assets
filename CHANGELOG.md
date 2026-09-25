@@ -14,7 +14,8 @@
 - Fix source keys containing non-word characters (e.g. `my-source`)
 - Fix crash when rewriting cached documents with non-string frontmatter values
 - Resolve the cache folder relative to the package rather than searching `node_modules`
-- Add CI, typechecking, ESLint 9 and more unit tests; upgrade `image-size` to v2; require Node 18.20+
+- Fix authored `srcset` attributes being replaced by generated ones
+- Add CI, typechecking, ESLint 9, more unit tests and end-to-end tests; upgrade `image-size` to v2; require Node 18.20+
 
 ### v1.8.3
 

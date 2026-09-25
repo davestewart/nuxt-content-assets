@@ -1,13 +1,19 @@
-import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
+import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { $fetch, fetch, setup } from '@nuxt/test-utils/e2e'
-import { findImage, findProps, getDoc } from './utils'
+import { $fetch, fetch } from '@nuxt/test-utils/e2e'
+import { findImage, findProps, getDoc, setupFixture } from './utils'
 
-const rootDir = fileURLToPath(new URL('../fixtures/content', import.meta.url))
+const routes = ['/', '/paths', '/paths/parent', '/media', '/srcset', '/frontmatter', '/ordered', '/query', '/tags']
 
 describe('content', async () => {
-  await setup({ rootDir })
+  // prerender the pages as well, so one build covers both the server and `nuxi generate` output
+  const { rootDir, outputDir } = await setupFixture('content', {
+    nuxtConfig: {
+      nitro: {
+        prerender: { routes, crawlLinks: false },
+      },
+    },
+  })
 
   describe('paths', () => {
     it('rewrites images in the same folder', async () => {
@@ -178,4 +184,44 @@ describe('content', async () => {
       expect((await fetch('/media/notes.txt')).status).toBe(200)
     })
   })
+
+  describe('prerender', () => {
+    const publicDir = `${outputDir}/public`
+
+    const read = (path: string) => readFileSync(`${publicDir}/${path}`, 'utf8')
+
+    it.each([
+      ['paths/same.png', 'paths/same.png'],
+      ['paths/sub/images/sub.png', 'paths/sub/images/sub.png'],
+      ['ordered/ordered.png', '1.ordered/ordered.png'],
+      ['srcset/photo@2x.png', 'srcset/photo@2x.png'],
+      ['media/document.pdf', 'media/document.pdf'],
+      ['media/video.mp4', 'media/video.mp4'],
+    ])('copies %s', (path, source) => {
+      const output = readFileSync(`${publicDir}/${path}`)
+      expect(output.equals(readFileSync(`${rootDir}/content/${source}`))).toBe(true)
+    })
+
+    it.each([
+      '_partials/hidden.png',
+      'data/names.list',
+      'data/items.json',
+    ])('does not copy %s', (path) => {
+      expect(existsSync(`${publicDir}/${path}`)).toBe(false)
+    })
+
+    it('renders rewritten paths and image hints', () => {
+      expect(read('paths/index.html')).toContain('<img src="/paths/same.png" alt="same folder" width="40" height="30" style="aspect-ratio:40/30;">')
+      expect(read('paths/parent/index.html')).toContain('src="/paths/parent.png"')
+    })
+
+    it('renders srcset', () => {
+      expect(read('srcset/index.html')).toContain('srcset="/srcset/photo.png 40w, /srcset/photo@2x.png 80w, /srcset/photo@3x.png 120w"')
+    })
+
+    it('rewrites the payload used for client-side navigation', () => {
+      expect(read('frontmatter/_payload.json')).toContain('/frontmatter/cover.png')
+    })
+  })
+
 })
