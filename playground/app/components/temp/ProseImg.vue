@@ -1,57 +1,41 @@
-<template>
-  <span class="image">
-    <nuxt-img
-      :src="$attrs.src"
-      :alt="$attrs.title"
-      :width="$attrs.width"
-      :height="$attrs.height"
-      :title="$attrs.src"
-    />
-    <label>{{ $attrs.title || $attrs.alt || 'Image' }}{{ size }}</label>
-  </span>
-</template>
-
-<script>
-
+<script setup lang="ts">
 /**
- * The following attributes are written into the parsed HTML:
+ * Example ProseImg that renders all content images with Nuxt Image
  *
- * - style="aspect-ratio=640/480"
- * - data-width="640"
- * - data-height="480"
+ * To use, replace app/components/content/ProseImg.vue with this file
+ *
+ * The module writes the following attributes into the parsed HTML:
+ *
+ * - style="aspect-ratio:640/480"
+ * - width="640"
+ * - height="480"
  */
-export default {
-  inheritAttrs: false,
+import { computed, useAttrs } from '#imports'
 
-  computed: {
-    size () {
-      const { width, height } = this.$attrs
-      return width && height
-        ? ` (${width}px x ${height}px)`
-        : ''
-    }
-  }
-}
+defineOptions({ inheritAttrs: false })
+
+const attrs = useAttrs()
+
+const size = computed(() => {
+  const { width, height } = attrs
+  return width && height
+    ? ` (${width}px x ${height}px)`
+    : ''
+})
 </script>
 
-<style>
-.image {
-  padding: 1rem;
-  border: 1px solid #EEE;
-  border-radius: 8px;
-  margin: .5rem 0;
-}
-
-.image img {
-  background: #EEE;
-  border-radius: 3px;
-}
-
-.image label {
-  display: block;
-  margin-top: .5rem;
-  margin-bottom: -.5rem;
-  text-align: center;
-  font-size: .8em;
-}
-</style>
+<template>
+  <figure class="p-4 border border-default rounded-lg">
+    <NuxtImg
+      :src="attrs.src as string"
+      :alt="attrs.alt as string"
+      :width="attrs.width as string"
+      :height="attrs.height as string"
+      :title="attrs.src as string"
+      class="rounded-md bg-elevated"
+    />
+    <figcaption class="mt-2 text-sm text-center text-muted">
+      {{ attrs.title || attrs.alt || 'Image' }}{{ size }}
+    </figcaption>
+  </figure>
+</template>

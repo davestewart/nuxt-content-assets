@@ -1,8 +1,11 @@
-# Tarragon & Cashew Mushroom Risotto
-
-> Content from GitHub
+---
+title: GitHub source
+description: Content and images from a remote source, configured with the Nuxt Content sources option
+---
 
 ![Tarragon & Cashew Mushroom Risotto](images/mushroom-risotto.jpg)
+
+This page is loaded from the playground's `external/` folder on GitHub, so edits only show once they're pushed to `main`.
 
 Tarragon and mushroom, the dream combo, star in this easy risotto. Chop, slice, simmer – with creamy cashew butter, garlic and cheez – then top with fresh green pea shoots and serve.
 

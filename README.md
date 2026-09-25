@@ -147,7 +147,7 @@ These values can then be passed to components:
 :image-gallery{:data="images"}
 ```
 
-See the playground for [markup](playground/content/advanced/gallery.md) and [component](playground/app/components/content/ContentGallery.vue) examples.
+See the playground for [markup](playground/content/frontmatter/index.md) and [component](playground/app/components/content/ContentGallery.vue) examples.
 
 ### Live reload
 
@@ -253,7 +253,7 @@ To serve all images as Nuxt Image images, create a `ProseImg` component like so:
 </template>
 ```
 
-See the playground folder for both the [global](playground/app/components/temp/ProseImg.vue) and a [per image](playground/app/components/content/NuxtImg.ts) solution.
+See the playground folder for both a [global](playground/app/components/temp/ProseImg.vue) and a [per image](playground/nuxt.config.ts) solution.
 
 ## Configuration
 
