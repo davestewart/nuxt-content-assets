@@ -1,6 +1,6 @@
 export type Walkable = { [key: string | number]: any }
 
-export type WalkFilter = (value: any, key?: string | number) => boolean | undefined
+export type WalkFilter = (value: any, key?: string | number, parent?: Walkable) => boolean | undefined
 
 export type WalkCallback = (value: any, parent: Walkable, key: string | number) => void
 
@@ -15,7 +15,7 @@ export function walk (node: any, callback: WalkCallback, filter?: WalkFilter): v
   function visit (node: any, callback: WalkCallback, parent: Walkable, key: string | number) {
     // filter
     if (filter) {
-      const result = filter(node, key)
+      const result = filter(node, key, parent)
       if (result === false) {
         return
       }

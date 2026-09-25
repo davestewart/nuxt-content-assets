@@ -64,6 +64,7 @@ describe('process', () => {
       sizes: '(max-width: 400px) 100vw, 400px',
     })
     expect(p2[2][1].src).toBe('/posts/image.png?x=1')
+    expect(p2[2][1].srcset).toBe('/posts/image.png?x=1 400w, /posts/image@2x.png?x=1 800w')
     expect(p2[2][1].style).toBe('color: red; aspect-ratio: 400/300;')
     expect(p3[2][1]).toEqual({ href: '/posts/file.pdf', target: '_blank' })
     expect(video[1]).toEqual({ src: '/posts/media/video.mp4' })
@@ -84,6 +85,12 @@ describe('process', () => {
       sizes: '(max-width: 400px) 100vw, 400px',
     })
     expect(content.image).toBe('/posts/image.png')
+  })
+
+  it('should rewrite nested frontmatter keys that share identity key names', () => {
+    const content = { path: '/posts', download: { path: 'file.pdf' } }
+    processContent('/c/posts/index.md', content, makeIndex(), [])
+    expect(content).toEqual({ path: '/posts', download: { path: '/posts/file.pdf' } })
   })
 
   it('should keep an authored srcset', () => {

@@ -18,6 +18,9 @@ export default defineNuxtPlugin(() => {
     const time = String(Date.now())
     const selector = `:is(img, video, source, embed, iframe):where([src*="${src}"], [srcset*="${src}"])`
 
+    // media elements only pick up a changed <source> when reloaded
+    const media = new Set<HTMLMediaElement>()
+
     document.querySelectorAll(selector).forEach((el: any) => {
       // dim if deleted
       el.style.opacity = isUpdate ? '1' : '0.2'
@@ -40,25 +43,40 @@ export default defineNuxtPlugin(() => {
       }
 
       // bust src (nuxt image serves from /_ipx/..., so keep whatever path is there)
-      const [path, query] = String(el.getAttribute('src') || '').split('?')
-      const params = new URLSearchParams(query)
-      params.set('time', time)
-      if (width && height && params.get('width')) {
-        params.set('width', String(width))
-        params.set('height', String(height))
+      const srcAttr = el.getAttribute('src')
+      if (srcAttr) {
+        const [path, query] = srcAttr.split('?')
+        const params = new URLSearchParams(query)
+        params.set('time', time)
+        if (width && height && params.get('width')) {
+          params.set('width', String(width))
+          params.set('height', String(height))
+        }
+        el.setAttribute('src', `${path}?${params.toString()}`)
       }
-      el.setAttribute('src', `${path}?${params.toString()}`)
 
       // bust srcset
       const srcset = el.getAttribute('srcset')
       if (srcset) {
-        el.setAttribute('srcset', srcset.replace(/(\S+)(\s+\S+)?/g, (_match: string, url: string, descriptor = '') => {
-          const [base, q] = url.split('?')
-          const p = new URLSearchParams(q)
-          p.set('time', time)
-          return `${base}?${p.toString()}${descriptor}`
-        }))
+        el.setAttribute('srcset', srcset
+          .split(',')
+          .map((candidate: string) => candidate.trim())
+          .filter(Boolean)
+          .map((candidate: string) => {
+            const [url, ...descriptors] = candidate.split(/\s+/)
+            const [base, q] = url.split('?')
+            const p = new URLSearchParams(q)
+            p.set('time', time)
+            return [`${base}?${p.toString()}`, ...descriptors].join(' ')
+          })
+          .join(', '))
+      }
+
+      if (el.tagName === 'SOURCE' && el.parentElement instanceof HTMLMediaElement) {
+        media.add(el.parentElement)
       }
     })
+
+    media.forEach(el => el.load())
   })
 })
