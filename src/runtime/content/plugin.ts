@@ -76,7 +76,8 @@ const plugin: NitroAppPlugin = (nitro: NitroApp) => {
       }
     }
     // only plain images; nuxt-img generates its own srcset
-    if (node.tag === 'img' && asset.srcset && !props.srcset) {
+    // note: MDC camel-cases authored attributes, so `{srcset="..."}` arrives as `srcSet`
+    if (node.tag === 'img' && asset.srcset && !props.srcset && !props.srcSet) {
       props.srcset = asset.srcset
       if (asset.sizes && !props.sizes) {
         props.sizes = asset.sizes

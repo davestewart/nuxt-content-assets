@@ -422,10 +422,18 @@ npm run lint
 # check types
 npm run typecheck
 
-# runs tests with vitest
+# run unit tests with vitest
 npm run test
 npm run test:watch
+
+# run end-to-end tests (builds and serves the fixtures in test/fixtures)
+npm run test:e2e
+
+# run all tests
+npm run test:all
 ```
+
+Note that the end-to-end tests write to the module's `cache/public` folder, so don't run them at the same time as the playground.
 
 These also run in CI on every pull request.
 

@@ -26,14 +26,16 @@
     "dev:build": "nuxi build playground",
     "dev:preview": "nuxi preview playground",
     "build": "nuxt-module-build build",
-    "release:setup": "npm run lint && npm run typecheck && npm test && npm run build",
+    "release:setup": "npm run lint && npm run typecheck && npm run test:all && npm run build",
     "release:dry": "npm run release:setup && npm publish --dry-run",
     "release": "npm run release:setup && npm publish",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest watch"
+    "test": "vitest run --project unit",
+    "test:watch": "vitest watch --project unit",
+    "test:e2e": "vitest run --project e2e",
+    "test:all": "vitest run"
   },
   "dependencies": {
     "@nuxt/kit": "^3.20.2",
