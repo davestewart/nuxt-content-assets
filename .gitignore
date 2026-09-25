@@ -18,6 +18,7 @@ dist
 
 # Nuxt
 .nuxt
+.data
 .output
 .vercel_build_output
 .build-*

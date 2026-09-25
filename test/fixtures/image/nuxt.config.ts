@@ -13,5 +13,12 @@ export default defineNuxtConfig({
     srcset: false,
   },
 
-  compatibilityDate: '2024-08-11',
+  content: {
+    experimental: {
+      // use node's built-in sqlite, so tests don't need better-sqlite3
+      sqliteConnector: 'native',
+    },
+  },
+
+  compatibilityDate: '2026-09-01',
 })

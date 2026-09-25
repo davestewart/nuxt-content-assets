@@ -1,6 +1,6 @@
 ---
 title: GitHub source
-description: Content and images from a remote source, configured with the Nuxt Content sources option
+description: Content and images from a remote source, configured as a collection source in content.config.ts
 ---
 
 ![Tarragon & Cashew Mushroom Risotto](images/mushroom-risotto.jpg)

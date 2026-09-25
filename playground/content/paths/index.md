@@ -37,6 +37,6 @@ Absolute paths aren't rewritten, so they must point to where the asset is served
 ![Italian Bean Stew](/paths/italian-bean-stew.jpg)
 ```
 
-::callout
+::note
 In `dev` the module serves assets from its cache. In `build` and `generate` they're copied to the output folder and served from there.
 ::

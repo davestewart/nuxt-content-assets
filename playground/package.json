@@ -1,11 +1,15 @@
 {
   "name": "nuxt-content-assets-playground",
   "description": "Nuxt Content Assets Playground",
+  "private": true,
+  "type": "module",
   "dependencies": {
-    "@nuxt/image": "^1.11.0",
+    "@nuxt/content": "^3.16.1",
+    "@nuxt/image": "^2.1.0",
     "@nuxt/ui": "^4.11.2",
     "nuxt": "^4.5.2",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.3",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.136",

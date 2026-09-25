@@ -1,5 +1,5 @@
 import Path from 'crosspath'
-import type { AssetConfig, AssetIndex, ResolvedAsset, SrcsetOptions } from '../../types'
+import type { AssetConfig, ResolvedAsset, SrcsetOptions } from '../../types'
 
 export const defaultSrcsetOptions: SrcsetOptions = {
   pattern: '{name}@{scale}x.{ext}',
@@ -30,33 +30,43 @@ export function interpolate (template: string, tokens: Record<string, string | n
 }
 
 /**
- * Get the index key of a scaled variant of an asset
+ * Get the path of a scaled variant of an asset
  *
- * @param key       The index key of the base asset, i.e. 'posts/image.png'
+ * @param path      The path of the base asset, i.e. 'posts/image.png'
  * @param scale     The scale multiplier
  * @param pattern   The naming pattern for variants
  */
-export function getVariantKey (key: string, scale: number, pattern: string): string {
-  const dir = Path.dirname(key)
-  const ext = Path.extname(key)
-  const name = Path.basename(key, ext)
+export function getVariantPath (path: string, scale: number, pattern: string): string {
+  const dir = Path.dirname(path)
+  const ext = Path.extname(path)
+  const name = Path.basename(path, ext)
   const file = interpolate(pattern, { name, scale, ext: ext.substring(1) })
   return dir === '.' ? file : `${dir}/${file}`
 }
 
 /**
- * Build `srcset` and `sizes` attributes for an asset that has scaled variants in the index
+ * Build `srcset` and `sizes` attributes for an asset that has scaled variants
  *
  * Returns undefined if the asset has no width, or no variants
+ *
+ * @param path      The path of the base asset (used to derive variant paths)
+ * @param asset     The base asset
+ * @param lookup    Function to look up an asset by path
+ * @param options   Srcset options
  */
-export function getSrcset (key: string, asset: AssetConfig, index: AssetIndex, options: SrcsetOptions): Pick<ResolvedAsset, 'srcset' | 'sizes'> | undefined {
+export function getSrcset (
+  path: string,
+  asset: Pick<AssetConfig, 'srcAttr' | 'width'>,
+  lookup: (path: string) => Pick<AssetConfig, 'srcAttr' | 'width'> | undefined,
+  options: SrcsetOptions,
+): Pick<ResolvedAsset, 'srcset' | 'sizes'> | undefined {
   const { width } = asset
   if (!width) {
     return
   }
   const candidates = [`${asset.srcAttr} ${width}w`]
   for (const scale of options.scales) {
-    const variant = index[getVariantKey(key, scale, options.pattern)]
+    const variant = lookup(getVariantPath(path, scale, options.pattern))
     if (variant) {
       candidates.push(`${variant.srcAttr} ${variant.width || Math.round(width * scale)}w`)
     }

@@ -3,6 +3,7 @@ import { rmSync } from 'node:fs'
 import { createServer } from 'node:net'
 import { fileURLToPath } from 'node:url'
 import { imageSize } from 'image-size'
+import WebSocket from 'ws'
 import { expect } from 'vitest'
 import { setup } from '@nuxt/test-utils/e2e'
 
@@ -25,6 +26,8 @@ export async function setupFixture (name: string, options: SetupOptions = {}) {
   const rootDir = getFixturePath(name)
   const buildDir = `${rootDir}/.nuxt/test`
   rmSync(buildDir, { recursive: true, force: true })
+  // nuxt content's database, which also caches parsed documents
+  rmSync(`${rootDir}/.data`, { recursive: true, force: true })
   await setup({ rootDir, buildDir, ...options })
   return {
     rootDir,
@@ -62,6 +65,7 @@ export async function startDevServer (name: string) {
 
   // start clean, as Nuxt Content's parse cache would otherwise survive from previous runs
   rmSync(`${rootDir}/.nuxt`, { recursive: true, force: true })
+  rmSync(`${rootDir}/.data`, { recursive: true, force: true })
 
   const nuxi = fileURLToPath(new URL('../../node_modules/.bin/nuxi', import.meta.url))
   const { NODE_ENV: _, ...env } = process.env
@@ -122,6 +126,33 @@ export async function startDevServer (name: string) {
 }
 
 /**
+ * Connect to a dev server's Vite HMR channel, and collect the data of custom events with the given name
+ */
+export async function connectHmr (url: string, event: string) {
+  // the client script includes the token vite needs to accept the connection
+  const client = await (await fetch(`${url}/_nuxt/@vite/client`)).text()
+  const token = client.match(/const wsToken = "([^"]+)"/)?.[1]
+  expect(token).toBeDefined()
+
+  const messages: any[] = []
+  const socket = new WebSocket(`${url.replace(/^http/, 'ws')}/_nuxt/?token=${token}`, 'vite-hmr')
+  socket.on('message', (data) => {
+    const message = JSON.parse(String(data))
+    if (message.type === 'custom' && message.event === event) {
+      messages.push(message.data)
+    }
+  })
+  await new Promise((resolve, reject) => {
+    socket.once('open', resolve)
+    socket.once('error', reject)
+  })
+  return {
+    messages,
+    close: () => socket.close(),
+  }
+}
+
+/**
  * Get a free port
  */
 export function getPort (): Promise<number> {
@@ -158,14 +189,22 @@ export async function waitFor<T> (fn: () => T | Promise<T>, timeout = 10_000, in
 }
 
 /**
- * Collect the props of every AST element with the given tag
+ * Collect the props of every element with the given tag, in a minimark body or node
+ *
+ * Nuxt Content stores bodies as minimark: `{ type: 'minimark', value: [[tag, props, ...children], ...] }`
  */
 export function findProps (node: any, tag: string, found: Record<string, any>[] = []): Record<string, any>[] {
-  if (node?.tag === tag) {
-    found.push(node.props)
+  if (node?.type === 'minimark') {
+    node = ['root', {}, ...node.value]
   }
-  for (const child of node?.children || []) {
-    findProps(child, tag, found)
+  if (Array.isArray(node)) {
+    const [name, props, ...children] = node
+    if (name === tag) {
+      found.push(props)
+    }
+    for (const child of children) {
+      findProps(child, tag, found)
+    }
   }
   return found
 }

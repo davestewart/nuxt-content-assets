@@ -1,31 +1,30 @@
 <script lang="ts" setup>
-import { computed, queryContent, useAsyncData, useRoute, useSeoMeta } from '#imports'
+import { computed, queryCollection, useAsyncData, useRoute, useSeoMeta } from '#imports'
 
 const route = useRoute()
 
 // pages with a matching asset folder may be served with a trailing slash in dev
 const path = route.path.replace(/(.)\/$/, '$1')
 
-const { data: page } = await useAsyncData(path, () => queryContent(path).findOne())
+const { data: page } = await useAsyncData(path, () => queryCollection('content').path(path).first())
 
-// content sources, and their folders in the repo (external files include the source's "external/" prefix)
-const folders: Record<string, string> = {
-  content: 'playground/content',
-  ds: 'playground',
-}
-
+// the page's file in the repo (external pages are cloned from the repo's playground/external/ folder)
 const links = computed(() => {
-  const folder = page.value && folders[page.value._source]
-  return folder
-    ? [{
-        label: 'Open page',
-        icon: 'i-simple-icons-github',
-        to: `https://github.com/davestewart/nuxt-content-assets/blob/main/${folder}/${page.value!._file}?plain=1`,
-        target: '_blank',
-        color: 'neutral' as const,
-        variant: 'subtle' as const,
-      }]
-    : []
+  if (!page.value) {
+    return []
+  }
+  const { path, stem, extension } = page.value
+  const file = path.startsWith('/external')
+    ? `playground/${stem}.${extension}`
+    : `playground/content/${stem}.${extension}`
+  return [{
+    label: 'Open page',
+    icon: 'i-simple-icons-github',
+    to: `https://github.com/davestewart/nuxt-content-assets/blob/main/${file}?plain=1`,
+    target: '_blank',
+    color: 'neutral' as const,
+    variant: 'subtle' as const,
+  }]
 })
 
 useSeoMeta({

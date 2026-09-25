@@ -1,17 +1,14 @@
 import { copyFileSync, mkdirSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import WebSocket from 'ws'
-import { findImage, findProps, getFixturePath, startDevServer, waitFor } from './utils'
+import { connectHmr, findImage, findProps, getFixturePath, startDevServer, waitFor } from './utils'
 
 // feature tests run against the dev server, as it starts faster than a production build;
 // see prod.spec.ts and content-generate.spec.ts for production and static output
 describe('content', () => {
   const rootDir = getFixturePath('content')
   const liveDir = `${rootDir}/content/live`
-  const messages: any[] = []
-
   let server: Awaited<ReturnType<typeof startDevServer>>
-  let socket: WebSocket
+  let hmr: Awaited<ReturnType<typeof connectHmr>>
 
   const get = (path: string) => server.get(path)
 
@@ -29,21 +26,12 @@ describe('content', () => {
 
     server = await startDevServer('content')
 
-    // connect to the module's socket server (not Nuxt Content's, which is also in the config)
-    const wsUrl = server.html.match(/sockets:\{wsUrl:"([^"]+)"/)?.[1]
-    expect(wsUrl).toBeDefined()
-    socket = new WebSocket(wsUrl!)
-    socket.on('message', (data) => {
-      const message = JSON.parse(String(data))
-      if (message.channel === 'content-assets') {
-        messages.push(message.data)
-      }
-    })
-    await new Promise(resolve => socket.once('open', resolve))
+    // the module sends asset changes over vite's hmr channel
+    hmr = await connectHmr(server.url, 'nuxt-content-assets:update')
   })
 
   afterAll(async () => {
-    socket?.close()
+    hmr?.close()
     await server?.close()
     rmSync(liveDir, { recursive: true, force: true })
   })
@@ -157,9 +145,9 @@ describe('content', () => {
       expect(doc.cover).toBe('/frontmatter/cover.png')
     })
 
-    it('rewrites nested properties', async () => {
+    it('rewrites nested properties outside the schema', async () => {
       const doc = await getDoc('/frontmatter')
-      expect(doc.gallery).toEqual(['/frontmatter/cover.png', { image: '/paths/same.png' }])
+      expect(doc.meta.gallery).toEqual(['/frontmatter/cover.png', { image: '/paths/same.png' }])
     })
 
     it('leaves remote urls alone', async () => {
@@ -222,7 +210,7 @@ describe('content', () => {
     const copy = (from: string, to: string) => copyFileSync(`${rootDir}/content/${from}`, `${liveDir}/${to}`)
 
     const waitForMessage = (match: Record<string, any>) => waitFor(() => {
-      return messages.find(message => Object.entries(match).every(([key, value]) => message[key] === value))
+      return hmr.messages.find(message => Object.entries(match).every(([key, value]) => message[key] === value))
     })
 
     it('copies and serves added assets', async () => {
@@ -231,7 +219,7 @@ describe('content', () => {
       expect((await get('/live/added.png')).status).toBe(200)
     })
 
-    it('updates image sizes in the client and in parsed content', async () => {
+    it('updates image sizes in the client, and in parsed content once the page is saved', async () => {
       const getImage = async () => findImage((await getDoc('/live')).body, 'resized')
 
       expect(await getImage()).toMatchObject({ width: 16, height: 16 })
@@ -239,6 +227,9 @@ describe('content', () => {
       // resize image
       copy('paths/same.png', 'resized.png')
       expect(await waitForMessage({ event: 'update', src: '/live/resized.png' })).toMatchObject({ width: 40, height: 30 })
+
+      // nuxt content can't re-parse a single document, so parsed content updates when the page next changes
+      writeFileSync(`${liveDir}/index.md`, '![resized](resized.png)\n\n')
       await waitFor(async () => (await getImage())?.width === 40)
       expect(await getImage()).toMatchObject({ width: 40, height: 30, style: { aspectRatio: '40/30' } })
     })
@@ -255,7 +246,7 @@ describe('content', () => {
       copy('index.md', 'page.md')
       // give the watcher time to (not) act
       await new Promise(resolve => setTimeout(resolve, 1000))
-      expect(messages.find(message => message.src === '/live/page.md')).toBeUndefined()
+      expect(hmr.messages.find(message => message.src === '/live/page.md')).toBeUndefined()
     })
   })
 })

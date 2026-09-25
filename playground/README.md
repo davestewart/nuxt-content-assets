@@ -10,15 +10,16 @@ The playground demos the module's main features, one page each:
 - **Srcset**: high resolution variants
 - **Nuxt Image**: rendering content images with `<NuxtImg>`
 - **Live reload**: add, edit and delete assets while the dev server runs
-- **GitHub source**: content and images from a remote [source](https://content.nuxtjs.org/api/configuration#sources)
+- **GitHub source**: content and images from a remote [collection source](https://content.nuxt.com/docs/collections/sources#repository-sources), at `/external`
 
 Edge cases are covered by the unit and e2e tests in `/test`, rather than here.
 
 ## Running the playground
 
-To view the playground locally, run:
+To view the playground locally, install its dependencies and run:
 
 ```
+npm install --prefix ./playground
 npm run dev
 ```
 
@@ -30,6 +31,7 @@ To view the playground online, visit:
 
 The playground uses [Nuxt UI](https://ui.nuxt.com) for its layout:
 
+- `content.config.ts`: the content collection, with local and GitHub sources
 - `app/app.vue`: header, sidebar and page layout
 - `app/menu.ts`: the sidebar menu
 - `app/pages/[...slug].vue`: queries and renders content

@@ -12,7 +12,7 @@ export function matchTokens (value: any): string[] {
     tokens = value
       .filter(value => typeof value === 'string')
       .reduce((output: string[], input) => {
-        return [ ...output, ...matchTokens(input)]
+        return [...output, ...matchTokens(input)]
       }, [])
   }
   else if (!!value && typeof value === 'object') {
@@ -24,16 +24,3 @@ export function matchTokens (value: any): string[] {
     ? Array.from(new Set(tokens))
     : tokens
 }
-
-export function toPath (key: string): string {
-  return key.replaceAll(':', '/')
-}
-
-export function toKey (path: string) {
-  return path.replaceAll('/', ':')
-}
-
-export function deKey (path: string) {
-  return path.replace(/^[^:]+:/, '')
-}
-

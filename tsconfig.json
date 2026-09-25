@@ -14,14 +14,12 @@
     "allowJs": true,
     "resolveJsonModule": true,
     "types": [
-      "node"
+      "node",
+      "vite/client"
     ],
     "paths": {
       "#imports": [
         "./node_modules/nuxt/dist/app/index"
-      ],
-      "#nuxt-content-assets": [
-        "./src/virtual"
       ]
     }
   },

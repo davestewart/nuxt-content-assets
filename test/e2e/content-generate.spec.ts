@@ -1,4 +1,5 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
+import { gunzipSync } from 'node:zlib'
 import { describe, expect, it } from 'vitest'
 import { generateFixture } from './utils'
 
@@ -41,15 +42,16 @@ describe('content generate', async () => {
   })
 
   it('rewrites the payload used for client-side navigation', () => {
-    expect(read('frontmatter/_payload.json')).toContain('/frontmatter/cover.png')
+    // payloads are flat arrays of values
+    expect(JSON.parse(read('frontmatter/_payload.json'))).toContain('/frontmatter/cover.png')
   })
 
-  it('rewrites the content cache used for client-side queries', () => {
-    const file = readdirSync(`${publicDir}/api/_content`).find(name => /^cache\..+\.json$/.test(name))
-    expect(file).toBeDefined()
-    const cache = read(`api/_content/${file}`)
-    expect(cache).toContain('"cover":"/frontmatter/cover.png"')
-    expect(cache).toContain('"src":"/paths/sub/images/sub.png"')
-    expect(cache).not.toContain('"src":"sub/images/sub.png"')
+  it('rewrites the database dump used for client-side queries', () => {
+    // a gzipped, base64-encoded array of sql statements
+    const dump = gunzipSync(Buffer.from(read('__nuxt_content/content/sql_dump.txt'), 'base64')).toString()
+    const sql = (JSON.parse(dump) as string[]).join('\n')
+    expect(sql).toContain('\'/frontmatter/cover.png\'')
+    expect(sql).toContain('"src":"/paths/sub/images/sub.png"')
+    expect(sql).not.toContain('"src":"sub/images/sub.png"')
   })
 })
