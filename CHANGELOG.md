@@ -10,8 +10,7 @@ Nuxt Content 3 support. The module now targets `@nuxt/content` v3 only; for Nuxt
 - Live reload over Vite's HMR channel instead of a separate websocket server
 - Re-parse documents when assets change by contributing a fingerprint to Nuxt Content's parse cache key
 - Drop the `unstorage`, `ws`, `listhen`, `debounce` and `unist-util-visit` dependencies
-- Rewrite the playground for Nuxt 4 and Nuxt Content 3 with technical rather than recipe content [#53](../../issues/53)
-- Playground dependencies are now installed from the repository root
+- Port the Nuxt UI playground and end-to-end tests from v1.9 to Nuxt Content 3 [#53](../../issues/53)
 - Requires Node 20.19+
 
 ### v1.9.0
@@ -28,7 +27,8 @@ Nuxt Content 3 support. The module now targets `@nuxt/content` v3 only; for Nuxt
 - Fix source keys containing non-word characters (e.g. `my-source`)
 - Fix crash when rewriting cached documents with non-string frontmatter values
 - Resolve the cache folder relative to the package rather than searching `node_modules`
-- Add CI, typechecking, ESLint 9 and more unit tests; upgrade `image-size` to v2; require Node 18.20+
+- Fix authored `srcset` attributes being replaced by generated ones
+- Add CI, typechecking, ESLint 9, more unit tests and end-to-end tests; upgrade `image-size` to v2; require Node 18.20+
 
 ### v1.8.3
 

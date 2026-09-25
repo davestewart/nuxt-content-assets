@@ -1,21 +1,53 @@
 <script lang="ts" setup>
-import { queryCollection, useAsyncData, useRoute } from '#imports'
+import { computed, queryCollection, useAsyncData, useRoute, useSeoMeta } from '#imports'
 
 const route = useRoute()
-const path = route.path.replace(/\/$/, '') || '/'
-const { data, error } = await useAsyncData(path, () => queryCollection('content').path(path).first())
+
+// pages with a matching asset folder may be served with a trailing slash in dev
+const path = route.path.replace(/(.)\/$/, '$1')
+
+const { data: page } = await useAsyncData(path, () => queryCollection('content').path(path).first())
+
+// the page's file in the repo (external pages are cloned from the repo's playground/external/ folder)
+const links = computed(() => {
+  if (!page.value) {
+    return []
+  }
+  const { path, stem, extension } = page.value
+  const file = path.startsWith('/external')
+    ? `playground/${stem}.${extension}`
+    : `playground/content/${stem}.${extension}`
+  return [{
+    label: 'Open page',
+    icon: 'i-simple-icons-github',
+    to: `https://github.com/davestewart/nuxt-content-assets/blob/main/${file}?plain=1`,
+    target: '_blank',
+    color: 'neutral' as const,
+    variant: 'subtle' as const,
+  }]
+})
+
+useSeoMeta({
+  title: page.value?.title,
+  description: page.value?.description,
+})
 </script>
 
 <template>
-  <main>
-    <article v-if="data">
-      <ContentRenderer :value="data" />
-    </article>
+  <template v-if="page">
+    <UPageHeader :title="page.title" :description="page.description" :links="links" :ui="{ root: 'border-none pb-0' }" />
+    <UPageBody>
+      <ContentRenderer :value="page" />
+    </UPageBody>
+  </template>
 
-    <!-- 404 not found -->
-    <template v-else>
-      <p>No content found for "{{ route.path }}"</p>
-      <pre v-if="error">{{ error }}</pre>
-    </template>
-  </main>
+  <UPageBody v-else>
+    <UAlert
+      color="error"
+      variant="subtle"
+      icon="i-lucide-circle-alert"
+      title="Page not found"
+      :description="`No content found for ${path}`"
+    />
+  </UPageBody>
 </template>

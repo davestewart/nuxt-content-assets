@@ -86,6 +86,12 @@ describe('process', () => {
     expect(content.image).toBe('/posts/image.png')
   })
 
+  it('should keep an authored srcset', () => {
+    const content = { body: { type: 'minimark', value: [['img', { src: 'image.png', srcSet: 'custom.png 1x' }]] } }
+    processContent('/c/posts/index.md', content, makeIndex(), [])
+    expect((content.body.value[0] as any)[1]).toEqual({ src: '/posts/image.png', srcSet: 'custom.png 1x' })
+  })
+
   it('should not add srcset when disabled', () => {
     const index = makeAssetIndex('/public', false)
     index.set('/c/a.txt', '/public/a.txt')

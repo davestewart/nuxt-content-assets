@@ -2,34 +2,43 @@
 
 ## Overview
 
-The playground shows off the module's main features:
+The playground demos the module's main features, one page each:
 
-- various relative path locations
-- local and [external](https://content.nuxt.com/docs/collections/sources#remote-source) content sources
-- inline and `frontmatter` image paths
-- image, link, video, iframe, and embed examples
-- automatic `srcset` for high resolution images
-- live reload; edit, crop or move images, video, embeds, etc
+- **Paths**: relative paths from the same, sub and parent folders, and absolute paths
+- **Media**: links, video, iframes and embeds
+- **Frontmatter**: asset paths in frontmatter, passed to components
+- **Srcset**: high resolution variants
+- **Nuxt Image**: rendering content images with `<NuxtImg>`
+- **Live reload**: add, edit and delete assets while the dev server runs
+- **GitHub source**: content and images from a remote [collection source](https://content.nuxt.com/docs/collections/sources#repository-sources), at `/external`
 
-Additionally, configuration:
-
-- `imageSize`: image size hints added to rendered images
-- `debug`: see what the module is doing
-
-And, components:
-
-- example `<ContentGallery>` and `<ContentImage>` components
-- example `<ProseImg />` component
-
-## Notes
-
-- The playground uses `@nuxt/image` 1.x. With `@nuxt/image` 2.1 (IPX 4 beta) `nuxi generate` stalled during prerendering of `_ipx` routes in this toolchain (Nuxt 4.5, Nitro 2.13), with or without this module enabled.
-- Dependencies are installed from the repository root; the playground has no `node_modules` of its own.
+Edge cases are covered by the unit and e2e tests in `/test`, rather than here.
 
 ## Running the playground
 
-To view the playground locally, run:
+To view the playground locally, install its dependencies and run:
 
 ```
+npm install --prefix ./playground
 npm run dev
 ```
+
+To view the playground online, visit:
+
+- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=playground%2Fapp%2Fapp.vue
+
+## Structure
+
+The playground uses [Nuxt UI](https://ui.nuxt.com) for its layout:
+
+- `content.config.ts`: the content collection, with local and GitHub sources
+- `app/app.vue`: header, sidebar and page layout
+- `app/menu.ts`: the sidebar menu
+- `app/pages/[...slug].vue`: queries and renders content
+- `app/components/content/`: components used in markdown
+
+Nuxt UI's `ProseImg` renders images through Nuxt Image and adds a zoom effect, so `app/components/content/ProseImg.vue` replaces it with a plain `<img>`, to show the markup the module outputs.
+
+### Nuxt Image
+
+To render all content images with Nuxt Image, replace `app/components/content/ProseImg.vue` with the one in `app/components/temp/`.

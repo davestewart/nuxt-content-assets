@@ -19,7 +19,7 @@ export default createConfigForNuxt({
     ],
   })
   .append({
-    files: ['playground/**/*.vue'],
+    files: ['playground/**/*.vue', 'test/fixtures/**/*.vue'],
     rules: {
       'vue/multi-word-component-names': 'off',
     },

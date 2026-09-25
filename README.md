@@ -77,7 +77,7 @@ To clone and run locally:
 ```bash
 git clone https://github.com/davestewart/nuxt-content-assets.git
 cd nuxt-content-assets
-npm install
+npm install && npm install --prefix ./playground
 npm run dev
 ```
 
@@ -96,7 +96,7 @@ To browse the playground folder:
 Install the dependency:
 
 ```bash
-npm install nuxt-content-assets
+npx nuxt module add content-assets
 ```
 
 Configure `nuxt.config.ts`:
@@ -155,7 +155,7 @@ These values can then be passed to components:
 
 Both schema fields and free-form `meta` fields are rewritten.
 
-See the playground for [markup](playground/content/advanced/gallery.md) and [component](playground/app/components/content/ContentGallery.vue) examples.
+See the playground for [markup](playground/content/frontmatter/index.md) and [component](playground/app/components/content/ContentGallery.vue) examples.
 
 ### Collections and sources
 
@@ -230,7 +230,7 @@ export default {
 
 #### Frontmatter
 
-If you pass [frontmatter](playground/content/advanced/gallery.md) to [custom components](playground/app/components/content/ContentImage.vue) set `imageSize` to `'src'` to encode values in `src`:
+If you pass [frontmatter](playground/content/frontmatter/index.md) to [custom components](playground/app/components/content/ContentImage.vue) set `imageSize` to `'src'` to encode values in `src`:
 
 ```
 :image-content{:src="image"}
@@ -242,7 +242,7 @@ The component will receive the size information as a query string which you can 
 <img class="image-content" src="/image.jpg?width=640&height=480">
 ```
 
-See playground component [here](playground/app/components/content/ContentImage.vue).
+See the playground [ContentImage.vue](playground/app/components/content/ContentImage.vue) component for an example.
 
 ### High resolution images
 
@@ -289,7 +289,7 @@ To serve all images as Nuxt Image images, create a `ProseImg` component like so:
 </template>
 ```
 
-See the playground folder for both the [global](playground/app/components/temp/ProseImg.vue) and a [per image](playground/app/components/content/NuxtImg.ts) solution.
+See the playground folder for both a [global](playground/app/components/temp/ProseImg.vue) and a [per image](playground/nuxt.config.ts) solution.
 
 ## Configuration
 
@@ -422,7 +422,7 @@ To set up the project, run each of these scripts once:
 
 ```bash
 # install dependencies
-npm install
+npm install && npm install --prefix ./playground
 
 # generate types for the module and playground (re-run if you install new packages)
 npm run dev:prepare
@@ -457,10 +457,18 @@ npm run lint
 # check types
 npm run typecheck
 
-# runs tests with vitest
+# run unit tests with vitest
 npm run test
 npm run test:watch
+
+# run end-to-end tests (runs the fixtures in test/fixtures in dev, generate and production)
+npm run test:e2e
+
+# run all tests
+npm run test:all
 ```
+
+Note that the end-to-end tests write to the module's `cache/public` folder, so don't run them at the same time as the playground.
 
 These also run in CI on every pull request.
 

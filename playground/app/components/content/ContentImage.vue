@@ -1,6 +1,6 @@
 <template>
   <img
-    class="content-image"
+    class="rounded-lg shadow-lg"
     :src="info.src"
     :width="info.width"
     :height="info.height"
@@ -26,13 +26,3 @@ const info = computed(() => {
   }
 })
 </script>
-
-<style>
-.content-image {
-  display: block;
-  margin: 1rem auto;
-  max-width: 100%;
-  border-radius: 2%;
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.3);
-}
-</style>

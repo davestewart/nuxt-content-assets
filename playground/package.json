@@ -1,6 +1,18 @@
 {
   "name": "nuxt-content-assets-playground",
-  "description": "Nuxt Content Assets Playground (dependencies are installed from the repository root)",
+  "description": "Nuxt Content Assets Playground",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@nuxt/content": "^3.16.1",
+    "@nuxt/image": "^2.1.0",
+    "@nuxt/ui": "^4.11.2",
+    "nuxt": "^4.5.2",
+    "tailwindcss": "^4.3.3",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@iconify-json/lucide": "^1.2.136",
+    "@iconify-json/simple-icons": "^1.2.97"
+  }
 }
