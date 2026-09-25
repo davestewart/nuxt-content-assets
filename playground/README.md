@@ -2,24 +2,17 @@
 
 ## Overview
 
-The playground shows off the module's main features:
+The playground demos the module's main features, one page each:
 
-- various relative path locations
-- local and [external](https://content.nuxtjs.org/api/configuration#sources) content sources
-- inline and `frontmatter` image paths
-- image, link, video, iframe, and embed examples
-- live reload; edit, crop or move images, video, embeds, etc
+- **Paths**: relative paths from the same, sub and parent folders, and absolute paths
+- **Media**: links, video, iframes and embeds
+- **Frontmatter**: asset paths in frontmatter, passed to components
+- **Srcset**: high resolution variants
+- **Nuxt Image**: rendering content images with `<NuxtImg>`
+- **Live reload**: add, edit and delete assets while the dev server runs
+- **GitHub source**: content and images from a remote [source](https://content.nuxtjs.org/api/configuration#sources)
 
-Additionally, configuration:
-
-[//]: # (- `output`: custom output path)
-- `imageSize`: image sizes passed by URL in frontmatter
-- `debug`: see what the module is doing
-
-And, components:
-
-- example `<ContentGallery>` and `<ContentImage>` components
-- example `<ProseImg />` component
+Edge cases are covered by the unit and e2e tests in `/test`, rather than here.
 
 ## Running the playground
 
@@ -31,13 +24,19 @@ npm run dev
 
 To view the playground online, visit:
 
-- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=playground%2Fapp.vue
+- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=playground%2Fapp%2Fapp.vue
 
-## Features
+## Structure
 
-### Prose components
+The playground uses [Nuxt UI](https://ui.nuxt.com) for its layout:
 
-To view an example image [prose component](https://content.nuxtjs.org/api/components/prose/) passing generated attributes:
+- `app/app.vue`: header, sidebar and page layout
+- `app/menu.ts`: the sidebar menu
+- `app/pages/[...slug].vue`: queries and renders content
+- `app/components/content/`: components used in markdown
 
-- move `components/temp/ProseImg.vue` to `components/content`
-- restart the playground
+Nuxt UI's `ProseImg` renders images through Nuxt Image and adds a zoom effect, so `app/components/content/ProseImg.vue` replaces it with a plain `<img>`, to show the markup the module outputs.
+
+### Nuxt Image
+
+To render all content images with Nuxt Image, replace `app/components/content/ProseImg.vue` with the one in `app/components/temp/`.

@@ -1,57 +1,49 @@
+<script setup lang="ts">
+import { computed, useRoute } from '#imports'
+import { menu } from './menu'
+
+const route = useRoute()
+
+// pages with a matching asset folder may be served with a trailing slash in dev
+const items = computed(() => {
+  const path = route.path.replace(/(.)\/$/, '$1')
+  return menu.map(group => group.map(item => item.to ? { ...item, active: item.to === path } : item))
+})
+</script>
+
 <template>
-  <div class="container is-max-desktop px-5 py-5">
-    <NuxtLoadingIndicator :height="10" />
-    <SiteNav />
-    <div class="content">
-      <NuxtPage />
-    </div>
-  </div>
+  <UApp>
+    <NuxtLoadingIndicator />
+
+    <UHeader title="Nuxt Content Assets">
+      <template #right>
+        <UButton
+          to="https://github.com/davestewart/nuxt-content-assets"
+          target="_blank"
+          icon="i-simple-icons-github"
+          color="neutral"
+          variant="ghost"
+          aria-label="GitHub"
+        />
+      </template>
+
+      <template #body>
+        <UNavigationMenu :items="items" orientation="vertical" class="-mx-2.5" />
+      </template>
+    </UHeader>
+
+    <UMain>
+      <UContainer>
+        <UPage>
+          <template #left>
+            <UPageAside>
+              <UNavigationMenu :items="items" orientation="vertical" highlight class="-mx-2.5" />
+            </UPageAside>
+          </template>
+
+          <NuxtPage />
+        </UPage>
+      </UContainer>
+    </UMain>
+  </UApp>
 </template>
-
-<style>
-:root {
-  --green: #2cb687;
-}
-
-body {
-  margin-bottom: 10rem;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Dosis', sans-serif;
-  font-weight: 700 !important;
-}
-
-.content h1 + blockquote {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: -.75em 0 1.5rem !important;
-  color: var(--green);
-  font-weight: bold;
-  font-size: .9em;
-}
-
-a, .breadcrumb a {
-  color: var(--green);
-}
-
-img + p {
-  margin-top: 1rem;
-}
-
-code {
-  color: var(--green);
-  font-size: 1em;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-pre {
-  border-radius: 4px;
-}
-
-a:hover code {
-  color: black;
-}
-</style>

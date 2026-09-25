@@ -38,12 +38,13 @@ function makeChannelBroker (ws: SocketServer) {
   }
 }
 
-const ws = createWebSocket()
-
-const broker = makeChannelBroker(ws)
-
 export async function setupSocketServer (channel: string, handler?: Callback): Promise<SocketInstance> {
   const nuxt = useNuxt()
+
+  // create per Nuxt instance, as the server is closed when Nuxt restarts in dev
+  const ws = createWebSocket()
+  const broker = makeChannelBroker(ws)
+
   nuxt.hook('nitro:init', async (nitro) => {
     if (!nuxt._socketServer) {
       // server
