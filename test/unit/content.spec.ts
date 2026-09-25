@@ -45,6 +45,12 @@ describe('content', () => {
     expect(values).toEqual(['Title', 'image.jpg', 'a.jpg', 'b.jpg', 2, 'og.jpg'])
   })
 
+  it('should only skip identity keys at the root', () => {
+    const values: any[] = []
+    walkMeta({ path: '/', download: { path: 'file.pdf', id: 'a.jpg' }, links: [{ stem: 'b.jpg' }] }, value => values.push(value))
+    expect(values).toEqual(['file.pdf', 'a.jpg', 'b.jpg'])
+  })
+
   it('should walk minimark bodies including headings but not code', () => {
     const tags: string[] = []
     walkBody(content.body, node => tags.push(`${node.tag}:${node.props.src || node.props.href}`))

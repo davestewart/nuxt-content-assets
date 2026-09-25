@@ -1,5 +1,11 @@
 # Changelog
 
+### v3.0.1
+
+- Rewrite nested frontmatter and data fields named `path`, `id`, `stem` or `extension` (previously skipped at any depth, not just the document root)
+- Keep query strings on generated `srcset` candidates, not just `src`
+- Live reload: fix busting authored `srcset`s without spaces or descriptors, don't add an empty `src` to srcset-only elements, and reload `<video>` / `<audio>` when a `<source>` changes
+
 ### v3.0.0
 
 Nuxt Content 3 support. The module now targets `@nuxt/content` v3 only; for Nuxt Content 2 keep using `nuxt-content-assets@1`.

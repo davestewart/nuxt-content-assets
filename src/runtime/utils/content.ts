@@ -15,10 +15,10 @@ export interface ElementView {
 const nonMetaKeys = ['body', 'excerpt', 'rawbody', '__metadata', 'id', 'path', 'stem', 'extension']
 
 /**
- * Walk parsed content fields (frontmatter and schema fields), skipping ASTs and identity fields
+ * Walk parsed content fields (frontmatter and schema fields), skipping root-level ASTs and identity fields
  */
 export function walkMeta (content: Record<string, any>, callback: WalkCallback) {
-  walk(content, callback, (value, key) => !(typeof key === 'string' && nonMetaKeys.includes(key)))
+  walk(content, callback, (value, key, parent) => !(parent === content && typeof key === 'string' && nonMetaKeys.includes(key)))
 }
 
 /**

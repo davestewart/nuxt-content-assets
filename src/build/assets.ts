@@ -59,13 +59,15 @@ export function makeAssetIndex (publicPath: string, srcset: SrcsetOptions | fals
     if (!asset) {
       return
     }
-    const resolved: ResolvedAsset = { ...asset }
-    if (srcset && isImage(absSrc)) {
-      Object.assign(resolved, getSrcset(absSrc, asset, path => assets.get(path), srcset))
-    }
+    // keep any query on src and srcset candidates
     const query = parseQuery(value)
-    if (query) {
-      resolved.srcAttr += query
+    const withQuery = (asset: AssetConfig): AssetConfig => ({ ...asset, srcAttr: asset.srcAttr + query })
+    const resolved: ResolvedAsset = withQuery(asset)
+    if (srcset && isImage(absSrc)) {
+      Object.assign(resolved, getSrcset(absSrc, resolved, (path) => {
+        const variant = assets.get(path)
+        return variant && withQuery(variant)
+      }, srcset))
     }
     return resolved
   }
