@@ -1,6 +1,8 @@
+import * as Fs from 'node:fs'
 import Path from 'crosspath'
-import Fs from 'fs'
 
+export function readFile (path: string): string
+export function readFile<T = any> (path: string, asJson: true): T
 export function readFile (path: string, asJson = false) {
   const text = Fs.readFileSync(path, { encoding: 'utf8' })
   return asJson
@@ -16,8 +18,8 @@ export function writeFile (path: string, data: null | string | number | boolean 
   Fs.writeFileSync(path, text, { encoding: 'utf8' })
 }
 
-export async function writeBlob (path: string, data: object) {
-  const buffer = Buffer.from(await (data as Blob).arrayBuffer())
+export async function writeBlob (path: string, data: Blob) {
+  const buffer = Buffer.from(await data.arrayBuffer())
   createFolder(Path.dirname(path))
   Fs.writeFileSync(path, buffer)
 }
@@ -28,7 +30,7 @@ export function copyFile (src: string, trg: string): void {
 }
 
 export function removeFile (src: string): void {
-  Fs.rmSync(src)
+  Fs.rmSync(src, { force: true })
 }
 
 export function createFolder (path: string) {
@@ -55,4 +57,8 @@ export function removeEntry (path: string) {
 
 export function isFile (path: string) {
   return Fs.lstatSync(path).isFile()
+}
+
+export function exists (path: string) {
+  return Fs.existsSync(path)
 }

@@ -3,7 +3,6 @@ import type { MountOptions } from '@nuxt/content'
 import FireModule from './modules/fire/module'
 import ListModule from './modules/list/module'
 
-// @ts-ignore
 const isStackblitz = process.env.GIT_PROXY?.includes('stackblitz')
 
 // external source
@@ -37,7 +36,6 @@ export default defineNuxtConfig({
     },
   },
 
-  // @ts-ignore
   modules: [
     ListModule,
     FireModule,
@@ -71,11 +69,12 @@ export default defineNuxtConfig({
     debug: true,
   },
 
-  // use layers to support nuxt image
-  extends: [
-    // https://github.com/davestewart/nuxt-content-assets/#nuxt-image
-    'node_modules/nuxt-content-assets/cache',
-  ],
+  // the playground deliberately includes invalid and query-string image paths, which IPX can't prerender
+  nitro: {
+    prerender: {
+      failOnError: false,
+    },
+  },
 
   compatibilityDate: '2024-08-11',
 })

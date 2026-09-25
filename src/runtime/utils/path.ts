@@ -1,6 +1,5 @@
 import Path from 'crosspath'
-
-import { extensions } from './config'
+import { extensions, isContentExtension } from './config'
 
 /**
  * Parses the query string from a path
@@ -30,25 +29,23 @@ export function removeOrdering (path: string): string {
 }
 
 /**
- * Gets the extension of a path
- * @param path
+ * Gets the extension of a path (without the dot)
  */
-export function getExt (path: string) {
+export function getExt (path: string): string {
   return Path.extname(removeQuery(path)).substring(1)
 }
 
 /**
- * Test path to be relative
+ * Test path to be relative (not a URL, protocol, anchor or absolute path)
  */
 export function isRelative (path: string): boolean {
-  return !(path.startsWith('http') || Path.isAbsolute(path))
+  return !/^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(path)
 }
 
 /**
  * Test if path is excluded (_partial or .ignored)
- * @param path
  */
-export function isExcluded (path: string) {
+export function isExcluded (path: string): boolean {
   return path.split('/').some(segment => segment.startsWith('.') || segment.startsWith('_'))
 }
 
@@ -56,26 +53,27 @@ export function isExcluded (path: string) {
  * Test path for image extension
  */
 export function isImage (path: string): boolean {
-  return extensions.image.includes(getExt(path))
+  return extensions.image.includes(getExt(path).toLowerCase())
 }
 
 /**
  * Test path is markdown or data
  */
 export function isArticle (path: string): boolean {
-  return extensions.content.includes(getExt(path))
+  return isContentExtension(getExt(path))
 }
 
 /**
- * Test path is asset
+ * Test path is an asset (has an extension which is not a content extension)
  */
 export function isAsset (path: string): boolean {
-  return !isArticle(path)
+  const ext = getExt(path)
+  return ext !== '' && !isContentExtension(ext)
 }
 
 /**
- * Test if value is a relative asset
+ * Test if value is a relative asset path
  */
-export function isValidAsset (value?: string): boolean {
-  return typeof value === 'string' && isAsset(value) && isRelative(value)
+export function isValidAsset (value: unknown): value is string {
+  return typeof value === 'string' && isRelative(value) && isAsset(value)
 }

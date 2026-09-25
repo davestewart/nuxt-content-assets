@@ -1,3 +1,39 @@
 {
-  "extends": "./playground/.nuxt/tsconfig.json"
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "types": [
+      "node"
+    ],
+    "paths": {
+      "#imports": [
+        "./node_modules/nuxt/dist/app/index"
+      ],
+      "#nuxt-content-assets": [
+        "./src/virtual"
+      ]
+    }
+  },
+  "include": [
+    "src",
+    "test",
+    "build.config.ts",
+    "vitest.config.ts",
+    "eslint.config.mjs",
+    "nuxt.d.ts"
+  ],
+  "exclude": [
+    "test/fixtures"
+  ]
 }

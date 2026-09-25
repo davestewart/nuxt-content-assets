@@ -59,8 +59,10 @@ Developer experience:
 
 - works with tags and custom components
 - works in markdown and frontmatter
+- works with local and remote (GitHub) content sources
 - file watching and asset live-reload
-- image size injection
+- image size and `srcset` injection
+- Nuxt Image support
 - zero config
 
 ## Playground
@@ -80,7 +82,7 @@ Then open the playground in your browser at <a href="http://localhost:3000" targ
 
 To run the playground online, visit:
 
-- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=playground%2Fapp.vue
+- https://stackblitz.com/github/davestewart/nuxt-content-assets?file=playground%2Fapp%2Fapp.vue
 
 To browse the playground folder:
 
@@ -145,7 +147,7 @@ These values can then be passed to components:
 :image-gallery{:data="images"}
 ```
 
-See the playground for [markup](playground/content/advanced/gallery.md) and [component](playground/components/content/ContentGallery.vue) examples.
+See the playground for [markup](playground/content/advanced/gallery.md) and [component](playground/app/components/content/ContentGallery.vue) examples.
 
 ### Live reload
 
@@ -154,11 +156,6 @@ In development, the module watches for asset additions, moves and deletes, and w
 If you delete an asset, it will be greyed out in the browser until you replace the file or modify the path to it.
 
 If you edit an image, video, embed or iframe source, the content will update immediately, which is useful if you're looking to get that design just right!
-
-> [!NOTE]
-> Live reload does not currently work with Nuxt Image (see Issue [#77](https://github.com/davestewart/nuxt-content-assets/issues/77)).
-> 
-> If you need to iterate on image design, consider disabling Nuxt Image in development.
 
 ### Image sizing
 
@@ -181,7 +178,7 @@ Turning this on prevents content jumps as your page loads.
 
 #### Prose components
 
-If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can [hook into](playground/components/temp/ProseImg.vue) image size hints via the `$attrs` property:
+If you use [ProseImg](https://content.nuxtjs.org/api/components/prose) components, you can [hook into](playground/app/components/temp/ProseImg.vue) image size hints via the `$attrs` property:
 
 ```vue
 <template>
@@ -199,7 +196,7 @@ export default {
 
 #### Frontmatter
 
-If you pass [frontmatter](playground/content/advanced/gallery.md) to [custom components](playground/components/content/ContentImage.vue) set `imageSize` to `'src'` to encode values in `src`:
+If you pass [frontmatter](playground/content/advanced/gallery.md) to [custom components](playground/app/components/content/ContentImage.vue) set `imageSize` to `'src'` to encode values in `src`:
 
 ```
 :image-content{:src="image"}
@@ -211,20 +208,41 @@ The component will receive the size information as a query string which you can 
 <img class="image-content" src="/image.jpg?width=640&height=480">
 ```
 
-See playground component [here](playground/components/content/ContentImage.vue).
+See the playground [ContentImage.vue](playground/app/components/content/ContentImage.vue) component for an example.
+
+### High resolution images
+
+If you provide high resolution variants of an image alongside the original, the module will generate `srcset` and `sizes` attributes automatically:
+
+```
++- content
+    +- posts
+        +- index.md
+        +- diagram.png
+        +- diagram@2x.png
+        +- diagram@3x.png
+```
+
+```md
+![Diagram](diagram.png)
+```
+
+```html
+<img
+  src="/posts/diagram.png"
+  srcset="/posts/diagram.png 480w, /posts/diagram@2x.png 960w, /posts/diagram@3x.png 1440w"
+  sizes="(max-width: 480px) 100vw, 480px"
+>
+```
+
+See the [configuration](#srcset) section to customise or disable this.
 
 ### Nuxt Image
 
-To support [Nuxt Image](https://image.nuxtjs.org/), add Nuxt Content Asset's cache folder as a Nuxt Layer:
+[Nuxt Image](https://image.nuxtjs.org/) is supported out of the box; the module registers its assets cache as a Nuxt layer so IPX can serve the copied images.
 
-```ts
-// nuxt.config.ts
-export default defineNuxtConfig({
-  extends: [
-    'node_modules/nuxt-content-assets/cache',
-  ],
-}
-```
+> [!NOTE]
+> Prior to `v1.9.0` you needed to add `node_modules/nuxt-content-assets/cache` to `extends` in your Nuxt config. This is no longer required, but is harmless if left in place.
 
 To serve all images as Nuxt Image images, create a `ProseImg` component like so:
 
@@ -235,7 +253,7 @@ To serve all images as Nuxt Image images, create a `ProseImg` component like so:
 </template>
 ```
 
-See the playground folder for both the [global](playground/components/temp/ProseImg.vue) and a [per image](playground/components/content/NuxtImg.ts) solution.
+See the playground folder for both the [global](playground/app/components/temp/ProseImg.vue) and a [per image](playground/app/components/content/NuxtImg.ts) solution.
 
 ## Configuration
 
@@ -250,7 +268,10 @@ export default defineNuxtConfig({
     
     // treat these extensions as content
     contentExtensions: 'mdx? csv ya?ml json',
-    
+
+    // generate srcset attributes for images with high resolution variants
+    srcset: true,
+
     // output debug messages
     debug: false,
   }
@@ -305,6 +326,29 @@ Without this, Nuxt Content would warn about unsupported file types:
 
 > [WARN] .jpg files are not supported, "content:path:to:some-asset.jpg" falling back to raw content
 
+### Srcset
+
+By default, the module looks for `@2x` and `@3x` variants of each image and, where found, generates `srcset` and `sizes` attributes on rendered `<img>` tags (see [High resolution images](#high-resolution-images)).
+
+Pass an object to customise the behaviour, or `false` to disable it:
+
+```ts
+{
+  srcset: {
+    // naming pattern for variants; tokens are {name}, {scale} and {ext}
+    pattern: '{name}@{scale}x.{ext}',
+
+    // scale multipliers to look for
+    scales: [2, 3],
+
+    // template for the sizes attribute; {width} is the base image's width (or false to omit)
+    sizes: '(max-width: {width}px) 100vw, {width}px',
+  }
+}
+```
+
+Note that `srcset` is only added to plain `<img>` tags, as Nuxt Image generates its own.
+
 ### Debug
 
 If you want to see what the module does as it runs, set `debug` to true:
@@ -317,17 +361,19 @@ If you want to see what the module does as it runs, set `debug` to true:
 
 ## How it works
 
-When Nuxt builds, the module scans all content sources for assets, copies them to a temporary layer folder (`node_modules/nuxt-content-assets/cache`), and indexes path and image metadata.
+When Nuxt builds, the module scans all content sources for assets, copies them to a cache folder within the package (`node_modules/nuxt-content-assets/cache`), and indexes path and image metadata.
 
-After Nuxt Content has run, the parsed content (`.nuxt/content-cache`) is traversed, and both element attributes and frontmatter properties are checked to see if they resolve to the previously-indexed asset paths.
+As Nuxt Content parses each document, both element attributes and frontmatter properties are checked to see if they resolve to the previously-indexed asset paths.
 
-If they do, then the attribute or property in Nuxt Content's cache is rewritten with the absolute path. If the asset is an image, then the element or metadata is optionally updated with size attributes or a query string.
+If they do, then the attribute or property is rewritten with the absolute path before Nuxt Content caches the document. If the asset is an image, then the element or metadata is optionally updated with size attributes, `srcset` or a query string.
+
+Between runs, the module remembers which documents referenced which assets, and only invalidates Nuxt Content's cache (`.nuxt/content-cache`) for documents affected by added, removed or resized assets.
 
 Finally, Nitro serves the site, and any requests made to the transformed asset paths should be picked up and the *copied* asset served by the browser.
 
 In development, a watch process propagates asset changes to the cache, updates the asset index, and notifies the browser via web sockets to refresh any loaded images. 
 
-If Nuxt Image is used, the `_ipx/` endpoint serves images directly from the cache's public folder.
+The cache folder is registered as a Nuxt layer, so if Nuxt Image is used, the `_ipx/` endpoint serves images directly from the cache's public folder.
 
 ## Development
 
@@ -343,10 +389,7 @@ To set up the project, run each of these scripts once:
 
 ```bash
 # install dependencies
-npm install
-
-# copy the cache folder to the playground's node_modules (workaround required in development)
-npm run dev:setup
+npm install && npm install --prefix ./playground
 
 # generate types for the module and playground (re-run if you install new packages)
 npm run dev:prepare
@@ -376,10 +419,23 @@ Check your code quality using these tools:
 # lint your code with eslint
 npm run lint
 
-# runs tests with vitest
+# check types
+npm run typecheck
+
+# run unit tests with vitest
 npm run test
 npm run test:watch
+
+# run end-to-end tests (runs the fixtures in test/fixtures in dev, generate and production)
+npm run test:e2e
+
+# run all tests
+npm run test:all
 ```
+
+Note that the end-to-end tests write to the module's `cache/public` folder, so don't run them at the same time as the playground.
+
+These also run in CI on every pull request.
 
 ### Publishing
 

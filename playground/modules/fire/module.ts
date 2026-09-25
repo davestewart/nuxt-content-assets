@@ -1,4 +1,4 @@
-import { join } from 'path'
+import { join } from 'node:path'
 import { defineNuxtModule } from '@nuxt/kit'
 import type { Nuxt } from '@nuxt/schema'
 
@@ -6,7 +6,7 @@ console.log('custom module imported')
 
 // @see https://github.com/davestewart/nuxt-content-assets/issues/81
 export default defineNuxtModule({
-  setup (_options: any, nuxt: Nuxt) {
+  setup (_options: unknown, nuxt: Nuxt) {
     nuxt.options.nitro.externals = nuxt.options.nitro.externals || {}
     nuxt.options.nitro.externals.inline = nuxt.options.nitro.externals.inline || []
     nuxt.options.nitro.externals.inline.push(join(__dirname, 'module'))

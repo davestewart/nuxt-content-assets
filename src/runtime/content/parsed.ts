@@ -1,28 +1,40 @@
 import type { AssetConfig, ParsedContent } from '../../types'
-import { walkBody, walkMeta, buildQuery, readFile, writeFile } from '../utils'
+import { buildQuery, exists, parseQuery, readFile, removeQuery, walkBody, walkMeta, writeFile } from '../utils'
 
 /**
- * Rewrite cached content with updated image sizes
+ * Rewrite a cached document with updated image sizes
+ *
+ * @param path    The absolute path to the cached document
+ * @param asset   The updated asset
  */
-export function rewriteContent (path: string, asset: AssetConfig): ParsedContent {
-  // load content
-  const { parsed }: ParsedContent = readFile(path, true)
+export function rewriteContent (path: string, asset: AssetConfig): ParsedContent | undefined {
+  if (!exists(path)) {
+    return
+  }
 
-  // get asset properties
+  // load content
+  const data = readFile<{ parsed: ParsedContent, hash?: string }>(path, true)
+  const { parsed } = data
   const { srcAttr, width, height } = asset
+  const sizeQuery = `width=${width}&height=${height}`
 
   // walk meta
   walkMeta(parsed, (value, parent, key) => {
-    if (value.startsWith(srcAttr)) {
-      parent[key] = parent[key].replace(/width=\d+&height=\d+/, `width=${width}&height=${height}`)
+    if (typeof value === 'string' && removeQuery(value) === srcAttr) {
+      parent[key] = value.includes('width=')
+        ? value.replace(/width=\d+&height=\d+/, sizeQuery)
+        : value
     }
   })
 
   // walk body
-  walkBody(parsed, function (node: any) {
+  walkBody(parsed, (node: any) => {
     const { tag, props } = node
-    if (tag === 'img' && props?.src?.startsWith(srcAttr)) {
-      props.src = buildQuery(srcAttr, `time=${Date.now()}`)
+    if (tag === 'img' && typeof props?.src === 'string' && removeQuery(props.src) === srcAttr) {
+      const query = parseQuery(props.src)
+        .replace(/[?&]time=\d+/, '')
+        .replace(/width=\d+&height=\d+/, sizeQuery)
+      props.src = buildQuery(srcAttr, query, `time=${Date.now()}`)
       if (props.width) {
         props.width = width
       }
@@ -32,18 +44,28 @@ export function rewriteContent (path: string, asset: AssetConfig): ParsedContent
       if (props.style) {
         const ratio = `${width}/${height}`
         if (typeof props.style === 'string') {
-          props.style = props.style.replace(/aspect-ratio: \d+\/\d+/, `aspect-ratio: ${ratio}`)
+          props.style = props.style.replace(/aspect-ratio: ?\d+\/\d+/, `aspect-ratio: ${ratio}`)
         }
         else if (props.style.aspectRatio) {
           props.style.aspectRatio = ratio
         }
       }
+      if (typeof props.srcset === 'string' && width) {
+        const oldWidth = props.srcset.match(new RegExp(`${escapeRegExp(srcAttr)} (\\d+)w`))?.[1]
+        props.srcset = props.srcset.replace(new RegExp(`${escapeRegExp(srcAttr)} \\d+w`), `${srcAttr} ${width}w`)
+        if (oldWidth && typeof props.sizes === 'string') {
+          props.sizes = props.sizes.replaceAll(`${oldWidth}px`, `${width}px`)
+        }
+      }
     }
   })
 
-  // save file
-  writeFile(path, { module: true, parsed })
+  // save file (preserving any other keys, such as Nuxt Content's hash)
+  writeFile(path, { ...data, parsed })
 
-  // return
   return parsed
+}
+
+function escapeRegExp (value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }

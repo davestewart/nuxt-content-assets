@@ -4,48 +4,121 @@
 
 export interface ModuleOptions {
   /**
-   * Image size hints
+   * Image size hints to inject into rendered images
    *
-   * @example 'attrs style url'
-   * @default 'style'
+   * One or more of `style`, `attrs`, `src`
+   *
+   * @example 'style attrs'
+   * @default ''
    */
   imageSize?: string | string[] | false
 
   /**
-   * List of content extensions; anything else as an asset
+   * File extensions to treat as content; anything else is treated as an asset
    *
-   * @example 'md'
-   * @default 'md csv ya?ml json'
+   * Tokens may use simple regex fragments
+   *
+   * @example 'mdx? csv ya?ml json fire'
+   * @default 'mdx? csv ya?ml json'
    */
-  contentExtensions?: string | string[],
+  contentExtensions?: string | string[]
+
+  /**
+   * Generate `srcset` and `sizes` attributes for images that have high resolution variants
+   *
+   * Pass `true` for defaults, an options object to customise, or `false` to disable
+   *
+   * @default true
+   */
+  srcset?: boolean | Partial<SrcsetOptions>
 
   /**
    * Display debug messages
    *
-   * @example true
    * @default false
    */
   debug?: boolean
+}
+
+export interface SrcsetOptions {
+  /**
+   * Naming pattern for high resolution variants
+   *
+   * Tokens: `{name}` base filename, `{scale}` multiplier, `{ext}` extension
+   *
+   * @default '{name}@{scale}x.{ext}'
+   */
+  pattern: string
+
+  /**
+   * Scale multipliers to look for
+   *
+   * @default [2, 3]
+   */
+  scales: number[]
+
+  /**
+   * Template for the `sizes` attribute, or `false` to omit
+   *
+   * Tokens: `{width}` the base image's intrinsic width
+   *
+   * @default '(max-width: {width}px) 100vw, {width}px'
+   */
+  sizes: string | false
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 // assets
 // ---------------------------------------------------------------------------------------------------------------------
 
-export type ImageSize = Array<'style' | 'src' | 'url' | 'attrs'>
+export type ImageSize = Array<'style' | 'attrs' | 'src'>
 
-export type AssetConfig = {
+/**
+ * A single asset, keyed in the index by its path relative to the public folder
+ */
+export interface AssetConfig {
+  /**
+   * The absolute web path to the asset
+   * @example '/content/posts/image.jpg'
+   */
   srcAttr: string
-  content: string[],
   width?: number
   height?: number
 }
 
+/**
+ * A resolved asset, including any image variants
+ */
+export interface ResolvedAsset extends AssetConfig {
+  srcset?: string
+  sizes?: string
+}
+
+/**
+ * Index of assets, written by the build process
+ */
+export type AssetIndex = Record<string, AssetConfig>
+
+/**
+ * Index of which documents reference which assets, written by the server process
+ */
+export interface ContentIndex {
+  /**
+   * Asset paths which resolved, and the ids of the documents that referenced them
+   */
+  hits: Record<string, string[]>
+
+  /**
+   * Asset paths which did not resolve, and the ids of the documents that referenced them
+   */
+  misses: Record<string, string[]>
+}
+
 export interface AssetMessage {
-  event: 'update' | 'remove' | 'refresh'
-  src?: string
-  width?: string
-  height?: string
+  event: 'update' | 'remove'
+  src: string
+  width?: number
+  height?: number
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -97,10 +170,9 @@ export interface ParsedContent {
 
   /**
    * The AST structure
-   * @example
    */
   body: {
-    type: string,
+    type: string
     children: Array<any>
   }
 
@@ -108,7 +180,7 @@ export interface ParsedContent {
    * Any other metadata key
    * @see https://content.nuxtjs.org/guide/writing/markdown/#native-parameters
    */
-  [key: string | '_draft' | '_partial' | '_locale' | '_empty' | 'title' | 'description' | 'excerpt']: any
+  [key: string]: any
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

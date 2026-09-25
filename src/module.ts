@@ -1,10 +1,23 @@
-import * as Fs from 'fs'
 import Path from 'crosspath'
+import { hash } from 'ohash'
 import { addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
-import { isImage, list, log, warn, makeIgnores, matchTokens, removeEntry, toPath } from './runtime/utils'
+import {
+  createFolder,
+  defaultContentExtensions,
+  exists,
+  isImage,
+  list,
+  log,
+  makeIgnores,
+  matchTokens,
+  resolveSrcsetOptions,
+  setContentExtensions,
+  warn,
+} from './runtime/utils'
 import { setupSocketServer } from './build/sockets/setup'
 import { makeSourceManager } from './runtime/assets/source'
-import { makeAssetsManager } from './runtime/assets/public'
+import { getAssetPaths, makeAssetsManager } from './runtime/assets/public'
+import { getStaleContentIds, makeContentCache } from './runtime/content/cache'
 import { rewriteContent } from './runtime/content/parsed'
 import type { ModuleMeta, Nuxt, NuxtConfigLayer } from '@nuxt/schema'
 import type { MountOptions } from '@nuxt/content'
@@ -13,10 +26,11 @@ import type { ImageSize, ModuleOptions } from './types'
 // Re-export types for consumers
 export type {
   ModuleOptions,
+  SrcsetOptions,
   ImageSize,
   AssetConfig,
   AssetMessage,
-  SocketInstance
+  SocketInstance,
 } from './types'
 
 const resolve = createResolver(import.meta.url).resolve
@@ -34,7 +48,8 @@ export default defineNuxtModule<ModuleOptions>({
 
   defaults: {
     imageSize: '',
-    contentExtensions: 'mdx? csv ya?ml json',
+    contentExtensions: defaultContentExtensions,
+    srcset: true,
     debug: false,
   },
 
@@ -43,83 +58,84 @@ export default defineNuxtModule<ModuleOptions>({
     // paths
     // ---------------------------------------------------------------------------------------------------------------------
 
-    // nuxt build folder (.nuxt)
-    const buildPath = nuxt.options.buildDir
+    // assets cache; ships with the package as `cache/` (a Nuxt layer, so Nuxt Image can serve from it)
+    const cachePath = resolve('../cache')
 
-    // node modules folder (note: from v1.4.1 the assets cache moved from .nuxt/... to node_modules/... @see #76)
-    const modulesPath = nuxt.options.modulesDir.find((path: string) => Fs.existsSync(`${path}/nuxt-content-assets/cache`)) || ''
-    if (!modulesPath) {
-      warn('Unable to find cache folder!')
-      if (nuxt.options.rootDir.endsWith('/playground')) {
-        warn('Run "npm run dev:setup" to generate a new cache folder')
-      }
-    }
-
-    // assets cache (node_modules/nuxt-content-assets/cache)
-    const cachePath = modulesPath
-      ? Path.resolve(modulesPath, 'nuxt-content-assets/cache')
-      : Path.resolve(buildPath, 'content-assets') // TODO check if fallback even works?
-
-    // public folder (node_modules/nuxt-content-assets/cache/public)
+    // public folder (cache/public)
     const publicPath = Path.join(cachePath, 'public')
+    createFolder(publicPath)
 
-    // content cache (.nuxt/content-cache)
-    const contentPath = Path.join(buildPath, 'content-cache')
+    // nuxt content's parsed cache (.nuxt/content-cache)
+    const contentPath = Path.join(nuxt.options.buildDir, 'content-cache')
+
+    // where we remember what we did last run (.nuxt/content-assets.json)
+    const metaPath = Path.join(nuxt.options.buildDir, 'content-assets.json')
 
     // ---------------------------------------------------------------------------------------------------------------------
-    // setup
-    // ---------------------------------------------------------------------------------------------------------------------
-
     // options
+    // ---------------------------------------------------------------------------------------------------------------------
+
     const isDev = !!nuxt.options.dev
     const isDebug = !!options.debug
 
-    // clear caches
+    // content extensions; used to tell nuxt content to ignore assets, and us to ignore content
+    const contentExtensions = matchTokens(options.contentExtensions).join(' ') || defaultContentExtensions
+    setContentExtensions(contentExtensions)
+    // @ts-expect-error content options may not be typed if @nuxt/content isn't installed
+    nuxt.options.content ||= {}
+    nuxt.options.content!.ignores ||= []
+    nuxt.options.content!.ignores.push(makeIgnores(contentExtensions))
+
+    // image size hints
+    const imageSizes = matchTokens(options.imageSize)
+      .map(token => token === 'url' ? 'src' : token) as ImageSize
+
+    // srcset
+    const srcset = resolveSrcsetOptions(options.srcset)
+
+    // fingerprint of everything that affects how content is rewritten
+    const fingerprint = hash({ v: 1, imageSizes, srcset, contentExtensions })
+
     if (isDebug) {
-      log('Cleaning content-cache')
-      log(`Cache path: "${Path.relative(".", cachePath)}"`)
+      log(`Cache path: "${Path.relative('.', cachePath)}"`)
     }
 
-    // clear cached markdown so image paths get updated
-    removeEntry(contentPath)
-
     // ---------------------------------------------------------------------------------------------------------------------
-    // options
+    // layer (so Nuxt Image's IPX can find the public folder in development)
     // ---------------------------------------------------------------------------------------------------------------------
 
-    // set up content ignores
-    const { contentExtensions } = options
-    if (contentExtensions) {
-      // @ts-ignore
-      nuxt.options.content ||= {}
-      if (nuxt.options.content) {
-        nuxt.options.content.ignores ||= []
-      }
-      const ignores = makeIgnores(contentExtensions)
-      if (ignores.length) {
-        nuxt.options.content?.ignores.push(ignores)
-      }
+    const hasLayer = nuxt.options._layers.some(layer => Path.normalize(layer.config.rootDir || layer.cwd) === cachePath)
+    if (!hasLayer) {
+      (nuxt.options._layers as NuxtConfigLayer[]).push({
+        cwd: cachePath,
+        configFile: Path.join(cachePath, 'nuxt.config.ts'),
+        config: {
+          rootDir: cachePath,
+          srcDir: cachePath,
+          dir: { public: 'public' },
+        },
+      } as NuxtConfigLayer)
     }
 
-    // convert image size hints to array
-    const imageSizes: ImageSize = matchTokens(options.imageSize) as ImageSize
+    // ---------------------------------------------------------------------------------------------------------------------
+    // sources
+    // ---------------------------------------------------------------------------------------------------------------------
 
-    // collate sources
     type Sources = Record<string, MountOptions>
     const sources: Sources = Array
       .from(nuxt.options._layers)
       .map((layer: NuxtConfigLayer) => layer.config?.content?.sources)
       .reduce((output: Sources, sources) => {
         if (sources && !Array.isArray(sources)) {
-          Object.assign(output, <Sources>sources)
+          Object.assign(output, sources as Sources)
         }
         return output
       }, {})
 
     // add default content folder
-    if (Object.keys(sources).length === 0 || !sources.content) {
-      const content = nuxt.options.rootDir + '/content'
-      if (Fs.existsSync(content)) {
+    if (!sources.content) {
+      const content = Path.join(nuxt.options.rootDir, 'content')
+      if (exists(content)) {
         sources.content = {
           driver: 'fs',
           base: content,
@@ -131,16 +147,11 @@ export default defineNuxtModule<ModuleOptions>({
     // assets
     // ---------------------------------------------------------------------------------------------------------------------
 
-    /**
-     * Assets manager
-     */
     const assets = makeAssetsManager(publicPath, isDev)
-
-    // clear files from previous run
-    assets.init()
+    const cache = makeContentCache(contentPath, metaPath)
 
     /**
-     * Callback for when assets change
+     * Callback for when assets change (dev only)
      *
      * - if the asset is updated or deleted, we tell the browser to update the asset's properties
      * - if the asset is an image and changes size, we also rewrite the cached content
@@ -149,132 +160,122 @@ export default defineNuxtModule<ModuleOptions>({
      * @param absTrg  The absolute path to the copied asset
      */
     function onAssetChange (event: 'update' | 'remove', absTrg: string) {
-      let src: string = ''
+      const { srcAttr } = getAssetPaths(publicPath, absTrg)
       let width: number | undefined
       let height: number | undefined
 
-      // update
       if (event === 'update') {
-        // 1. get the old asset config first...
         const oldAsset = isImage(absTrg) && imageSizes.length
           ? assets.getAsset(absTrg)
-          : null
-
-        // 2. ...before the asset overwrites the image size
+          : undefined
         const newAsset = assets.setAsset(absTrg)
-
-        // sizes
         width = newAsset.width
         height = newAsset.height
 
-        // check for image size change
-        if (oldAsset) {
-          // special behaviour for image size change!
-          // we rewrite cached content directly so image size changes are permanent
-          if (oldAsset.width !== newAsset.width || oldAsset.height !== newAsset.height) {
-            newAsset.content.forEach(async (id: string) => {
-              const path = Path.join(contentPath, 'parsed', toPath(id))
-              rewriteContent(path, newAsset)
-            })
+        // image size changed: rewrite cached documents so the change is permanent
+        if (oldAsset && (oldAsset.width !== newAsset.width || oldAsset.height !== newAsset.height)) {
+          for (const id of assets.getContentIds(absTrg)) {
+            rewriteContent(cache.getPath(id), newAsset)
           }
         }
-
-        // set src
-        src = newAsset.srcAttr
       }
-
-      // remove
       else {
-        const asset = assets.removeAsset(absTrg)
-        if (asset) {
-          src = asset.srcAttr
-        }
+        assets.removeAsset(absTrg)
       }
 
-      // sockets
-      if (src && socket) {
-        socket.send({ event, src, width, height })
+      if (socket) {
+        socket.send({ event, src: srcAttr, width, height })
       }
     }
 
-    /**
-     * Socket to communicate changes to client
-     */
+    // socket to communicate changes to client
     addPlugin(resolve('./runtime/sockets/plugin'))
     const socket = isDev && nuxt.options.content?.watch !== false
       ? await setupSocketServer('content-assets')
       : null
 
-    // ---------------------------------------------------------------------------------------------------------------------
-    // sources
-    // ---------------------------------------------------------------------------------------------------------------------
-
-    // create source managers
-    const managers: Record<string, ReturnType<typeof makeSourceManager>> = {}
-    for (const [key, source] of Object.entries(sources)) {
-      // debug
+    // source managers
+    const managers = Object.entries(sources).map(([key, source]) => {
       if (isDebug) {
         log(`Creating source "${key}"`)
       }
-
-      // create manager
-      managers[key] = makeSourceManager(key, source, publicPath, onAssetChange)
-    }
+      return { key, manager: makeSourceManager(key, source, publicPath, onAssetChange, isDev) }
+    })
 
     // ---------------------------------------------------------------------------------------------------------------------
-    // nuxt hooks
+    // hooks
     // ---------------------------------------------------------------------------------------------------------------------
 
-    // copy assets to public folder
-    nuxt.hook('build:before', async function () {
-      for (const [key, manager] of Object.entries(managers)) {
-        // copy assets
+    // copy assets and invalidate stale content
+    // note: `modules:done` (rather than `build:before`) as Nuxt skips the build when `experimental.buildCache` restores
+    nuxt.hook('modules:done', async () => {
+      if (nuxt.options._prepare) {
+        return
+      }
+
+      // what we knew last run
+      const previous = await assets.load()
+      const previousFingerprint = cache.getFingerprint()
+
+      // copy assets
+      assets.clear()
+      for (const { key, manager } of managers) {
         const paths = await manager.init()
-
-        // update assets config
         paths.forEach(path => assets.setAsset(path))
-
-        // debug
         if (isDebug) {
           list(`Copied "${key}" assets`, paths.map(path => Path.relative(publicPath, path)))
         }
       }
+
+      // invalidate nuxt content's cache so relative paths get rewritten
+      const isFirstRun = Object.keys(previous).length === 0
+      if (isFirstRun || previousFingerprint !== fingerprint) {
+        if (isDebug) {
+          log('Clearing content cache')
+        }
+        cache.clear()
+      }
+      else {
+        const ids = getStaleContentIds(previous, assets.assets, assets.content)
+        if (ids.length) {
+          if (isDebug) {
+            list('Invalidating cached content', ids)
+          }
+          cache.invalidate(ids)
+        }
+      }
+      cache.setFingerprint(fingerprint)
     })
 
     // cleanup when nuxt closes
     nuxt.hook('close', async () => {
       await assets.dispose()
-      for (const key in managers) {
-        await managers[key]?.dispose()
+      for (const { manager } of managers) {
+        await manager.dispose()
       }
     })
 
     // ---------------------------------------------------------------------------------------------------------------------
-    // nitro hook
+    // nitro
     // ---------------------------------------------------------------------------------------------------------------------
 
-    // plugin
-    const pluginPath = resolve('./runtime/content/plugin')
-
-    // config
     const makeVar = (name: string, value: any) => `export const ${name} = ${JSON.stringify(value)};`
     const virtualConfig = [
       makeVar('publicPath', publicPath),
       makeVar('imageSizes', imageSizes),
+      makeVar('srcset', srcset),
+      makeVar('contentExtensions', contentExtensions),
       makeVar('debug', isDebug),
     ].join('\n')
 
-    // setup server plugin
-    nuxt.hook('nitro:config', async (config) => {
-      // add plugin
+    nuxt.hook('nitro:config', (config) => {
+      // server plugin
       config.plugins ||= []
-      config.plugins.push(pluginPath)
+      config.plugins.push(resolve('./runtime/content/plugin'))
 
       // make config available to nitro
       config.virtual ||= {}
-      config.virtual[`#${meta.name}`] = () => {
-        return virtualConfig
-      }
+      config.virtual[`#${meta.name}`] = virtualConfig
 
       // serve public assets
       config.publicAssets ||= []
@@ -283,5 +284,9 @@ export default defineNuxtModule<ModuleOptions>({
         maxAge: (60 * 60 * 24) * 7, // 7 days
       })
     })
+
+    if (!exists(Path.join(cachePath, 'nuxt.config.ts'))) {
+      warn('Cache layer is missing its nuxt.config.ts; Nuxt Image may not be able to serve assets in development')
+    }
   },
 })
