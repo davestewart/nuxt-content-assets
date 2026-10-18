@@ -1,5 +1,6 @@
 import { defineNuxtPlugin } from '#imports'
-import { type AssetMessage, HMR_EVENT } from '../types'
+import type { AssetMessage } from '../types'
+import { HMR_EVENT } from './constants'
 
 /**
  * Client-side plugin to support asset live-reload (development only)

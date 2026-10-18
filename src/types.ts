@@ -139,5 +139,3 @@ export interface AssetMessage {
   width?: number
   height?: number
 }
-
-export const HMR_EVENT = 'nuxt-content-assets:update'

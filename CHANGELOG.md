@@ -1,5 +1,9 @@
 # Changelog
 
+### v3.0.2
+
+- Fix `Failed to resolve import "../types"` in development: the live reload plugin imported a value from a file that only ships as type declarations
+
 ### v3.0.1
 
 - Rewrite nested frontmatter and data fields named `path`, `id`, `stem` or `extension` (previously skipped at any depth, not just the document root)

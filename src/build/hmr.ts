@@ -1,6 +1,7 @@
 import type { Nuxt } from '@nuxt/schema'
 import type { ViteDevServer } from 'vite'
-import { type AssetMessage, HMR_EVENT } from '../types'
+import type { AssetMessage } from '../types'
+import { HMR_EVENT } from '../runtime/constants'
 
 /**
  * Send asset updates to the browser over Vite's HMR channel
